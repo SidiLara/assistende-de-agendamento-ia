@@ -2,6 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Message, LeadData, LeadDataKey } from "../types";
 
 const MAKE_URL = "https://hook.us2.make.com/ud4aq9lrms2mfpce40ur6ac1papv68fi";
+const PRIMARY_API_KEY = "AIzaSyBdyZUMEdkxSCSXF-X3KnrRjnKt9e7yEXM";
 const SECONDARY_API_KEY = "AIzaSyAr-ZhYtdZ-b3jzXvIUjANB0A5dQSxHcV4";
 
 const getAiClient = (apiKey: string | undefined) => {
@@ -70,7 +71,7 @@ type AiResponse = {
 
 const callApiWithFallback = async (apiCall: (ai: GoogleGenAI) => Promise<any>) => {
     try {
-        const primaryAi = getAiClient(process.env.API_KEY);
+        const primaryAi = getAiClient(PRIMARY_API_KEY);
         return await apiCall(primaryAi);
     } catch (primaryError) {
         console.warn("Primary API key failed. Trying fallback.", primaryError);
@@ -116,10 +117,13 @@ export const getAiResponse = async (
     try {
         const parsedJson = JSON.parse(jsonText);
         const { responseText, action, nextKey, ...updatedLeadData } = parsedJson;
+        
+        const formattedText = (responseText || "Desculpe, não entendi. Pode repetir?")
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
         return {
             updatedLeadData,
-            responseText: responseText || "Desculpe, não entendi. Pode repetir?",
+            responseText: formattedText,
             action: action || null,
             nextKey: nextKey || null
         };
@@ -130,7 +134,7 @@ export const getAiResponse = async (
 };
 
 export const getFinalSummary = async (leadData: Partial<LeadData>): Promise<string> => {
-    const summaryPrompt = `Crie um resumo de confirmação conciso para um agendamento com base nos dados JSON a seguir.
+    const summaryPrompt = `Crie um resumo de confirmação conciso para um agendameto com base nos dados JSON a seguir.
 NÃO inclua uma saudação inicial (como "Olá"). Comece diretamente com uma frase como "Perfeito! Por favor, confirme se os dados abaixo estão corretos:".
 Formate a saída em HTML. Use a tag <strong> para destacar informações chave (nome, valores, data/hora). Use <br> para quebras de linha.
 O tom deve ser profissional e positivo.
@@ -143,8 +147,9 @@ ${JSON.stringify(leadData, null, 2)}`;
         model: "gemini-2.5-flash",
         contents: summaryPrompt,
     }));
-
-    return response.text.trim();
+    
+    const formattedSummary = response.text.trim().replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    return formattedSummary;
 };
 
 // --- Fallback Logic (Non-AI) ---
