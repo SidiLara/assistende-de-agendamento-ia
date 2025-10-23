@@ -1,14 +1,22 @@
-
-import React, { useState, forwardRef } from 'react';
+import React, { useState, forwardRef, ChangeEvent } from 'react';
+import { LeadDataKey } from '../types';
 
 interface ChatInputProps {
     onSendMessage: (text: string) => void;
     isSending: boolean;
     isDone: boolean;
     isActionPending: boolean;
+    nextKey: LeadDataKey | null;
 }
 
-export const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(({ onSendMessage, isSending, isDone, isActionPending }, ref) => {
+const applyWhatsappMask = (value: string): string => {
+    value = value.replace(/\D/g, '');
+    value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+    value = value.replace(/(\d{5})(\d)/, '$1-$2');
+    return value.slice(0, 15);
+};
+
+export const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(({ onSendMessage, isSending, isDone, isActionPending, nextKey }, ref) => {
     const [inputValue, setInputValue] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -19,6 +27,15 @@ export const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(({ onSendM
         }
     };
     
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { value } = e.target;
+        if (nextKey === 'client_whatsapp') {
+            setInputValue(applyWhatsappMask(value));
+        } else {
+            setInputValue(value);
+        }
+    };
+
     const isDisabled = isSending || isDone || isActionPending;
     let placeholderText = "Digite sua mensagem...";
     if (isDone) {
@@ -27,15 +44,19 @@ export const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(({ onSendM
         placeholderText = "Selecione uma opção acima...";
     } else if (isSending) {
         placeholderText = "Aguarde...";
+    } else if (nextKey === 'client_whatsapp') {
+        placeholderText = "(XX) 9XXXX-XXXX";
     }
+
+    const inputType = nextKey === 'client_whatsapp' ? 'tel' : 'text';
 
     return (
         <form onSubmit={handleSubmit} className="flex items-center space-x-3">
             <input
                 ref={ref}
-                type="text"
+                type={inputType}
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={handleChange}
                 placeholder={placeholderText}
                 className="flex-1 w-full px-5 py-3 border-2 border-brand-green rounded-full focus:outline-none focus:ring-2 focus:ring-brand-green focus:border-transparent transition-colors duration-200 disabled:bg-gray-100 disabled:border-gray-300"
                 autoComplete="off"

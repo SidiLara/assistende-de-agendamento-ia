@@ -142,7 +142,7 @@ const App: React.FC = () => {
                 const errorMessage: Message = {
                     id: Date.now() + 1,
                     sender: MessageSender.Bot,
-                    text: "Hmm, não consegui identificar um número de WhatsApp válido em sua mensagem. Por favor, insira o número com DDD no formato <strong>(XX) 9XXXX-XXXX</strong>."
+                    text: "Hmm, não consegui identificar um número de WhatsApp válido. Por favor, insira o número com DDD no formato <strong>(XX) 9XXXX-XXXX</strong>."
                 };
                 setMessages(prev => [...prev, errorMessage]);
                 setIsTyping(false);
@@ -365,7 +365,7 @@ const App: React.FC = () => {
                     <ChatBody messages={messages} isTyping={isTyping} />
                     <div className="p-5 border-t border-gray-200 bg-white rounded-b-2xl">
                         {isActionPending && <ActionPills options={actionOptions} onSelect={handlePillSelect} />}
-                        <ChatInput ref={inputRef} onSendMessage={handleSendMessage} isSending={isSending} isDone={isDone} isActionPending={isActionPending} />
+                        <ChatInput ref={inputRef} onSendMessage={handleSendMessage} isSending={isSending} isDone={isDone} isActionPending={isActionPending} nextKey={nextKey} />
                     </div>
                 </div>
             </div>
