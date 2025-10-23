@@ -14,6 +14,8 @@ const calculateFullDate = (dayOfWeek: string, time: string): string => {
     };
     const targetDay = weekDays[dayOfWeek.toLowerCase()];
     
+    if (targetDay === undefined) return `${dayOfWeek} ${time}`;
+
     const timeMatch = time.match(/(\d{1,2}):?(\d{2})?/);
     if (!timeMatch) return `${dayOfWeek} às ${time}`;
 
@@ -57,10 +59,17 @@ const App: React.FC = () => {
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sourceParam = urlParams.get('origem') || urlParams.get('source') || urlParams.get('utm_source');
+        
+        const initialData: Partial<LeadData> = {
+            source: sourceParam || 'Direto'
+        };
+        setLeadData(initialData);
+
         const fetchWelcomeMessage = async () => {
             setIsTyping(true);
             const initialHistory: Message[] = [];
-            const initialData: Partial<LeadData> = {};
             try {
                 const { responseText, nextKey: newNextKeyFromAI } = await getAiResponse(initialHistory, initialData);
                 setMessages([{ id: Date.now(), sender: MessageSender.Bot, text: responseText }]);
@@ -69,7 +78,7 @@ const App: React.FC = () => {
                 console.error("Initial API call failed, starting in fallback mode.", error);
                 setIsFallbackMode(true);
                 const fallbackNotice: Message = { id: Date.now(), sender: MessageSender.Bot, text: "Olá! Parece que estamos com instabilidade na conexão com nossa IA. Vamos continuar em um modo mais direto para garantir seu atendimento."};
-                const { responseText, nextKey } = getFallbackResponse("", {}, null);
+                const { responseText, nextKey } = getFallbackResponse("", initialData, null);
                 const firstQuestion: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
                 setMessages([fallbackNotice, firstQuestion]);
                 setNextKey(nextKey);

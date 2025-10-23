@@ -19,6 +19,7 @@ export interface LeadData {
     meeting_type: 'Videochamada' | 'Presencial';
     start_datetime: string;
     final_summary?: string;
+    source?: string;
 }
 
 export type LeadDataKey = keyof LeadData;

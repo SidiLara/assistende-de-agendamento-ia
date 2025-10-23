@@ -167,7 +167,8 @@ const fallbackQuestions: Record<LeadDataKey, string> = {
     client_email: "E qual o seu <strong>melhor e-mail</strong> para mantermos contato?",
     meeting_type: "Você prefere uma reunião por <strong>Videochamada</strong> ou <strong>Presencial</strong>?",
     start_datetime: "Qual o melhor <strong>dia da semana</strong> para a nossa conversa?",
-    final_summary: "" 
+    final_summary: "",
+    source: ""
 };
 
 
@@ -178,7 +179,9 @@ export const getFallbackResponse = (
 ): AiResponse => {
     let updatedLeadData = { ...currentData };
     if (keyToCollect && lastUserMessage) {
-        if (keyToCollect === 'valor_credito' || keyToCollect === 'reserva_mensal') {
+        if (keyToCollect === 'start_datetime' && currentData.start_datetime && !currentData.start_datetime.includes('às')) {
+            updatedLeadData.start_datetime = `${currentData.start_datetime} às ${lastUserMessage}`;
+        } else if (keyToCollect === 'valor_credito' || keyToCollect === 'reserva_mensal') {
             const numericValue = parseFloat(lastUserMessage.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, ''));
             if (!isNaN(numericValue)) {
                 updatedLeadData[keyToCollect] = numericValue;
@@ -199,7 +202,7 @@ export const getFallbackResponse = (
 
     if (nextKey === 'start_datetime' && !lastUserMessage.toLowerCase().includes('feira') && !lastUserMessage.toLowerCase().includes('sábado') && !lastUserMessage.toLowerCase().includes('domingo')) {
         action = 'SHOW_DAY_OPTIONS';
-    } else if (keyToCollect === 'start_datetime') {
+    } else if (keyToCollect === 'start_datetime' && updatedLeadData.start_datetime && !updatedLeadData.start_datetime.includes('às')) {
          return {
             updatedLeadData,
             responseText: "Ótimo. E qual seria o <strong>melhor horário</strong> para você nesse dia?",
@@ -232,12 +235,13 @@ export const getFallbackSummary = (leadData: Partial<LeadData>): string => {
 }
 
 export const sendLeadToCRM = async (leadData: LeadData) => {
-    const { client_name, client_whatsapp, client_email, topic, valor_credito, reserva_mensal, start_datetime } = leadData;
+    const { client_name, client_whatsapp, client_email, topic, valor_credito, reserva_mensal, start_datetime, source } = leadData;
 
     const formattedValorCredito = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor_credito);
     const formattedReservaMensal = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(reserva_mensal);
 
-    let obsContent = "Resumo do Agendamento (Captado via IA):\n\n";
+    let obsContent = `Origem: ${source || 'Direto'}\n\n`;
+    obsContent += "Resumo do Agendamento (Captado via IA):\n\n";
     obsContent += `Nome do Cliente: ${client_name}\n`;
     obsContent += `WhatsApp: ${client_whatsapp || 'Não informado'}\n`;
     obsContent += `E-mail: ${client_email || 'Não informado'}\n`;
