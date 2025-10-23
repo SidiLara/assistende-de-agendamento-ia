@@ -291,7 +291,7 @@ const App: React.FC = () => {
             setActionOptions([]);
             setIsActionPending(false);
             setIsTyping(true);
-            await sendLeadToCRM(leadData as LeadData);
+            await sendLeadToCRM(leadData as LeadData, messages);
             const finalMessage: Message = { id: Date.now(), sender: MessageSender.Bot, text: "Perfeito! Seu agendamento foi confirmado. Sidinei Lara entrará em contato com você em breve. Obrigado!" };
             setMessages(prev => [...prev, finalMessage]);
             setIsDone(true);
@@ -327,6 +327,9 @@ const App: React.FC = () => {
                     </div>
                 </div>
             </div>
+             <footer className="text-center text-xs text-gray-600 p-4">
+                Todos os direitos reservados ao desenvolvedor Sidinei Lara
+            </footer>
         </div>
     );
 };

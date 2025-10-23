@@ -261,14 +261,58 @@ export const getFallbackSummary = (leadData: Partial<LeadData>): string => {
     return summary;
 }
 
-export const sendLeadToCRM = async (leadData: LeadData) => {
+const getInternalSummaryForCRM = async (leadData: LeadData, history: Message[], formattedValorCredito: string, formattedReservaMensal: string): Promise<string> => {
+    const conversationHistory = history.map(m => `${m.sender === 'bot' ? 'Assistente' : 'Cliente'}: ${m.text.replace(/<[^>]*>/g, '')}`).join('\n');
+
+    const dataForPrompt = {
+        ...leadData,
+        valor_credito: formattedValorCredito,
+        reserva_mensal: formattedReservaMensal
+    };
+
+    const internalSummaryPrompt = `
+    Você é um analista de vendas. Sua tarefa é criar um relatório narrativo conciso para um consultor com base em um resumo de dados e no histórico da conversa com um assistente de IA.
+
+    O relatório deve seguir o formato:
+    "Cliente [Nome] busca um planejamento para [Objetivo]. Ele(a) precisa de um crédito de [Valor do Crédito] e pode aportar [Reserva Mensal] mensalmente. [Observações sobre a conversa]."
+
+    Na seção de observações, resuma brevemente a interação. Se o cliente apresentou alguma dúvida, objeção ou ponto importante durante a conversa, mencione isso. Se a conversa foi direta, simplesmente afirme que o cliente foi colaborativo.
+
+    Dados Coletados:
+    ${JSON.stringify(dataForPrompt, null, 2)}
+
+    Histórico da Conversa:
+    ${conversationHistory}
+
+    Gere apenas o relatório narrativo.
+    `;
+    
+    try {
+        const response = await callApiWithFallback(ai => ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: internalSummaryPrompt,
+        }));
+        return response.text.trim();
+    } catch (error) {
+        console.error("Failed to generate internal CRM summary:", error);
+        return "Não foi possível gerar o relatório narrativo da conversa.";
+    }
+};
+
+
+export const sendLeadToCRM = async (leadData: LeadData, history: Message[]) => {
     const { client_name, client_whatsapp, client_email, topic, valor_credito, reserva_mensal, start_datetime, source } = leadData;
 
     const formattedValorCredito = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor_credito);
     const formattedReservaMensal = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(reserva_mensal);
 
-    let obsContent = `Origem: ${source || 'Direto'}\n\n`;
-    obsContent += "Resumo do Agendamento (Captado via IA):\n\n";
+    const narrativeReport = await getInternalSummaryForCRM(leadData, history, formattedValorCredito, formattedReservaMensal);
+
+    let obsContent = "RELATÓRIO DA CONVERSA (IA):\n";
+    obsContent += `${narrativeReport}\n\n`;
+    obsContent += "--------------------------------------\n\n";
+    obsContent += "DADOS CAPTURADOS:\n";
+    obsContent += `Origem: ${source || 'Direto'}\n`;
     obsContent += `Nome do Cliente: ${client_name}\n`;
     obsContent += `WhatsApp: ${client_whatsapp || 'Não informado'}\n`;
     obsContent += `E-mail: ${client_email || 'Não informado'}\n`;
