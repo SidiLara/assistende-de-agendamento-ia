@@ -69,17 +69,44 @@ type AiResponse = {
     nextKey: LeadDataKey | null;
 };
 
+// Helper function for retrying with exponential backoff
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const callApiWithRetry = async <T>(apiFn: () => Promise<T>, retries = 2, delay = 1000): Promise<T> => {
+    let lastError: any;
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await apiFn();
+        } catch (error: any) {
+            lastError = error;
+            const errorMessage = error.toString().toLowerCase();
+            // Only retry on specific transient errors (like overload)
+            if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('unavailable')) {
+                 if (i < retries - 1) {
+                    const waitTime = delay * Math.pow(2, i);
+                    console.log(`API call failed due to overload, retrying in ${waitTime}ms...`);
+                    await sleep(waitTime);
+                }
+            } else {
+                // Not a retryable error, throw immediately
+                throw lastError;
+            }
+        }
+    }
+    throw lastError;
+};
+
 const callApiWithFallback = async (apiCall: (ai: GoogleGenAI) => Promise<any>) => {
     try {
         const primaryAi = getAiClient(PRIMARY_API_KEY);
-        return await apiCall(primaryAi);
+        return await callApiWithRetry(() => apiCall(primaryAi));
     } catch (primaryError) {
-        console.warn("Primary API key failed. Trying fallback.", primaryError);
+        console.warn("Primary API key failed after retries. Trying fallback.", primaryError);
         try {
             const secondaryAi = getAiClient(SECONDARY_API_KEY);
-            return await apiCall(secondaryAi);
+            return await callApiWithRetry(() => apiCall(secondaryAi));
         } catch (secondaryError) {
-            console.error("Fallback API key also failed.", secondaryError);
+            console.error("Fallback API key also failed after retries.", secondaryError);
             throw new Error("Both API keys failed.");
         }
     }
