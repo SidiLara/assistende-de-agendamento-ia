@@ -3,9 +3,10 @@
 @tailwind utilities;
 
 body {
-  background-color: #f9fafb;
-  background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
-  background-size: 16px 16px;
+  background-image: url('https://media.istockphoto.com/id/1218737747/pt/vetorial/learning-online-e-learning-video-call-chat-with-class-distance-education.jpg?s=612x612&w=0&k=20&c=HfopuwvfxaIioZ9GzE6ulpBGySsD5ivyCmpKqjulOYo=');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 .chat-container::-webkit-scrollbar {
   width: 6px;

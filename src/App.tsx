@@ -307,7 +307,7 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-gray-100 font-sans">
+        <div className="flex flex-col h-screen font-sans bg-white/70 backdrop-blur-sm">
             <div className="flex-1 min-h-0 flex justify-center items-center p-4">
                 <div className="w-full max-w-xl h-full max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col">
                     <ChatHeader />
