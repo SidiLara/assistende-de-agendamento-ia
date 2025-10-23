@@ -160,25 +160,6 @@ export const getAiResponse = async (
     }
 };
 
-export const getFinalSummary = async (leadData: Partial<LeadData>): Promise<string> => {
-    const summaryPrompt = `Crie um resumo de confirmação conciso para um agendameto com base nos dados JSON a seguir.
-NÃO inclua uma saudação inicial (como "Olá"). Comece diretamente com uma frase como "Perfeito! Por favor, confirme se os dados abaixo estão corretos:".
-Formate a saída em HTML. Use a tag <strong> para destacar informações chave (nome, valores, data/hora). Use <br> para quebras de linha.
-O tom deve ser profissional e positivo.
-Termine com a pergunta "Podemos confirmar o agendamento?".
-
-Dados:
-${JSON.stringify(leadData, null, 2)}`;
-
-    const response = await callApiWithFallback(ai => ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: summaryPrompt,
-    }));
-    
-    const formattedSummary = response.text.trim().replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    return formattedSummary;
-};
-
 // --- Fallback Logic (Non-AI) ---
 const fallbackFlow: LeadDataKey[] = [
     'client_name', 'topic', 'valor_credito', 'reserva_mensal',

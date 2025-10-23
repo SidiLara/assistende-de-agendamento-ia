@@ -4,7 +4,7 @@ import { ChatBody } from './components/ChatBody';
 import { ChatInput } from './components/ChatInput';
 import { ActionPills } from './components/ActionPills';
 import { Message, MessageSender, LeadData, LeadDataKey } from './types';
-import { getAiResponse, getFinalSummary, sendLeadToCRM, getFallbackResponse, getFallbackSummary } from './services/geminiService';
+import { getAiResponse, sendLeadToCRM, getFallbackResponse, getFallbackSummary } from './services/geminiService';
 
 const calculateFullDate = (dayOfWeek: string, time: string): string => {
     const now = new Date();
@@ -14,7 +14,7 @@ const calculateFullDate = (dayOfWeek: string, time: string): string => {
     };
     const targetDay = weekDays[dayOfWeek.toLowerCase()];
     
-    if (targetDay === undefined) return `${dayOfWeek} ${time}`;
+    if (targetDay === undefined || !time) return `${dayOfWeek} ${time}`;
 
     const timeMatch = time.match(/(\d{1,2}):?(\d{2})?/);
     if (!timeMatch) return `${dayOfWeek} às ${time}`;
@@ -174,17 +174,21 @@ const App: React.FC = () => {
             if (newNextKeyFromAI === null && !isCorrecting) {
                 setIsTyping(true);
                 
-                const finalDate = calculateFullDate(
-                    (newLeadData.start_datetime?.split(' ')[0] || ''),
-                    (newLeadData.start_datetime?.split(' ')[2] || '')
-                );
+                const dateTimeString = newLeadData.start_datetime || '';
+                const dayMatch = dateTimeString.match(/(\b(domingo|segunda-feira|terça-feira|quarta-feira|quinta-feira|sexta-feira|sábado)\b)/i);
+                const timeMatch = dateTimeString.match(/(\d{1,2}:?\d{2})/);
+        
+                const dayOfWeek = dayMatch ? dayMatch[1] : '';
+                const time = timeMatch ? timeMatch[1] : '';
+
+                const finalDate = calculateFullDate(dayOfWeek, time);
                 
                 const finalLeadData = { ...newLeadData, start_datetime: finalDate };
                 setLeadData(finalLeadData);
                 
                 setIsFallbackMode(true);
 
-                const summaryText = isFallbackMode ? getFallbackSummary(finalLeadData) : await getFinalSummary(finalLeadData);
+                const summaryText = getFallbackSummary(finalLeadData);
                 setLeadData(prev => ({ ...prev, final_summary: summaryText }));
 
                 const summaryMessage: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: summaryText };
