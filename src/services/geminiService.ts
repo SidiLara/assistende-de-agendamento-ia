@@ -23,7 +23,7 @@ Você é Yannis, o assistente de planejamento do Sidinei Lara, um consultor da A
 
 4.  **Fluxo de Conversa**: Siga uma conversa natural para obter as seguintes informações, UMA DE CADA VEZ, na seguinte ordem estrita:
     *   \`client_name\`
-    *   \`topic\` (Ex: "Obrigado, [Nome]! Qual o seu <strong>objetivo principal</strong> com este planejamento? (Ex: Comprar um <strong>Imóvel</strong>, <strong>Automóvel</strong>, fazer uma <strong>Viagem</strong>, <strong>Investir/Planejar</strong>, ou outro projeto?)")
+    *   \`topic\`
     *   \`valor_credito\`
     *   \`reserva_mensal\`
     *   \`client_whatsapp\`
@@ -208,48 +208,50 @@ export const getFallbackResponse = (
     keyToCollect: LeadDataKey | null
 ): AiResponse => {
     let updatedLeadData = { ...currentData };
+
     if (keyToCollect && lastUserMessage) {
         if (keyToCollect === 'start_datetime' && currentData.start_datetime && !currentData.start_datetime.includes('às')) {
             updatedLeadData.start_datetime = `${currentData.start_datetime} às ${lastUserMessage}`;
         } else if (keyToCollect === 'valor_credito') {
             const numericValue = parseHumanNumber(lastUserMessage, true);
-            if (!isNaN(numericValue)) {
-                updatedLeadData[keyToCollect] = numericValue;
-            }
+            if (!isNaN(numericValue)) updatedLeadData[keyToCollect] = numericValue;
         } else if (keyToCollect === 'reserva_mensal') {
             const numericValue = parseHumanNumber(lastUserMessage, false);
-            if (!isNaN(numericValue)) {
-                updatedLeadData[keyToCollect] = numericValue;
-            }
-        }
-        else {
+            if (!isNaN(numericValue)) updatedLeadData[keyToCollect] = numericValue;
+        } else {
             (updatedLeadData as Record<string, unknown>)[keyToCollect] = lastUserMessage;
         }
     }
 
-    const nextKey = fallbackFlow.find(key => !updatedLeadData.hasOwnProperty(key)) || null;
+    if (keyToCollect === 'start_datetime' && updatedLeadData.start_datetime && !updatedLeadData.start_datetime.includes('às')) {
+        return {
+            updatedLeadData,
+            responseText: "Ótimo. E qual seria o <strong>melhor horário</strong> para você nesse dia?",
+            action: null,
+            nextKey: 'start_datetime'
+        };
+    }
+
+    const nextKey = fallbackFlow.find(key => {
+         if (key === 'start_datetime') {
+            return !(updatedLeadData.start_datetime && updatedLeadData.start_datetime.includes('às'));
+        }
+        return !updatedLeadData.hasOwnProperty(key);
+    }) || null;
 
     if (!nextKey) {
         return { updatedLeadData, responseText: "", action: null, nextKey: null };
     }
-    
+
     let responseText = fallbackQuestions[nextKey];
     if (nextKey === 'topic' && updatedLeadData.client_name) {
         const firstName = updatedLeadData.client_name.split(' ')[0];
         responseText = responseText.replace('{client_name}', firstName);
     }
-    
-    let action = null;
 
-    if (nextKey === 'start_datetime' && !lastUserMessage.toLowerCase().includes('feira') && !lastUserMessage.toLowerCase().includes('sábado') && !lastUserMessage.toLowerCase().includes('domingo')) {
+    let action = null;
+    if (nextKey === 'start_datetime') {
         action = 'SHOW_DAY_OPTIONS';
-    } else if (keyToCollect === 'start_datetime' && updatedLeadData.start_datetime && !updatedLeadData.start_datetime.includes('às')) {
-         return {
-            updatedLeadData,
-            responseText: "Ótimo. E qual seria o <strong>melhor horário</strong> para você nesse dia?",
-            action: null,
-            nextKey: 'start_datetime'
-         }
     }
 
     return { updatedLeadData, responseText, action, nextKey };
