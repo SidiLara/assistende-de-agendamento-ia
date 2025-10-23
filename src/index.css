@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes slide-in-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-message {
+  animation: slide-in-fade-in 0.4s ease-out forwards;
+}
+
+
 body {
   background-image: url('https://media.istockphoto.com/id/1218737747/pt/vetorial/learning-online-e-learning-video-call-chat-with-class-distance-education.jpg?s=612x612&w=0&k=20&c=HfopuwvfxaIioZ9GzE6ulpBGySsD5ivyCmpKqjulOYo=');
   background-size: cover;

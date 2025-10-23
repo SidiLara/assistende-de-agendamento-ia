@@ -11,7 +11,7 @@ export const ChatHeader: React.FC = () => {
                         src="https://img.freepik.com/fotos-premium/centro-de-atendimento-de-homem-feliz-e-sorriso-de-retrato-no-suporte-de-atendimento-ao-cliente-ou-telemarketing-no-escritorio-pessoa-do-sexo-masculino-amigavel-ou-agente-consultor-sorrindo-para-assistente-virtual-ou-aconselhamento-on-line-no-local-de-trabalho_590464-184673.jpg"
                         alt="Sidinei Lara"
                     />
-                    <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-green-500 ring-2 ring-white"></span>
+                    <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-brand-green ring-2 ring-white"></span>
                 </div>
                 <div>
                     <h1 className="text-lg font-bold text-gray-800">Assistente de Pré-Consultoria</h1>
