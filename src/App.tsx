@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatBody } from './components/ChatBody';
@@ -99,14 +98,27 @@ const App: React.FC = () => {
         setIsActionPending(false);
 
         if (nextKey === 'client_whatsapp') {
-            const whatsappRegex = /^\(?\d{2}\)?\s?9\d{4}-?\d{4}$/;
             const justDigits = text.replace(/\D/g, '');
-
-            if (!whatsappRegex.test(text.trim()) && !(justDigits.length === 11 && justDigits[2] === '9')) {
+            if (justDigits.length !== 11 || justDigits[2] !== '9') {
                 const errorMessage: Message = {
                     id: Date.now() + 1,
                     sender: MessageSender.Bot,
-                    text: "Hmm, esse número de WhatsApp não parece válido. Por favor, insira o número com DDD no formato <strong>(XX) 9XXXX-XXXX</strong>."
+                    text: "Hmm, não consegui identificar um número de WhatsApp válido em sua mensagem. Por favor, insira o número com DDD no formato <strong>(XX) 9XXXX-XXXX</strong>."
+                };
+                setMessages(prev => [...prev, errorMessage]);
+                setIsTyping(false);
+                setIsSending(false);
+                return;
+            }
+        }
+
+        if (nextKey === 'client_email') {
+            const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+            if (!text.match(emailRegex)) {
+                const errorMessage: Message = {
+                    id: Date.now() + 1,
+                    sender: MessageSender.Bot,
+                    text: "Opa, esse e-mail não parece válido. Por favor, poderia verificar e inserir novamente?"
                 };
                 setMessages(prev => [...prev, errorMessage]);
                 setIsTyping(false);
@@ -160,6 +172,8 @@ const App: React.FC = () => {
                 
                 const finalLeadData = { ...newLeadData, start_datetime: finalDate };
                 setLeadData(finalLeadData);
+                
+                setIsFallbackMode(true);
 
                 const summaryText = isFallbackMode ? getFallbackSummary(finalLeadData) : await getFinalSummary(finalLeadData);
                 setLeadData(prev => ({ ...prev, final_summary: summaryText }));
@@ -276,7 +290,8 @@ const App: React.FC = () => {
         } else if (value === 'correct') {
             const fieldLabels: Record<string, string> = {
                 client_name: 'Nome', topic: 'Objetivo', valor_credito: 'Valor do Crédito',
-                reserva_mensal: 'Reserva Mensal', client_whatsapp: 'WhatsApp', meeting_type: 'Tipo de Reunião', start_datetime: 'Data/Hora'
+                reserva_mensal: 'Reserva Mensal', client_whatsapp: 'WhatsApp', client_email: 'E-mail',
+                meeting_type: 'Tipo de Reunião', start_datetime: 'Data/Hora'
             };
             const correctionOptions = Object.keys(leadData)
                 .filter((key): key is LeadDataKey => key in fieldLabels && leadData[key as LeadDataKey] !== undefined)

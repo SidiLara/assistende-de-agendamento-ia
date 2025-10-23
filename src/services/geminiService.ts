@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { Message, LeadData, LeadDataKey } from "../types";
 
@@ -23,6 +22,7 @@ Você é Yannis, um assistente de pré-consultoria amigável, profissional e mui
     *   \`valor_credito\`
     *   \`reserva_mensal\`
     *   \`client_whatsapp\`
+    *   \`client_email\`
     *   \`meeting_type\`
     *   \`start_datetime\` (Pergunte primeiro o dia, depois a hora)
 
@@ -53,6 +53,7 @@ const leadDataSchema = {
         valor_credito: { type: Type.NUMBER, description: "O valor total do crédito ou projeto." },
         reserva_mensal: { type: Type.NUMBER, description: "O valor que o cliente pode investir mensalmente." },
         client_whatsapp: { type: Type.STRING, description: "Número de WhatsApp do cliente com DDD." },
+        client_email: { type: Type.STRING, description: "Endereço de e-mail do cliente." },
         meeting_type: { type: Type.STRING, enum: ['Videochamada', 'Presencial'], description: "Preferência de reunião." },
         start_datetime: { type: Type.STRING, description: "Data e hora sugeridas para a reunião (ex: 'Sexta-feira às 15:00')." },
         action: { type: Type.STRING, enum: ['SHOW_DAY_OPTIONS'], description: "Uma ação que a interface do usuário deve executar." }
@@ -149,7 +150,7 @@ ${JSON.stringify(leadData, null, 2)}`;
 // --- Fallback Logic (Non-AI) ---
 const fallbackFlow: LeadDataKey[] = [
     'client_name', 'topic', 'valor_credito', 'reserva_mensal',
-    'client_whatsapp', 'meeting_type', 'start_datetime'
+    'client_whatsapp', 'client_email', 'meeting_type', 'start_datetime'
 ];
 
 const fallbackQuestions: Record<LeadDataKey, string> = {
@@ -158,6 +159,7 @@ const fallbackQuestions: Record<LeadDataKey, string> = {
     valor_credito: "Qual o <strong>valor do crédito</strong> que você precisa?",
     reserva_mensal: "E qual valor você consegue <strong>investir por mês</strong> neste projeto?",
     client_whatsapp: "Qual o seu número de <strong>WhatsApp com DDD</strong> para contato?",
+    client_email: "E qual o seu <strong>melhor e-mail</strong> para mantermos contato?",
     meeting_type: "Você prefere uma reunião por <strong>Videochamada</strong> ou <strong>Presencial</strong>?",
     start_datetime: "Qual o melhor <strong>dia da semana</strong> para a nossa conversa?",
     final_summary: "" 
@@ -216,6 +218,7 @@ export const getFallbackSummary = (leadData: Partial<LeadData>): string => {
     summary += `<strong>Valor do Crédito:</strong> ${formatCurrency(leadData.valor_credito)}<br>`;
     summary += `<strong>Reserva Mensal:</strong> ${formatCurrency(leadData.reserva_mensal)}<br>`;
     summary += `<strong>WhatsApp:</strong> ${leadData.client_whatsapp || 'Não informado'}<br>`;
+    summary += `<strong>E-mail:</strong> ${leadData.client_email || 'Não informado'}<br>`;
     summary += `<strong>Tipo de Reunião:</strong> ${leadData.meeting_type || 'Não informado'}<br>`;
     summary += `<strong>Data/Hora:</strong> ${leadData.start_datetime || 'Não informado'}<br><br>`;
     summary += "Podemos confirmar o agendamento?";
@@ -224,7 +227,7 @@ export const getFallbackSummary = (leadData: Partial<LeadData>): string => {
 }
 
 export const sendLeadToCRM = async (leadData: LeadData) => {
-    const { client_name, client_whatsapp, topic, valor_credito, reserva_mensal, start_datetime } = leadData;
+    const { client_name, client_whatsapp, client_email, topic, valor_credito, reserva_mensal, start_datetime } = leadData;
 
     const formattedValorCredito = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor_credito);
     const formattedReservaMensal = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(reserva_mensal);
@@ -232,6 +235,7 @@ export const sendLeadToCRM = async (leadData: LeadData) => {
     let obsContent = "Resumo do Agendamento (Captado via IA):\n\n";
     obsContent += `Nome do Cliente: ${client_name}\n`;
     obsContent += `WhatsApp: ${client_whatsapp || 'Não informado'}\n`;
+    obsContent += `E-mail: ${client_email || 'Não informado'}\n`;
     obsContent += `Objetivo do Projeto: ${topic}\n`;
     obsContent += `Valor do Crédito: ${formattedValorCredito}\n`;
     obsContent += `Reserva Mensal: ${formattedReservaMensal}\n`;
@@ -249,14 +253,14 @@ export const sendLeadToCRM = async (leadData: LeadData) => {
 
     const requestBody = {
         nome: client_name,
-        email: 'nao-informado@lead.com',
+        email: client_email || 'nao-informado@lead.com',
         celular: (client_whatsapp || '').replace(/\D/g, ''),
         cpf_ou_cnpj: "000.000.000-00",
         classificacao1: `Projeto: ${topic}`,
         classificacao2: `${formattedValorCredito}`,
         classificacao3: `Reserva Mensal: ${formattedReservaMensal}`,
         obs: obsContent,
-        platform: "GEM-SID-REACT"
+        platform: "GEMSID"
     };
 
     try {

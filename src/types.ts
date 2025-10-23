@@ -15,6 +15,7 @@ export interface LeadData {
     valor_credito: number;
     reserva_mensal: number;
     client_whatsapp: string;
+    client_email: string;
     meeting_type: 'Videochamada' | 'Presencial';
     start_datetime: string;
     final_summary?: string;
