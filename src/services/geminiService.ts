@@ -224,25 +224,28 @@ export const getFallbackSummary = (leadData: Partial<LeadData>): string => {
 }
 
 export const sendLeadToCRM = async (leadData: LeadData) => {
-    const { client_name, client_whatsapp, topic, valor_credito, reserva_mensal, start_datetime, final_summary } = leadData;
+    const { client_name, client_whatsapp, topic, valor_credito, reserva_mensal, start_datetime } = leadData;
 
     const formattedValorCredito = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor_credito);
     const formattedReservaMensal = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(reserva_mensal);
 
-    let obsContent = "";
+    let obsContent = "Resumo do Agendamento (Captado via IA):\n\n";
+    obsContent += `Nome do Cliente: ${client_name}\n`;
+    obsContent += `WhatsApp: ${client_whatsapp || 'Não informado'}\n`;
+    obsContent += `Objetivo do Projeto: ${topic}\n`;
+    obsContent += `Valor do Crédito: ${formattedValorCredito}\n`;
+    obsContent += `Reserva Mensal: ${formattedReservaMensal}\n`;
+    obsContent += `Agendamento Preferencial: ${start_datetime || 'Não informado'}\n\n`;
     
     if (start_datetime) {
         const timeMatch = start_datetime.match(/\b(\d{1,2}):(\d{2})\b/);
         if (timeMatch) {
             const hour = parseInt(timeMatch[1], 10);
             if (hour < 6 || hour >= 22) {
-                obsContent += "ATENÇÃO: Horário fora do padrão comercial. Ligar para confirmar.\n\n";
+                obsContent += "ATENÇÃO: Horário de agendamento fora do padrão comercial. Recomenda-se ligar para confirmar.\n";
             }
         }
-        obsContent += `Agendamento: ${start_datetime}\n\n`;
     }
-    
-    obsContent += `--- Resumo para o Cliente ---\n${final_summary?.replace(/<br>/g, '\n').replace(/<strong>/g, '').replace(/<\/strong>/g, '')}`;
 
     const requestBody = {
         nome: client_name,
