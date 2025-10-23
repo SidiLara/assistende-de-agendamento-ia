@@ -12,7 +12,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     const bubbleClasses = `max-w-md shadow-md py-3 px-5 text-base ${
         isUser
             ? 'bg-green-600 text-white rounded-2xl rounded-br-lg'
-            : 'bg-white/80 backdrop-blur-sm text-gray-800 border border-gray-200/50 rounded-2xl rounded-bl-lg'
+            : 'bg-white/95 backdrop-blur-sm text-gray-800 border border-gray-200/50 rounded-2xl rounded-bl-lg'
     }`;
 
     return (
