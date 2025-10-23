@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export const ChatHeader: React.FC = () => {
@@ -19,9 +18,9 @@ export const ChatHeader: React.FC = () => {
                 </div>
             </div>
             <img 
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMg8cLOD6VKLgBXDZM5kBgDry_2n--Rz8eUQ&s"
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiiw-fX7YI8T1mTq9-fy5LO22TH0xu_VPu9g&s"
                 alt="Logo Ademicon" 
-                className="h-8"
+                className="w-12 h-12 rounded-full object-cover"
             />
         </div>
     );
