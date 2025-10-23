@@ -51,8 +51,8 @@ const leadDataSchema = {
         nextKey: { type: Type.STRING, nullable: true, description: "A chave do próximo dado a ser coletado (ex: 'client_name', 'topic'). Retorne null se tudo foi coletado." },
         client_name: { type: Type.STRING, description: "Nome completo do cliente." },
         topic: { type: Type.STRING, enum: ['Imóvel', 'Automóvel', 'Investimento', 'Viagem', 'Outro'], description: "O objetivo principal do cliente." },
-        valor_credito: { type: Type.NUMBER, description: "O valor total do crédito ou projeto." },
-        reserva_mensal: { type: Type.NUMBER, description: "O valor que o cliente pode investir mensalmente." },
+        valor_credito: { type: Type.NUMBER, description: "O valor total do crédito ou projeto. O valor mínimo é 15.000. Se o usuário disser '100', '100k' ou '100 mil', interprete como 100000." },
+        reserva_mensal: { type: Type.NUMBER, description: "O valor que o cliente pode investir mensalmente. Se o usuário disser '1', '1k' ou '1 mil', interprete como 1000." },
         client_whatsapp: { type: Type.STRING, description: "Número de WhatsApp do cliente com DDD." },
         client_email: { type: Type.STRING, description: "Endereço de e-mail do cliente." },
         meeting_type: { type: Type.STRING, enum: ['Videochamada', 'Presencial'], description: "Preferência de reunião." },
@@ -161,6 +161,25 @@ export const getAiResponse = async (
 };
 
 // --- Fallback Logic (Non-AI) ---
+const parseHumanNumber = (text: string, assumeThousandsForSmallNumbers = false): number => {
+    let normalizedText = text.toLowerCase().trim().replace(/r\$|\./g, '').replace(',', '.');
+    let multiplier = 1;
+    if (normalizedText.includes('k') || normalizedText.includes('mil')) {
+        multiplier = 1000;
+        normalizedText = normalizedText.replace(/k|mil/g, '').trim();
+    }
+    const numericMatch = normalizedText.match(/[+-]?([0-9]*[.])?[0-9]+/);
+    if (!numericMatch) return NaN;
+    let value = parseFloat(numericMatch[0]);
+    if (isNaN(value)) return NaN;
+    value *= multiplier;
+    if (assumeThousandsForSmallNumbers && multiplier === 1 && value >= 15 && value < 1000) {
+        value *= 1000;
+    }
+    return value;
+};
+
+
 const fallbackFlow: LeadDataKey[] = [
     'client_name', 'topic', 'valor_credito', 'reserva_mensal',
     'client_whatsapp', 'client_email', 'meeting_type', 'start_datetime'
@@ -189,12 +208,18 @@ export const getFallbackResponse = (
     if (keyToCollect && lastUserMessage) {
         if (keyToCollect === 'start_datetime' && currentData.start_datetime && !currentData.start_datetime.includes('às')) {
             updatedLeadData.start_datetime = `${currentData.start_datetime} às ${lastUserMessage}`;
-        } else if (keyToCollect === 'valor_credito' || keyToCollect === 'reserva_mensal') {
-            const numericValue = parseFloat(lastUserMessage.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, ''));
+        } else if (keyToCollect === 'valor_credito') {
+            const numericValue = parseHumanNumber(lastUserMessage, true);
             if (!isNaN(numericValue)) {
                 updatedLeadData[keyToCollect] = numericValue;
             }
-        } else {
+        } else if (keyToCollect === 'reserva_mensal') {
+            const numericValue = parseHumanNumber(lastUserMessage, false);
+            if (!isNaN(numericValue)) {
+                updatedLeadData[keyToCollect] = numericValue;
+            }
+        }
+        else {
             (updatedLeadData as Record<string, unknown>)[keyToCollect] = lastUserMessage;
         }
     }

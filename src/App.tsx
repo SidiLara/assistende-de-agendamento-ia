@@ -8,19 +8,30 @@ import { getAiResponse, sendLeadToCRM, getFallbackResponse, getFallbackSummary }
 
 const calculateFullDate = (dayOfWeek: string, time: string): string => {
     const now = new Date();
-    const weekDays: { [key: string]: number } = {
-        "domingo": 0, "segunda-feira": 1, "terça-feira": 2, "quarta-feira": 3, 
-        "quinta-feira": 4, "sexta-feira": 5, "sábado": 6
-    };
-    const targetDay = weekDays[dayOfWeek.toLowerCase()];
     
-    if (targetDay === undefined || !time) return `${dayOfWeek} ${time}`;
+    // More robust day matching
+    const weekDayMap: { [key: string]: number } = {
+        domingo: 0, segunda: 1, terca: 2, terça: 2, quarta: 3, 
+        quinta: 4, sexta: 5, sabado: 6, sábado: 6
+    };
+    const normalizedDayInput = dayOfWeek.toLowerCase().replace('-feira', '');
+    const targetDayKey = Object.keys(weekDayMap).find(key => normalizedDayInput.includes(key));
+    const targetDay = targetDayKey !== undefined ? weekDayMap[targetDayKey] : -1;
 
-    const timeMatch = time.match(/(\d{1,2}):?(\d{2})?/);
-    if (!timeMatch) return `${dayOfWeek} às ${time}`;
+    // More robust time parsing
+    const timeInput = time.toLowerCase();
+    const timeMatch = timeInput.match(/(\d{1,2})[:h]?(\d{2})?/);
+
+    if (targetDay === -1 || !timeMatch) {
+        return `${dayOfWeek} ${time}`.trim();
+    }
 
     const hour = parseInt(timeMatch[1], 10);
-    const minute = parseInt(timeMatch[2] || '0', 10);
+    const minute = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
+
+    if (isNaN(hour) || isNaN(minute) || hour > 23 || minute > 59) {
+         return `${dayOfWeek} ${time}`.trim();
+    }
 
     const resultDate = new Date();
     resultDate.setHours(hour, minute, 0, 0);
@@ -43,6 +54,25 @@ const calculateFullDate = (dayOfWeek: string, time: string): string => {
         minute: '2-digit'
     });
 };
+
+const parseHumanNumber = (text: string, assumeThousandsForSmallNumbers = false): number => {
+    let normalizedText = text.toLowerCase().trim().replace(/r\$|\./g, '').replace(',', '.');
+    let multiplier = 1;
+    if (normalizedText.includes('k') || normalizedText.includes('mil')) {
+        multiplier = 1000;
+        normalizedText = normalizedText.replace(/k|mil/g, '').trim();
+    }
+    const numericMatch = normalizedText.match(/[+-]?([0-9]*[.])?[0-9]+/);
+    if (!numericMatch) return NaN;
+    let value = parseFloat(numericMatch[0]);
+    if (isNaN(value)) return NaN;
+    value *= multiplier;
+    if (assumeThousandsForSmallNumbers && multiplier === 1 && value >= 15 && value < 1000) {
+        value *= 1000;
+    }
+    return value;
+};
+
 
 const App: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -146,20 +176,28 @@ const App: React.FC = () => {
             
             const { updatedLeadData, responseText, action, nextKey: newNextKeyFromAI } = response;
             
-            if (nextKey === 'valor_credito' && updatedLeadData.hasOwnProperty('valor_credito')) {
-                const creditValue = Number(String(updatedLeadData.valor_credito).replace(/[^0-9,.-]/g, '').replace('.', '').replace(',', '.'));
-                if (isNaN(creditValue) || creditValue <= 0) {
+            if (nextKey === 'valor_credito') {
+                let creditValue = updatedLeadData.valor_credito ? Number(updatedLeadData.valor_credito) : NaN;
+        
+                if (creditValue < 15000) {
+                    const reParsedValue = parseHumanNumber(text, true);
+                    if (!isNaN(reParsedValue) && reParsedValue >= 15000) {
+                        creditValue = reParsedValue;
+                        updatedLeadData.valor_credito = creditValue;
+                    }
+                }
+                
+                if (isNaN(creditValue) || creditValue < 15000) {
                     const errorMessage: Message = {
                         id: Date.now() + 1,
                         sender: MessageSender.Bot,
-                        text: "Ops, parece que o valor não é válido. Por favor, insira um valor de crédito positivo. Qual o <strong>valor do crédito</strong> que você tem em mente?"
+                        text: "Entendi. Para que a gente possa encontrar o melhor plano, o <strong>valor mínimo de crédito</strong> é de R$ 15.000,00. Qual seria o <strong>valor que você tem em mente</strong>?"
                     };
                     setMessages(prev => [...prev, errorMessage]);
                     setIsTyping(false);
                     setIsSending(false);
                     return;
                 }
-                 updatedLeadData.valor_credito = creditValue;
             }
             
             const newLeadData = { ...leadData, ...updatedLeadData };
@@ -176,10 +214,10 @@ const App: React.FC = () => {
                 
                 const dateTimeString = newLeadData.start_datetime || '';
                 const dayMatch = dateTimeString.match(/(\b(domingo|segunda-feira|terça-feira|quarta-feira|quinta-feira|sexta-feira|sábado)\b)/i);
-                const timeMatch = dateTimeString.match(/(\d{1,2}:?\d{2})/);
+                const timeMatch = dateTimeString.match(/(\d{1,2}[:h]?\d{0,2})/);
         
                 const dayOfWeek = dayMatch ? dayMatch[1] : '';
-                const time = timeMatch ? timeMatch[1] : '';
+                const time = timeMatch ? timeMatch[0] : '';
 
                 const finalDate = calculateFullDate(dayOfWeek, time);
                 
