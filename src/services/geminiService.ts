@@ -317,6 +317,22 @@ const getInternalSummaryForCRM = async (leadData: LeadData, history: Message[], 
 
 
 export const sendLeadToCRM = async (leadData: LeadData, history: Message[]) => {
+    let leadCounter = 1;
+    try {
+        const storedCounter = localStorage.getItem('leadCounter');
+        if (storedCounter) {
+            leadCounter = parseInt(storedCounter, 10);
+        }
+    } catch (e) {
+        console.error("Could not access localStorage for lead counter", e);
+    }
+    const currentLeadNumber = leadCounter;
+    try {
+        localStorage.setItem('leadCounter', (leadCounter + 1).toString());
+    } catch (e) {
+        console.error("Could not update localStorage for lead counter", e);
+    }
+
     const { client_name, client_whatsapp, client_email, topic, valor_credito, reserva_mensal, start_datetime, source } = leadData;
 
     const formattedValorCredito = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor_credito);
@@ -324,7 +340,8 @@ export const sendLeadToCRM = async (leadData: LeadData, history: Message[]) => {
 
     const narrativeReport = await getInternalSummaryForCRM(leadData, history, formattedValorCredito, formattedReservaMensal);
 
-    let obsContent = "RELATÓRIO DA CONVERSA (IA):\n";
+    let obsContent = `Lead: ${currentLeadNumber}\n\n`;
+    obsContent += "RELATÓRIO DA CONVERSA (IA):\n";
     obsContent += `${narrativeReport}\n\n`;
     obsContent += "--------------------------------------\n\n";
     obsContent += "DADOS CAPTURADOS:\n";
