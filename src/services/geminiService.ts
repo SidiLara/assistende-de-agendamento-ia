@@ -23,7 +23,7 @@ Você é Yannis, o assistente de planejamento do Sidinei Lara, um consultor da A
 
 4.  **Fluxo de Conversa**: Siga uma conversa natural para obter as seguintes informações, UMA DE CADA VEZ, na seguinte ordem estrita:
     *   \`client_name\`
-    *   \`topic\` (Ex: "Obrigado, [Nome]! Qual o seu <strong>objetivo principal</strong> com este planejamento?")
+    *   \`topic\` (Ex: "Obrigado, [Nome]! Qual o seu <strong>objetivo principal</strong> com este planejamento? (Ex: Comprar um <strong>Imóvel</strong>, <strong>Automóvel</strong>, fazer uma <strong>Viagem</strong>, <strong>Investir/Planejar</strong>, ou outro projeto?)")
     *   \`valor_credito\`
     *   \`reserva_mensal\`
     *   \`client_whatsapp\`
@@ -53,7 +53,7 @@ const leadDataSchema = {
         responseText: { type: Type.STRING, description: "A resposta em texto para ser exibida ao usuário." },
         nextKey: { type: Type.STRING, nullable: true, description: "A chave do próximo dado a ser coletado (ex: 'client_name', 'topic'). Retorne null se tudo foi coletado." },
         client_name: { type: Type.STRING, description: "Nome completo do cliente." },
-        topic: { type: Type.STRING, enum: ['Imóvel', 'Automóvel', 'Investimento', 'Viagem', 'Outro'], description: "O objetivo principal do cliente." },
+        topic: { type: Type.STRING, enum: ['Imóvel', 'Automóvel', 'Investimento', 'Viagem', 'Outro'], description: "O objetivo principal do cliente. (Ex: Imóvel, Automóvel, Viagem, Investimento, ou Outro se for para entender melhor as opções de planejamento)." },
         valor_credito: { type: Type.NUMBER, description: "O valor total do crédito ou projeto. O valor mínimo é 15.000. Se o usuário disser '100', '100k' ou '100 mil', interprete como 100000." },
         reserva_mensal: { type: Type.NUMBER, description: "O valor que o cliente pode investir mensalmente. Se o usuário disser '1', '1k' ou '1 mil', interprete como 1000." },
         client_whatsapp: { type: Type.STRING, description: "Número de WhatsApp do cliente com DDD." },
@@ -190,7 +190,7 @@ const fallbackFlow: LeadDataKey[] = [
 
 const fallbackQuestions: Record<LeadDataKey, string> = {
     client_name: "Olá! Que ótimo ter você aqui. Para começarmos nosso planejamento, qual o seu <strong>nome completo</strong>, por favor?",
-    topic: "Obrigado! E qual o seu <strong>principal objetivo</strong> com este planejamento? É para um <strong>Imóvel</strong>, <strong>Automóvel</strong>, <strong>Investimento</strong>, <strong>Viagem</strong> ou <strong>Outro</strong> projeto?",
+    topic: "Obrigado, {client_name}! Qual o seu <strong>objetivo principal</strong> com este planejamento? (Ex: <strong>Carro</strong>, <strong>Imóvel</strong>, <strong>Viagem</strong>, <strong>Investir/Planejar</strong> ou outro projeto)",
     valor_credito: "Entendi. Para este projeto, qual o <strong>valor de crédito</strong> aproximado que você está buscando?",
     reserva_mensal: "Ótimo! Para o seu planejamento, qual seria o valor da sua <strong>reserva mensal</strong> para essa aquisição?",
     client_whatsapp: "Perfeito. Para que o Sidinei possa entrar em contato, qual o seu melhor <strong>WhatsApp com DDD</strong>?",
@@ -233,7 +233,12 @@ export const getFallbackResponse = (
         return { updatedLeadData, responseText: "", action: null, nextKey: null };
     }
     
-    const responseText = fallbackQuestions[nextKey];
+    let responseText = fallbackQuestions[nextKey];
+    if (nextKey === 'topic' && updatedLeadData.client_name) {
+        const firstName = updatedLeadData.client_name.split(' ')[0];
+        responseText = responseText.replace('{client_name}', firstName);
+    }
+    
     let action = null;
 
     if (nextKey === 'start_datetime' && !lastUserMessage.toLowerCase().includes('feira') && !lastUserMessage.toLowerCase().includes('sábado') && !lastUserMessage.toLowerCase().includes('domingo')) {
