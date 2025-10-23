@@ -37,7 +37,7 @@ export const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(({ onSendM
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={placeholderText}
-                className="flex-1 w-full px-5 py-3 border-2 border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors duration-200 disabled:bg-gray-100"
+                className="flex-1 w-full px-5 py-3 border-2 border-green-500 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors duration-200 disabled:bg-gray-100 disabled:border-gray-300"
                 autoComplete="off"
                 disabled={isDisabled}
             />
