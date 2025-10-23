@@ -8,7 +8,7 @@ export const ChatHeader: React.FC = () => {
                 <div className="relative">
                     <img
                         className="w-12 h-12 rounded-full border-2 border-white object-cover shadow-sm"
-                        src="https://i.imgur.com/3j2k2zC.png"
+                        src="https://img.freepik.com/fotos-premium/centro-de-atendimento-de-homem-feliz-e-sorriso-de-retrato-no-suporte-de-atendimento-ao-cliente-ou-telemarketing-no-escritorio-pessoa-do-sexo-masculino-amigavel-ou-agente-consultor-sorrindo-para-assistente-virtual-ou-aconselhamento-on-line-no-local-de-trabalho_590464-184673.jpg"
                         alt="Sidinei Lara"
                     />
                     <span className="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-green-500 ring-2 ring-white"></span>
@@ -19,7 +19,7 @@ export const ChatHeader: React.FC = () => {
                 </div>
             </div>
             <img 
-                src="https://i.imgur.com/b1f3b8E.png"
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMg8cLOD6VKLgBXDZM5kBgDry_2n--Rz8eUQ&s"
                 alt="Logo Ademicon" 
                 className="h-8"
             />
