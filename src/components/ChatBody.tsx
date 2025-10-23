@@ -18,7 +18,7 @@ export const ChatBody: React.FC<ChatBodyProps> = ({ messages, isTyping }) => {
     }, [messages, isTyping]);
 
     return (
-        <div ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-4 chat-container">
+        <div ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-4 chat-container chat-background">
             {messages.map((msg) => (
                 <ChatMessage key={msg.id} message={msg} />
             ))}
