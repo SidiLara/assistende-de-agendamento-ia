@@ -23,3 +23,11 @@ export interface LeadData {
 }
 
 export type LeadDataKey = keyof LeadData;
+
+export interface ChatConfig {
+    consultantName: string;
+    assistantName: string;
+    consultantPhoto: string;
+    logoUrl: string;
+    webhookId: string;
+}

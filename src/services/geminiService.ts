@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { Message, LeadData, LeadDataKey } from "../types";
+import { Message, LeadData, LeadDataKey, ChatConfig } from "../types";
 
-const MAKE_URL = "https://hook.us2.make.com/ud4aq9lrms2mfpce40ur6ac1papv68fi";
+const BASE_MAKE_URL = "https://hook.us2.make.com/";
 const PRIMARY_API_KEY = "AIzaSyBdyZUMEdkxSCSXF-X3KnrRjnKt9e7yEXM";
 const SECONDARY_API_KEY = "AIzaSyAr-ZhYtdZ-b3jzXvIUjANB0A5dQSxHcV4";
 
@@ -12,12 +12,12 @@ const getAiClient = (apiKey: string | undefined) => {
     return new GoogleGenAI({ apiKey });
 };
 
-const systemPrompt = `
-Você é Yannis, o assistente de planejamento do Sidinei Lara, um consultor da Ademicon. Sua missão é ajudar os clientes a organizar as informações sobre seus projetos de vida para que o Sidinei possa oferecer a melhor estratégia de aquisição. Você é empático, focado nos sonhos do cliente e usa uma linguagem de planejamento e conquista. Siga estritamente estas regras:
+const createSystemPrompt = (assistantName: string, consultantName: string): string => `
+Você é ${assistantName}, o assistente de planejamento de ${consultantName}, um consultor da Ademicon. Sua missão é ajudar os clientes a organizar as informações sobre seus projetos de vida para que ${consultantName} possa oferecer a melhor estratégia de aquisição. Você é empático, focado nos sonhos do cliente e usa uma linguagem de planejamento e conquista. Siga estritamente estas regras:
 
 1.  **NUNCA USE A PALAVRA 'CONSÓRCIO'**: Sua comunicação deve ser focada em 'planejamento para aquisição', 'projeto', 'realização de objetivos', 'conquista'. Evite a palavra 'consórcio' a todo custo.
 
-2.  **LIDANDO COM PERGUNTAS DIRETAS**: Se o cliente perguntar diretamente sobre o produto (ex: "mas isso é um consórcio?"), sua resposta deve ser amigável e direcionar para o especialista. Responda: "Essa é uma ótima pergunta! O Sidinei é o especialista que vai te apresentar em detalhes a melhor estratégia para o seu projeto. Meu papel aqui é apenas coletar algumas informações iniciais para que ele já chegue na conversa com um plano desenhado para você." e, em seguida, retorne à pergunta do fluxo.
+2.  **LIDANDO COM PERGUNTAS DIRETAS**: Se o cliente perguntar diretamente sobre o produto (ex: "mas isso é um consórcio?"), sua resposta deve ser amigável e direcionar para o especialista. Responda: "Essa é uma ótima pergunta! O ${consultantName} é o especialista que vai te apresentar em detalhes a melhor estratégia para o seu projeto. Meu papel aqui é apenas coletar algumas informações iniciais para que ele já chegue na conversa com um plano desenhado para você." e, em seguida, retorne à pergunta do fluxo.
 
 3.  **Contexto e Início**: Sua primeira mensagem deve ser calorosa e convidativa. Algo como: "Olá! Que ótimo ter você aqui. Para começarmos nosso planejamento, qual o seu <strong>nome completo</strong>, por favor?". Depois, use o contexto para determinar qual é o próximo dado que falta coletar.
 
@@ -118,6 +118,7 @@ const callApiWithFallback = async (apiCall: (ai: GoogleGenAI) => Promise<any>) =
 export const getAiResponse = async (
     history: Message[],
     currentData: Partial<LeadData>,
+    config: ChatConfig
 ): Promise<AiResponse> => {
     const contextMessage = `[CONTEXTO] Dados já coletados: ${JSON.stringify(currentData)}. Analise o histórico e o contexto para determinar a próxima pergunta.`;
     
@@ -132,12 +133,14 @@ export const getAiResponse = async (
             parts: [{ text: msg.text }]
         });
     }
+    
+    const systemInstruction = createSystemPrompt(config.assistantName, config.consultantName);
 
     const response = await callApiWithFallback(ai => ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents,
         config: {
-            systemInstruction: systemPrompt,
+            systemInstruction,
             responseMimeType: "application/json",
             responseSchema: leadDataSchema
         }
@@ -188,24 +191,25 @@ const fallbackFlow: LeadDataKey[] = [
     'client_whatsapp', 'client_email', 'meeting_type', 'start_datetime'
 ];
 
-const fallbackQuestions: Record<LeadDataKey, string> = {
+const getFallbackQuestions = (config: ChatConfig): Record<LeadDataKey, string> => ({
     client_name: "Olá! Que ótimo ter você aqui. Para começarmos nosso planejamento, qual o seu <strong>nome completo</strong>, por favor?",
     topic: "Obrigado, {client_name}! Qual o seu <strong>objetivo principal</strong> com este planejamento? (Ex: <strong>Carro</strong>, <strong>Imóvel</strong>, <strong>Viagem</strong>, <strong>Investir/Planejar</strong> ou outro projeto)",
     valor_credito: "Entendi. Para este projeto, qual o <strong>valor de crédito</strong> aproximado que você está buscando?",
     reserva_mensal: "Ótimo! Para o seu planejamento, qual seria o valor da sua <strong>reserva mensal</strong> para essa aquisição?",
-    client_whatsapp: "Perfeito. Para que o Sidinei possa entrar em contato, qual o seu melhor <strong>WhatsApp com DDD</strong>?",
+    client_whatsapp: `Perfeito. Para que ${config.consultantName} possa entrar em contato, qual o seu melhor <strong>WhatsApp com DDD</strong>?`,
     client_email: "E qual o seu <strong>melhor e-mail</strong> para mantermos contato?",
     meeting_type: "Estamos quase lá! Você prefere uma reunião por <strong>Videochamada</strong> ou <strong>Presencial</strong>?",
     start_datetime: "Qual o melhor <strong>dia da semana</strong> para a nossa conversa?",
     final_summary: "",
     source: ""
-};
+});
 
 
 export const getFallbackResponse = (
     lastUserMessage: string,
     currentData: Partial<LeadData>,
-    keyToCollect: LeadDataKey | null
+    keyToCollect: LeadDataKey | null,
+    config: ChatConfig
 ): AiResponse => {
     let updatedLeadData = { ...currentData };
 
@@ -243,6 +247,7 @@ export const getFallbackResponse = (
         return { updatedLeadData, responseText: "", action: null, nextKey: null };
     }
 
+    const fallbackQuestions = getFallbackQuestions(config);
     let responseText = fallbackQuestions[nextKey];
     if (nextKey === 'topic' && updatedLeadData.client_name) {
         const firstName = updatedLeadData.client_name.split(' ')[0];
@@ -277,7 +282,7 @@ export const getFallbackSummary = (leadData: Partial<LeadData>): string => {
     return summary;
 }
 
-const getInternalSummaryForCRM = async (leadData: LeadData, history: Message[], formattedValorCredito: string, formattedReservaMensal: string): Promise<string> => {
+const getInternalSummaryForCRM = async (leadData: LeadData, history: Message[], formattedValorCredito: string, formattedReservaMensal: string, consultantName: string): Promise<string> => {
     const conversationHistory = history.map(m => `${m.sender === 'bot' ? 'Assistente' : 'Cliente'}: ${m.text.replace(/<[^>]*>/g, '')}`).join('\n');
 
     const dataForPrompt = {
@@ -287,7 +292,7 @@ const getInternalSummaryForCRM = async (leadData: LeadData, history: Message[], 
     };
 
     const internalSummaryPrompt = `
-    Você é um analista de vendas. Sua tarefa é criar um relatório narrativo conciso para um consultor com base em um resumo de dados e no histórico da conversa com um assistente de IA.
+    Você é um analista de vendas. Sua tarefa é criar um relatório narrativo conciso para o consultor ${consultantName} com base em um resumo de dados e no histórico da conversa com um assistente de IA.
 
     O relatório deve seguir o formato:
     "Cliente [Nome] busca um planejamento para [Objetivo]. Ele(a) precisa de um crédito de [Valor do Crédito] e pode aportar [Reserva Mensal] mensalmente. [Observações sobre a conversa]."
@@ -316,7 +321,10 @@ const getInternalSummaryForCRM = async (leadData: LeadData, history: Message[], 
 };
 
 
-export const sendLeadToCRM = async (leadData: LeadData, history: Message[]) => {
+export const sendLeadToCRM = async (leadData: LeadData, history: Message[], config: ChatConfig) => {
+    const { webhookId, consultantName } = config;
+    const MAKE_URL = `${BASE_MAKE_URL}${webhookId}`;
+    
     let leadCounter = 1;
     try {
         const storedCounter = localStorage.getItem('leadCounter');
@@ -338,7 +346,7 @@ export const sendLeadToCRM = async (leadData: LeadData, history: Message[]) => {
     const formattedValorCredito = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor_credito);
     const formattedReservaMensal = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(reserva_mensal);
 
-    const narrativeReport = await getInternalSummaryForCRM(leadData, history, formattedValorCredito, formattedReservaMensal);
+    const narrativeReport = await getInternalSummaryForCRM(leadData, history, formattedValorCredito, formattedReservaMensal, consultantName);
 
     let obsContent = `Lead: ${currentLeadNumber}\n\n`;
     obsContent += "RELATÓRIO DA CONVERSA (IA):\n";

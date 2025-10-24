@@ -3,7 +3,7 @@ import { ChatHeader } from './components/ChatHeader';
 import { ChatBody } from './components/ChatBody';
 import { ChatInput } from './components/ChatInput';
 import { ActionPills } from './components/ActionPills';
-import { Message, MessageSender, LeadData, LeadDataKey } from './types';
+import { Message, MessageSender, LeadData, LeadDataKey, ChatConfig } from './types';
 import { getAiResponse, sendLeadToCRM, getFallbackResponse, getFallbackSummary } from './services/geminiService';
 
 const calculateFullDate = (dayOfWeek: string, time: string): string => {
@@ -75,6 +75,7 @@ const parseHumanNumber = (text: string, assumeThousandsForSmallNumbers = false):
 
 
 const App: React.FC = () => {
+    const [config, setConfig] = useState<ChatConfig | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [leadData, setLeadData] = useState<Partial<LeadData>>({});
     const [isTyping, setIsTyping] = useState<boolean>(true);
@@ -90,25 +91,32 @@ const App: React.FC = () => {
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
-        const sourceParam = urlParams.get('origem') || urlParams.get('source') || urlParams.get('utm_source');
         
-        const initialData: Partial<LeadData> = {
-            source: sourceParam || 'Direto'
-        };
+        const appConfig: ChatConfig = {
+            consultantName: urlParams.get('consultor') || 'Sidinei Lara',
+            assistantName: urlParams.get('assistente') || 'Yannis',
+            consultantPhoto: urlParams.get('foto') || 'https://img.freepik.com/fotos-premium/centro-de-atendimento-de-homem-feliz-e-sorriso-de-retrato-no-suporte-de-atendimento-ao-cliente-ou-telemarketing-no-escritorio-pessoa-do-sexo-masculino-amigavel-ou-agente-consultor-sorrindo-para-assistente-virtual-ou-aconselhamento-on-line-no-local-de-trabalho_590464-184673.jpg',
+            logoUrl: urlParams.get('logo') || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiiw-fX7YI8T1mTq9-fy5LO22TH0xu_VPu9g&s',
+            webhookId: urlParams.get('webhook') || 'ud4aq9lrms2mfpce40ur6ac1papv68fi',
+        }
+        setConfig(appConfig);
+
+        const sourceParam = urlParams.get('origem') || urlParams.get('source') || urlParams.get('utm_source');
+        const initialData: Partial<LeadData> = { source: sourceParam || 'Direto' };
         setLeadData(initialData);
 
         const fetchWelcomeMessage = async () => {
             setIsTyping(true);
             const initialHistory: Message[] = [];
             try {
-                const { responseText, nextKey: newNextKeyFromAI } = await getAiResponse(initialHistory, initialData);
+                const { responseText, nextKey: newNextKeyFromAI } = await getAiResponse(initialHistory, initialData, appConfig);
                 setMessages([{ id: Date.now(), sender: MessageSender.Bot, text: responseText }]);
                 setNextKey(newNextKeyFromAI);
             } catch (error) {
                 console.error("Initial API call failed, starting in fallback mode.", error);
                 setIsFallbackMode(true);
                 const fallbackNotice: Message = { id: Date.now(), sender: MessageSender.Bot, text: "Olá! Parece que estamos com instabilidade na conexão com nossa IA. Vamos continuar em um modo mais direto para garantir seu atendimento."};
-                const { responseText, nextKey } = getFallbackResponse("", initialData, null);
+                const { responseText, nextKey } = getFallbackResponse("", initialData, null, appConfig);
                 const firstQuestion: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
                 setMessages([fallbackNotice, firstQuestion]);
                 setNextKey(nextKey);
@@ -126,7 +134,7 @@ const App: React.FC = () => {
 
 
     const handleSendMessage = async (text: string) => {
-        if (isSending || isDone) return;
+        if (isSending || isDone || !config) return;
 
         const userMessage: Message = { id: Date.now(), sender: MessageSender.User, text };
         const currentHistory = [...messages, userMessage];
@@ -138,7 +146,7 @@ const App: React.FC = () => {
 
         if (nextKey === 'client_whatsapp') {
             const justDigits = text.replace(/\D/g, '');
-            if (justDigits.length !== 11 || justDigits[2] !== '9') {
+            if (justDigits.length < 10 || justDigits.length > 11) {
                 const errorMessage: Message = {
                     id: Date.now() + 1,
                     sender: MessageSender.Bot,
@@ -169,9 +177,9 @@ const App: React.FC = () => {
         try {
             let response;
             if (isFallbackMode) {
-                 response = getFallbackResponse(text, leadData, nextKey);
+                 response = getFallbackResponse(text, leadData, nextKey, config);
             } else {
-                 response = await getAiResponse(currentHistory, leadData);
+                 response = await getAiResponse(currentHistory, leadData, config);
             }
             
             const { updatedLeadData, responseText, action, nextKey: newNextKeyFromAI } = response;
@@ -224,8 +232,6 @@ const App: React.FC = () => {
                 const finalLeadData = { ...newLeadData, start_datetime: finalDate };
                 setLeadData(finalLeadData);
                 
-                setIsFallbackMode(true);
-
                 const summaryText = getFallbackSummary(finalLeadData);
                 setLeadData(prev => ({ ...prev, final_summary: summaryText }));
 
@@ -257,7 +263,7 @@ const App: React.FC = () => {
             const fallbackNotice: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: "Desculpe, estou com instabilidade na conexão. Para não te deixar sem resposta, vamos continuar de forma mais direta, ok?" };
             setMessages(prev => [...prev, fallbackNotice]);
 
-            const { responseText, nextKey: fallbackNextKey } = getFallbackResponse(text, leadData, nextKey);
+            const { responseText, nextKey: fallbackNextKey } = getFallbackResponse(text, leadData, nextKey, config);
             const fallbackQuestion: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: responseText };
             setMessages(prev => [...prev, fallbackQuestion]);
             setNextKey(fallbackNextKey);
@@ -268,6 +274,8 @@ const App: React.FC = () => {
     };
     
     const handleCorrection = async (keyToCorrect: LeadDataKey) => {
+        if (!config) return;
+
         setIsCorrecting(false);
         setActionOptions([]);
         setIsActionPending(false);
@@ -281,7 +289,7 @@ const App: React.FC = () => {
         setIsTyping(true);
 
         if (isFallbackMode) {
-             const { responseText, nextKey: newNextKey, action } = getFallbackResponse("", newLeadData, keyToCorrect);
+             const { responseText, nextKey: newNextKey, action } = getFallbackResponse("", newLeadData, keyToCorrect, config);
              if (responseText) {
                 const botMessage: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
                 setMessages(prev => [...prev, botMessage]);
@@ -301,7 +309,7 @@ const App: React.FC = () => {
             }
         } else {
             const correctionHistory = [...messages, { id: Date.now(), sender: MessageSender.User, text: `Quero corrigir ${keyToCorrect}` }];
-            const { responseText, action, nextKey: newNextKeyFromAI } = await getAiResponse(correctionHistory, newLeadData);
+            const { responseText, action, nextKey: newNextKeyFromAI } = await getAiResponse(correctionHistory, newLeadData, config);
 
             if (responseText) {
                 const botMessage: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
@@ -329,12 +337,13 @@ const App: React.FC = () => {
 
 
     const handlePillSelect = async (value: string, label?: string) => {
+        if (!config) return;
         if (value === 'confirm') {
             setActionOptions([]);
             setIsActionPending(false);
             setIsTyping(true);
-            await sendLeadToCRM(leadData as LeadData, messages);
-            const finalMessage: Message = { id: Date.now(), sender: MessageSender.Bot, text: "Perfeito! Seu agendamento foi confirmado. Sidinei Lara entrará em contato com você em breve. Obrigado!" };
+            await sendLeadToCRM(leadData as LeadData, messages, config);
+            const finalMessage: Message = { id: Date.now(), sender: MessageSender.Bot, text: `Perfeito! Seu agendamento foi confirmado. ${config.consultantName} entrará em contato com você em breve. Obrigado!` };
             setMessages(prev => [...prev, finalMessage]);
             setIsDone(true);
             setIsTyping(false);
@@ -357,11 +366,23 @@ const App: React.FC = () => {
         }
     };
 
+    if (!config) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-brand-green"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col h-screen font-sans bg-white/70 backdrop-blur-sm">
             <div className="flex-1 min-h-0 flex justify-center items-center p-4">
                 <div className="w-full max-w-xl h-full max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col">
-                    <ChatHeader />
+                    <ChatHeader 
+                        consultantName={config.consultantName}
+                        consultantPhoto={config.consultantPhoto}
+                        logoUrl={config.logoUrl}
+                    />
                     <ChatBody messages={messages} isTyping={isTyping} />
                     <div className="p-5 border-t border-gray-200 bg-white rounded-b-2xl">
                         {isActionPending && <ActionPills options={actionOptions} onSelect={handlePillSelect} />}
@@ -370,7 +391,7 @@ const App: React.FC = () => {
                 </div>
             </div>
              <footer className="text-center text-xs text-gray-600 p-4">
-                Todos os direitos reservados ao desenvolvedor Sidinei Lara
+                Powered by GEMSID | Direitos reservados para {config.consultantName}
             </footer>
         </div>
     );
