@@ -4,7 +4,7 @@ import { ChatBody } from './components/ChatBody';
 import { ChatInput } from './components/ChatInput';
 import { ActionPills } from './components/ActionPills';
 import { Message, MessageSender, LeadData, LeadDataKey, ChatConfig } from './types';
-import { getAiResponse, sendLeadToCRM, getFallbackResponse, getFallbackSummary } from './services/geminiService';
+import { getAiResponse, sendLeadToCRM, getFallbackResponse, getFallbackSummary, getFinalSummary } from './services/geminiService';
 
 const calculateFullDate = (dayOfWeek: string, time: string): string => {
     const now = new Date();
@@ -95,8 +95,8 @@ const App: React.FC = () => {
         const appConfig: ChatConfig = {
             consultantName: urlParams.get('consultor') || 'Sidinei Lara',
             assistantName: urlParams.get('assistente') || 'Yannis',
-            consultantPhoto: urlParams.get('foto') || 'https://img.freepik.com/fotos-premium/centro-de-atendimento-de-homem-feliz-e-sorriso-de-retrato-no-suporte-de-atendimento-ao-cliente-ou-telemarketing-no-escritorio-pessoa-do-sexo-masculino-amigavel-ou-agente-consultor-sorrindo-para-assistente-virtual-ou-aconselhamento-on-line-no-local-de-trabalho_590464-184673.jpg',
-            logoUrl: urlParams.get('logo') || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiiw-fX7YI8T1mTq9-fy5LO22TH0xu_VPu9g&s',
+            consultantPhoto: urlParams.get('foto') || 'https://i.imgur.com/3j2k2zC.png',
+            logoUrl: urlParams.get('logo') || 'https://i.imgur.com/b1f3b8E.png',
             webhookId: urlParams.get('webhook') || 'ud4aq9lrms2mfpce40ur6ac1papv68fi',
         }
         setConfig(appConfig);
@@ -232,7 +232,7 @@ const App: React.FC = () => {
                 const finalLeadData = { ...newLeadData, start_datetime: finalDate };
                 setLeadData(finalLeadData);
                 
-                const summaryText = getFallbackSummary(finalLeadData);
+                const summaryText = isFallbackMode ? getFallbackSummary(finalLeadData) : await getFinalSummary(finalLeadData, config);
                 setLeadData(prev => ({ ...prev, final_summary: summaryText }));
 
                 const summaryMessage: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: summaryText };

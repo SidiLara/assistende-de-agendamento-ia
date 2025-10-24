@@ -2,8 +2,6 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Message, LeadData, LeadDataKey, ChatConfig } from "../types";
 
 const BASE_MAKE_URL = "https://hook.us2.make.com/";
-const PRIMARY_API_KEY = "AIzaSyBdyZUMEdkxSCSXF-X3KnrRjnKt9e7yEXM";
-const SECONDARY_API_KEY = "AIzaSyAr-ZhYtdZ-b3jzXvIUjANB0A5dQSxHcV4";
 
 const getAiClient = (apiKey: string | undefined) => {
     if (!apiKey) {
@@ -75,7 +73,7 @@ type AiResponse = {
 // Helper function for retrying with exponential backoff
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const callApiWithRetry = async <T>(apiFn: () => Promise<T>, retries = 2, delay = 1000): Promise<T> => {
+const callApiWithRetry = async <T>(apiFn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> => {
     let lastError: any;
     for (let i = 0; i < retries; i++) {
         try {
@@ -84,10 +82,10 @@ const callApiWithRetry = async <T>(apiFn: () => Promise<T>, retries = 2, delay =
             lastError = error;
             const errorMessage = error.toString().toLowerCase();
             // Only retry on specific transient errors (like overload)
-            if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('unavailable')) {
+            if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('unavailable') || errorMessage.includes('rate limit')) {
                  if (i < retries - 1) {
                     const waitTime = delay * Math.pow(2, i);
-                    console.log(`API call failed due to overload, retrying in ${waitTime}ms...`);
+                    console.warn(`API call failed due to transient error, retrying in ${waitTime}ms...`);
                     await sleep(waitTime);
                 }
             } else {
@@ -99,19 +97,13 @@ const callApiWithRetry = async <T>(apiFn: () => Promise<T>, retries = 2, delay =
     throw lastError;
 };
 
-const callApiWithFallback = async (apiCall: (ai: GoogleGenAI) => Promise<any>) => {
+const callGeminiApi = async (apiCall: (ai: GoogleGenAI) => Promise<any>) => {
     try {
-        const primaryAi = getAiClient(PRIMARY_API_KEY);
-        return await callApiWithRetry(() => apiCall(primaryAi));
-    } catch (primaryError) {
-        console.warn("Primary API key failed after retries. Trying fallback.", primaryError);
-        try {
-            const secondaryAi = getAiClient(SECONDARY_API_KEY);
-            return await callApiWithRetry(() => apiCall(secondaryAi));
-        } catch (secondaryError) {
-            console.error("Fallback API key also failed after retries.", secondaryError);
-            throw new Error("Both API keys failed.");
-        }
+        const ai = getAiClient(process.env.API_KEY);
+        return await callApiWithRetry(() => apiCall(ai));
+    } catch (error) {
+        console.error("API call failed after all retries.", error);
+        throw error;
     }
 };
 
@@ -136,7 +128,7 @@ export const getAiResponse = async (
     
     const systemInstruction = createSystemPrompt(config.assistantName, config.consultantName);
 
-    const response = await callApiWithFallback(ai => ai.models.generateContent({
+    const response = await callGeminiApi(ai => ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents,
         config: {
@@ -165,6 +157,25 @@ export const getAiResponse = async (
         throw new Error("JSON parsing failed");
     }
 };
+
+export const getFinalSummary = async (leadData: Partial<LeadData>, config: ChatConfig): Promise<string> => {
+    const summaryPrompt = `Crie um resumo de confirmação conciso e amigável para um agendamento com ${config.consultantName}, baseado nos dados JSON a seguir.
+NÃO inclua uma saudação inicial (como "Olá"). Comece diretamente com uma frase como "Perfeito, {client_name}! Por favor, confirme se os dados para nosso planejamento estão corretos:".
+Formate a saída em HTML. Use a tag <strong> para destacar informações chave (nome, valores, data/hora). Use <br> para quebras de linha.
+O tom deve ser profissional e positivo.
+Termine com a pergunta "Podemos confirmar o agendamento?".
+
+Dados:
+${JSON.stringify(leadData, null, 2)}`;
+
+    const response = await callGeminiApi(ai => ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: summaryPrompt,
+    }));
+
+    return response.text.trim();
+};
+
 
 // --- Fallback Logic (Non-AI) ---
 const parseHumanNumber = (text: string, assumeThousandsForSmallNumbers = false): number => {
@@ -309,7 +320,7 @@ const getInternalSummaryForCRM = async (leadData: LeadData, history: Message[], 
     `;
     
     try {
-        const response = await callApiWithFallback(ai => ai.models.generateContent({
+        const response = await callGeminiApi(ai => ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: internalSummaryPrompt,
         }));
