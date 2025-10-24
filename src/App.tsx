@@ -95,8 +95,8 @@ const App: React.FC = () => {
         const appConfig: ChatConfig = {
             consultantName: urlParams.get('consultor') || 'Sidinei Lara',
             assistantName: urlParams.get('assistente') || 'Yannis',
-            consultantPhoto: urlParams.get('foto') || 'https://i.imgur.com/3j2k2zC.png',
-            logoUrl: urlParams.get('logo') || 'https://i.imgur.com/b1f3b8E.png',
+            consultantPhoto: urlParams.get('foto') || 'https://i.imgur.com/sR41cb6.png',
+            logoUrl: urlParams.get('logo') || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6trSojmXDyWHddIVPk0tj6HIPQjszY2dfDQ&s',
             webhookId: urlParams.get('webhook') || 'ud4aq9lrms2mfpce40ur6ac1papv68fi',
         }
         setConfig(appConfig);
