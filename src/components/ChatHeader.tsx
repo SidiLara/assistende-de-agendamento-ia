@@ -26,7 +26,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ consultantName, consulta
             <img 
                 src={logoUrl}
                 alt="Logo Ademicon" 
-                className="w-12 h-12 rounded-full object-cover"
+                className="h-10 w-auto object-contain"
             />
         </div>
     );
