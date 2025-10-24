@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatBody } from './components/ChatBody';
@@ -95,7 +96,7 @@ const App: React.FC = () => {
         const appConfig: ChatConfig = {
             consultantName: urlParams.get('consultor') || 'Sidinei Lara',
             assistantName: urlParams.get('assistente') || 'Yannis',
-            consultantPhoto: urlParams.get('foto') || 'https://i.imgur.com/sR41cb6.png',
+            consultantPhoto: urlParams.get('foto') || 'https://formaqui.fr/wp-content/uploads/2023/08/titre-professionnel-sams-1024x683.jpeg',
             logoUrl: urlParams.get('logo') || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6trSojmXDyWHddIVPk0tj6HIPQjszY2dfDQ&s',
             webhookId: urlParams.get('webhook') || 'ud4aq9lrms2mfpce40ur6ac1papv68fi',
         }
