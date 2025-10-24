@@ -2,6 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Message, LeadData, LeadDataKey, ChatConfig } from "../types";
 
 const BASE_MAKE_URL = "https://hook.us2.make.com/";
+const SECONDARY_API_KEY = "AIzaSyAr-ZhYtdZ-b3jzXvIUjANB0A5dQSxHcV4";
 
 const getAiClient = (apiKey: string | undefined) => {
     if (!apiKey) {
@@ -70,7 +71,6 @@ type AiResponse = {
     nextKey: LeadDataKey | null;
 };
 
-// Helper function for retrying with exponential backoff
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const callApiWithRetry = async <T>(apiFn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> => {
@@ -81,7 +81,6 @@ const callApiWithRetry = async <T>(apiFn: () => Promise<T>, retries = 3, delay =
         } catch (error: any) {
             lastError = error;
             const errorMessage = error.toString().toLowerCase();
-            // Only retry on specific transient errors (like overload)
             if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('unavailable') || errorMessage.includes('rate limit')) {
                  if (i < retries - 1) {
                     const waitTime = delay * Math.pow(2, i);
@@ -89,7 +88,6 @@ const callApiWithRetry = async <T>(apiFn: () => Promise<T>, retries = 3, delay =
                     await sleep(waitTime);
                 }
             } else {
-                // Not a retryable error, throw immediately
                 throw lastError;
             }
         }
@@ -97,13 +95,19 @@ const callApiWithRetry = async <T>(apiFn: () => Promise<T>, retries = 3, delay =
     throw lastError;
 };
 
-const callGeminiApi = async (apiCall: (ai: GoogleGenAI) => Promise<any>) => {
+const callApiWithFallbackAndRetry = async (apiCall: (ai: GoogleGenAI) => Promise<any>) => {
     try {
-        const ai = getAiClient(process.env.API_KEY);
-        return await callApiWithRetry(() => apiCall(ai));
-    } catch (error) {
-        console.error("API call failed after all retries.", error);
-        throw error;
+        const primaryAi = getAiClient(process.env.API_KEY);
+        return await callApiWithRetry(() => apiCall(primaryAi));
+    } catch (primaryError) {
+        console.warn("Primary API key failed after retries. Trying fallback.", primaryError);
+        try {
+            const secondaryAi = getAiClient(SECONDARY_API_KEY);
+            return await callApiWithRetry(() => apiCall(secondaryAi));
+        } catch (secondaryError) {
+            console.error("Fallback API key also failed after retries.", secondaryError);
+            throw new Error("Both API keys failed, switching to local script.");
+        }
     }
 };
 
@@ -128,7 +132,7 @@ export const getAiResponse = async (
     
     const systemInstruction = createSystemPrompt(config.assistantName, config.consultantName);
 
-    const response = await callGeminiApi(ai => ai.models.generateContent({
+    const response = await callApiWithFallbackAndRetry(ai => ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents,
         config: {
@@ -168,7 +172,7 @@ Termine com a pergunta "Podemos confirmar o agendamento?".
 Dados:
 ${JSON.stringify(leadData, null, 2)}`;
 
-    const response = await callGeminiApi(ai => ai.models.generateContent({
+    const response = await callApiWithFallbackAndRetry(ai => ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: summaryPrompt,
     }));
@@ -320,7 +324,7 @@ const getInternalSummaryForCRM = async (leadData: LeadData, history: Message[], 
     `;
     
     try {
-        const response = await callGeminiApi(ai => ai.models.generateContent({
+        const response = await callApiWithFallbackAndRetry(ai => ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: internalSummaryPrompt,
         }));

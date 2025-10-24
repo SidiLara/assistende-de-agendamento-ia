@@ -217,22 +217,23 @@ const App: React.FC = () => {
                 setMessages(prev => [...prev, botMessage]);
             }
 
-            if (newNextKeyFromAI === null && !isCorrecting) {
+            const shouldShowSummary = (newNextKeyFromAI === null) || isCorrecting;
+
+            if (shouldShowSummary) {
                 setIsTyping(true);
                 
                 const dateTimeString = newLeadData.start_datetime || '';
                 const dayMatch = dateTimeString.match(/(\b(domingo|segunda-feira|terça-feira|quarta-feira|quinta-feira|sexta-feira|sábado)\b)/i);
                 const timeMatch = dateTimeString.match(/(\d{1,2}[:h]?\d{0,2})/);
-        
                 const dayOfWeek = dayMatch ? dayMatch[1] : '';
                 const time = timeMatch ? timeMatch[0] : '';
-
                 const finalDate = calculateFullDate(dayOfWeek, time);
                 
                 const finalLeadData = { ...newLeadData, start_datetime: finalDate };
                 setLeadData(finalLeadData);
                 
-                const summaryText = isFallbackMode ? getFallbackSummary(finalLeadData) : await getFinalSummary(finalLeadData, config);
+                const useFallbackSummary = isFallbackMode || isCorrecting;
+                const summaryText = useFallbackSummary ? getFallbackSummary(finalLeadData) : await getFinalSummary(finalLeadData, config);
                 setLeadData(prev => ({ ...prev, final_summary: summaryText }));
 
                 const summaryMessage: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: summaryText };
@@ -243,6 +244,10 @@ const App: React.FC = () => {
                     { label: 'Corrigir Informações', value: 'correct' },
                 ]);
                 setIsActionPending(true);
+
+                if (isCorrecting) {
+                    setIsCorrecting(false);
+                }
             } else if (action === 'SHOW_DAY_OPTIONS') {
                 setActionOptions([
                     { label: 'Segunda-feira', value: 'Segunda-feira' },
@@ -255,7 +260,6 @@ const App: React.FC = () => {
                 ]);
                 setIsActionPending(true);
             }
-            setIsCorrecting(false); 
         } catch (error) {
             console.error("API Error, switching to fallback mode:", error);
             setIsFallbackMode(true);
@@ -276,7 +280,6 @@ const App: React.FC = () => {
     const handleCorrection = async (keyToCorrect: LeadDataKey) => {
         if (!config) return;
 
-        setIsCorrecting(false);
         setActionOptions([]);
         setIsActionPending(false);
 
@@ -288,50 +291,25 @@ const App: React.FC = () => {
         setNextKey(keyToCorrect);
         setIsTyping(true);
 
-        if (isFallbackMode) {
-             const { responseText, nextKey: newNextKey, action } = getFallbackResponse("", newLeadData, keyToCorrect, config);
-             if (responseText) {
-                const botMessage: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
-                setMessages(prev => [...prev, botMessage]);
-            }
-            setNextKey(newNextKey);
-             if (action === 'SHOW_DAY_OPTIONS') {
-                setActionOptions([
-                    { label: 'Segunda-feira', value: 'Segunda-feira' },
-                    { label: 'Terça-feira', value: 'Terça-feira' },
-                    { label: 'Quarta-feira', value: 'Quarta-feira' },
-                    { label: 'Quinta-feira', value: 'Quinta-feira' },
-                    { label: 'Sexta-feira', value: 'Sexta-feira' },
-                    { label: 'Sábado', value: 'Sábado' },
-                    { label: 'Domingo', value: 'Domingo' },
-                ]);
-                setIsActionPending(true);
-            }
-        } else {
-            const correctionHistory = [...messages, { id: Date.now(), sender: MessageSender.User, text: `Quero corrigir ${keyToCorrect}` }];
-            const { responseText, action, nextKey: newNextKeyFromAI } = await getAiResponse(correctionHistory, newLeadData, config);
-
-            if (responseText) {
-                const botMessage: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
-                setMessages(prev => [...prev, botMessage]);
-            }
-            
-            setNextKey(newNextKeyFromAI);
-
-            if (action === 'SHOW_DAY_OPTIONS') {
-                setActionOptions([
-                    { label: 'Segunda-feira', value: 'Segunda-feira' },
-                    { label: 'Terça-feira', value: 'Terça-feira' },
-                    { label: 'Quarta-feira', value: 'Quarta-feira' },
-                    { label: 'Quinta-feira', value: 'Quinta-feira' },
-                    { label: 'Sexta-feira', value: 'Sexta-feira' },
-                    { label: 'Sábado', value: 'Sábado' },
-                    { label: 'Domingo', value: 'Domingo' },
-                ]);
-                setIsActionPending(true);
-            }
+        const { responseText, nextKey: newNextKey, action } = getFallbackResponse("", newLeadData, keyToCorrect, config);
+        if (responseText) {
+            const botMessage: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
+            setMessages(prev => [...prev, botMessage]);
         }
-
+        setNextKey(newNextKey);
+        if (action === 'SHOW_DAY_OPTIONS') {
+            setActionOptions([
+                { label: 'Segunda-feira', value: 'Segunda-feira' },
+                { label: 'Terça-feira', value: 'Terça-feira' },
+                { label: 'Quarta-feira', value: 'Quarta-feira' },
+                { label: 'Quinta-feira', value: 'Quinta-feira' },
+                { label: 'Sexta-feira', value: 'Sexta-feira' },
+                { label: 'Sábado', value: 'Sábado' },
+                { label: 'Domingo', value: 'Domingo' },
+            ]);
+            setIsActionPending(true);
+        }
+        
         setIsTyping(false);
     };
 
@@ -348,13 +326,14 @@ const App: React.FC = () => {
             setIsDone(true);
             setIsTyping(false);
         } else if (value === 'correct') {
+            setIsFallbackMode(true);
             const fieldLabels: Record<string, string> = {
                 client_name: 'Nome', topic: 'Objetivo', valor_credito: 'Valor do Crédito',
                 reserva_mensal: 'Reserva Mensal', client_whatsapp: 'WhatsApp', client_email: 'E-mail',
                 meeting_type: 'Tipo de Reunião', start_datetime: 'Data/Hora'
             };
             const correctionOptions = Object.keys(leadData)
-                .filter((key): key is LeadDataKey => key in fieldLabels && leadData[key as LeadDataKey] !== undefined)
+                .filter((key): key is LeadDataKey => key in fieldLabels && leadData[key as LeadDataKey] !== undefined && key !== 'source' && key !== 'final_summary')
                 .map(key => ({ label: fieldLabels[key], value: key }));
 
             setActionOptions(correctionOptions);
