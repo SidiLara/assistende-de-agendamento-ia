@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatBody } from './components/ChatBody';
@@ -6,6 +5,12 @@ import { ChatInput } from './components/ChatInput';
 import { ActionPills } from './components/ActionPills';
 import { Message, MessageSender, LeadData, LeadDataKey, ChatConfig } from './types';
 import { getAiResponse, sendLeadToCRM, getFallbackResponse, getFallbackSummary, getFinalSummary } from './services/geminiService';
+
+declare global {
+  interface Window {
+    fbq?: (...args: any[]) => void;
+  }
+}
 
 const calculateFullDate = (dayOfWeek: string, time: string): string => {
     const now = new Date();
@@ -101,6 +106,28 @@ const App: React.FC = () => {
             webhookId: urlParams.get('webhook') || 'ud4aq9lrms2mfpce40ur6ac1papv68fi',
         }
         setConfig(appConfig);
+
+        // Pixel implementation
+        const pixelId = urlParams.get('pixelId');
+        if (pixelId && !window.fbq) {
+            const fbPixelScript = document.createElement('script');
+            fbPixelScript.innerHTML = `
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', '${pixelId}');
+                fbq('track', 'PageView');
+            `;
+            document.head.appendChild(fbPixelScript);
+            const noScript = document.createElement('noscript');
+            noScript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1"/>`;
+            document.head.appendChild(noScript);
+        }
 
         const sourceParam = urlParams.get('origem') || urlParams.get('source') || urlParams.get('utm_source');
         const initialData: Partial<LeadData> = { source: sourceParam || 'Direto' };
@@ -322,6 +349,11 @@ const App: React.FC = () => {
             setIsActionPending(false);
             setIsTyping(true);
             await sendLeadToCRM(leadData as LeadData, messages, config);
+            
+            if (window.fbq) {
+                window.fbq('track', 'Lead');
+            }
+            
             const finalMessage: Message = { id: Date.now(), sender: MessageSender.Bot, text: `Perfeito! Seu agendamento foi confirmado. ${config.consultantName} entrará em contato com você em breve. Obrigado!` };
             setMessages(prev => [...prev, finalMessage]);
             setIsDone(true);
