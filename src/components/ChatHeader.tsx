@@ -19,13 +19,13 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ consultantName, consulta
                 </div>
                 <div>
                     <h1 className="text-lg font-bold text-gray-800">Assistente de Pré-Consultoria</h1>
-                    <p className="text-sm text-gray-500">{consultantName}, Consultor Ademicon</p>
+                    <p className="text-sm text-gray-500">{consultantName}, Consultor</p>
                 </div>
             </div>
             <img 
-                src="https://i.imgur.com/b1f3b8E.png"
-                alt="Logo Ademicon" 
-                className="h-10 w-auto object-contain"
+                src="https://i.imgur.com/m0iSl1G.png"
+                alt="Logo" 
+                className="h-8"
             />
         </div>
     );
