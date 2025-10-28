@@ -297,7 +297,7 @@ export const getFallbackSummary = (leadData: Partial<LeadData>): string => {
     return summary;
 }
 
-const getInternalSummaryForCRM = async (leadData: LeadData, history: Message[], formattedValorCredito: string, formattedReservaMensal: string, consultantName: string): Promise<string> => {
+const getInternalSummaryForCRM = async (leadData: Partial<LeadData>, history: Message[], formattedValorCredito: string, formattedReservaMensal: string, consultantName: string): Promise<string> => {
     const conversationHistory = history.map(m => `${m.sender === 'bot' ? 'Assistente' : 'Cliente'}: ${m.text.replace(/<[^>]*>/g, '')}`).join('\n');
 
     const dataForPrompt = {
@@ -336,7 +336,7 @@ const getInternalSummaryForCRM = async (leadData: LeadData, history: Message[], 
 };
 
 
-export const sendLeadToCRM = async (leadData: LeadData, history: Message[], config: ChatConfig) => {
+export const sendLeadToCRM = async (leadData: Partial<LeadData>, history: Message[], config: ChatConfig) => {
     const { webhookId, consultantName } = config;
     const MAKE_URL = `${BASE_MAKE_URL}${webhookId}`;
     
@@ -356,7 +356,7 @@ export const sendLeadToCRM = async (leadData: LeadData, history: Message[], conf
         console.error("Could not update localStorage for lead counter", e);
     }
 
-    const { client_name, client_whatsapp, client_email, topic, valor_credito, reserva_mensal, start_datetime, source, final_summary } = leadData;
+    const { client_name, client_whatsapp, client_email, topic, valor_credito = 0, reserva_mensal = 0, start_datetime, source, final_summary, meeting_type } = leadData;
 
     const formattedValorCredito = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor_credito);
     const formattedReservaMensal = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(reserva_mensal);
@@ -400,18 +400,24 @@ export const sendLeadToCRM = async (leadData: LeadData, history: Message[], conf
         consultantName,
         final_summary,
         start_datetime,
-        meeting_type: leadData.meeting_type,
-        client_email
+        meeting_type: meeting_type,
     };
 
     try {
-        await fetch(MAKE_URL, {
+        const response = await fetch(MAKE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
         });
         console.log("Lead enviado para o CRM:", requestBody);
+        if (!response.ok) {
+            console.error("Erro na resposta do CRM:", response.status, response.statusText);
+            const responseBody = await response.text();
+            console.error("Corpo da resposta do CRM:", responseBody);
+            throw new Error(`CRM submission failed with status: ${response.status}`);
+        }
     } catch (error) {
         console.error("Erro ao enviar para o CRM:", error);
+        throw error;
     }
 };

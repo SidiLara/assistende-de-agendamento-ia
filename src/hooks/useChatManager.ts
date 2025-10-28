@@ -237,23 +237,62 @@ export const useChatManager = (config: ChatConfig | null) => {
 
     const handlePillSelect = useCallback(async (value: string, label?: string) => {
         if (!config) return;
+    
         if (value === 'confirm') {
             setActionOptions([]);
             setIsActionPending(false);
             setIsTyping(true);
-            await sendLeadToCRM(leadData as LeadData, messages, config);
-            
-            if (window.fbq) {
-                window.fbq('track', 'Lead');
+            const currentMessages = [...messages];
+    
+            const sendingMessage: Message = {
+                id: Date.now(),
+                sender: MessageSender.Bot,
+                text: "Um momento, estou confirmando os detalhes e enviando para o consultor..."
+            };
+            setMessages(prev => [...prev, sendingMessage]);
+    
+            try {
+                await sendLeadToCRM(leadData, currentMessages, config);
+                
+                if (window.fbq) {
+                    window.fbq('track', 'Lead');
+                }
+                
+                setMessages(prev => {
+                    const newMessages = prev.filter(m => m.id !== sendingMessage.id);
+                    const finalMessage: Message = { 
+                        id: Date.now() + 1, 
+                        sender: MessageSender.Bot, 
+                        text: `Perfeito! Seu agendamento foi confirmado. ${config.consultantName} entrará em contato com você em breve. Obrigado!` 
+                    };
+                    return [...newMessages, finalMessage];
+                });
+                setIsDone(true);
+    
+            } catch (error) {
+                console.error("Failed to send lead to CRM:", error);
+                setMessages(prev => {
+                    const newMessages = prev.filter(m => m.id !== sendingMessage.id);
+                    const errorMessage: Message = { 
+                        id: Date.now() + 1, 
+                        sender: MessageSender.Bot, 
+                        text: "Opa! Tivemos um problema ao registrar seu agendamento. Por favor, poderia tentar confirmar novamente?" 
+                    };
+                    return [...newMessages, errorMessage];
+                });
+                
+                setActionOptions([
+                    { label: 'Confirmar Agendamento', value: 'confirm' },
+                    { label: 'Corrigir Informações', value: 'correct' },
+                ]);
+                setIsActionPending(true);
+            } finally {
+                setIsTyping(false);
             }
-            
-            const finalMessage: Message = { id: Date.now(), sender: MessageSender.Bot, text: `Perfeito! Seu agendamento foi confirmado. ${config.consultantName} entrará em contato com você em breve. Obrigado!` };
-            setMessages(prev => [...prev, finalMessage]);
-            setIsDone(true);
-            setIsTyping(false);
+    
         } else if (value === 'correct') {
             setIsFallbackMode(true);
-            setIsCorrecting(true); // Set correcting mode
+            setIsCorrecting(true);
             const fieldLabels: Record<string, string> = {
                 client_name: 'Nome', topic: 'Objetivo', valor_credito: 'Valor do Crédito',
                 reserva_mensal: 'Reserva Mensal', client_whatsapp: 'WhatsApp', client_email: 'E-mail',
@@ -262,7 +301,7 @@ export const useChatManager = (config: ChatConfig | null) => {
             const correctionOptions = Object.keys(leadData)
                 .filter((key): key is LeadDataKey => key in fieldLabels && leadData[key as LeadDataKey] !== undefined && key !== 'source' && key !== 'final_summary')
                 .map(key => ({ label: fieldLabels[key], value: key }));
-
+    
             setActionOptions(correctionOptions);
         } else if (isCorrecting) {
             handleCorrection(value as LeadDataKey);
