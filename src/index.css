@@ -19,27 +19,19 @@
 
 
 body {
-  background-image: url('https://media.istockphoto.com/id/1218737747/pt/vetorial/learning-online-e-learning-video-call-chat-with-class-distance-education.jpg?s=612x612&w=0&k=20&c=HfopuwvfxaIioZ9GzE6ulpBGySsD5ivyCmpKqjulOYo=');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-}
-.chat-background {
-  background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('https://media.istockphoto.com/id/1218737747/pt/vetorial/learning-online-e-learning-video-call-chat-with-class-distance-education.jpg?s=612x612&w=0&k=20&c=HfopuwvfxaIioZ9GzE6ulpBGySsD5ivyCmpKqjulOYo=');
-  background-size: cover;
-  background-position: center;
+  @apply bg-gray-200 dark:bg-black;
 }
 
 .chat-container::-webkit-scrollbar {
   width: 6px;
 }
 .chat-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  @apply bg-gray-100 dark:bg-gray-800;
 }
 .chat-container::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  @apply bg-gray-300 dark:bg-gray-600;
   border-radius: 3px;
 }
 .chat-container::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  @apply bg-gray-400 dark:bg-gray-500;
 }

@@ -385,21 +385,21 @@ const App: React.FC = () => {
     }
 
     return (
-        <div className="flex flex-col h-screen font-sans bg-white/70 backdrop-blur-sm">
+        <div className="flex flex-col h-screen font-sans">
             <div className="flex-1 min-h-0 flex justify-center items-center p-4">
-                <div className="w-full max-w-xl h-full max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col">
+                <div className="w-full max-w-xl h-full max-h-[90vh] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col">
                     <ChatHeader 
                         consultantName={config.consultantName}
                         consultantPhoto={config.consultantPhoto}
                     />
                     <ChatBody messages={messages} isTyping={isTyping} />
-                    <div className="p-5 border-t border-gray-200 bg-white rounded-b-2xl">
+                    <div className="p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-b-2xl">
                         {isActionPending && <ActionPills options={actionOptions} onSelect={handlePillSelect} />}
                         <ChatInput ref={inputRef} onSendMessage={handleSendMessage} isSending={isSending} isDone={isDone} isActionPending={isActionPending} nextKey={nextKey} />
                     </div>
                 </div>
             </div>
-             <footer className="text-center text-xs text-gray-600 p-4">
+             <footer className="text-center text-xs text-gray-600 dark:text-gray-400 p-4">
                 Powered by GEMSID | Direitos reservados para {config.consultantName}
             </footer>
         </div>
