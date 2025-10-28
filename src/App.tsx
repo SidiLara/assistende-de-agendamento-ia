@@ -101,8 +101,8 @@ const App: React.FC = () => {
         const appConfig: ChatConfig = {
             consultantName: urlParams.get('consultor') || 'Sidinei Lara',
             assistantName: urlParams.get('assistente') || 'Yannis',
-            consultantPhoto: urlParams.get('foto') || 'https://i.imgur.com/3j2k2zC.png',
-            logoUrl: urlParams.get('logo') || 'https://i.imgur.com/b1f3b8E.png',
+            consultantPhoto: urlParams.get('foto') || 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=128&h=128&fit=crop&crop=faces',
+            logoUrl: urlParams.get('logo') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Ademicon_logo_2020.svg/2560px-Ademicon_logo_2020.svg.png',
             webhookId: urlParams.get('webhook') || 'ud4aq9lrms2mfpce40ur6ac1papv68fi',
         }
         setConfig(appConfig);
