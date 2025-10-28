@@ -3,9 +3,10 @@ import { CabecalhoDoChat } from '../../component/CabecalhoDoChat';
 import { CorpoDoChat } from '../../component/CorpoDoChat';
 import { EntradaDeChat } from '../../component/EntradaDeChat';
 import { PillsDeAcao } from '../../component/PillsDeAcao';
-import { useChatManager } from '../../hooks/useChatManager';
+import { useChatManager } from '../../application/manager/useChatManager';
 import { ChatConfig } from '../../model/configuracao/ConfiguracaoChatModel';
 import { ChatServiceImpl } from '../../infrastructure/service/ChatServiceImpl';
+import { FallbackRuleImpl } from '../../infrastructure/rule/FallbackRuleImpl';
 
 declare global {
   interface Window {
@@ -13,7 +14,8 @@ declare global {
   }
 }
 
-const chatService = new ChatServiceImpl();
+const fallbackRule = new FallbackRuleImpl();
+const chatService = new ChatServiceImpl(fallbackRule);
 
 const BatePapoTela: React.FC = () => {
     const [config, setConfig] = useState<ChatConfig | null>(null);
