@@ -159,6 +159,34 @@ const App: React.FC = () => {
         }
     }, [isTyping, isActionPending, isDone]);
 
+    const showSummaryAndActions = async (data: Partial<LeadData>) => {
+        if (!config) return;
+
+        setIsTyping(true);
+        
+        const dateTimeString = data.start_datetime || '';
+        const dayMatch = dateTimeString.match(/(\b(domingo|segunda-feira|terça-feira|quarta-feira|quinta-feira|sexta-feira|sábado)\b)/i);
+        const timeMatch = dateTimeString.match(/(\d{1,2}[:h]?\d{0,2})/);
+        const dayOfWeek = dayMatch ? dayMatch[1] : '';
+        const time = timeMatch ? timeMatch[0] : '';
+        const finalDate = calculateFullDate(dayOfWeek, time);
+        
+        const finalLeadData = { ...data, start_datetime: finalDate };
+        setLeadData(finalLeadData);
+        
+        const summaryText = isFallbackMode ? getFallbackSummary(finalLeadData) : await getFinalSummary(finalLeadData, config);
+        setLeadData(prev => ({ ...prev, final_summary: summaryText }));
+
+        const summaryMessage: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: summaryText };
+        setMessages(prev => [...prev, summaryMessage]);
+
+        setActionOptions([
+            { label: 'Confirmar Agendamento', value: 'confirm' },
+            { label: 'Corrigir Informações', value: 'correct' },
+        ]);
+        setIsActionPending(true);
+        setIsTyping(false);
+    };
 
     const handleSendMessage = async (text: string) => {
         if (isSending || isDone || !config) return;
@@ -244,33 +272,13 @@ const App: React.FC = () => {
                 setMessages(prev => [...prev, botMessage]);
             }
 
-            const allDataCollected = newNextKeyFromAI === null && !isCorrecting;
-
-            if (allDataCollected) {
-                setIsTyping(true);
-                
-                const dateTimeString = newLeadData.start_datetime || '';
-                const dayMatch = dateTimeString.match(/(\b(domingo|segunda-feira|terça-feira|quarta-feira|quinta-feira|sexta-feira|sábado)\b)/i);
-                const timeMatch = dateTimeString.match(/(\d{1,2}[:h]?\d{0,2})/);
-                const dayOfWeek = dayMatch ? dayMatch[1] : '';
-                const time = timeMatch ? timeMatch[0] : '';
-                const finalDate = calculateFullDate(dayOfWeek, time);
-                
-                const finalLeadData = { ...newLeadData, start_datetime: finalDate };
-                setLeadData(finalLeadData);
-                
-                const summaryText = isFallbackMode ? getFallbackSummary(finalLeadData) : await getFinalSummary(finalLeadData, config);
-                setLeadData(prev => ({ ...prev, final_summary: summaryText }));
-
-                const summaryMessage: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: summaryText };
-                setMessages(prev => [...prev, summaryMessage]);
-
-                setActionOptions([
-                    { label: 'Confirmar Agendamento', value: 'confirm' },
-                    { label: 'Corrigir Informações', value: 'correct' },
-                ]);
-                setIsActionPending(true);
-
+            const allDataNowCollected = newNextKeyFromAI === null;
+            
+            if (allDataNowCollected) {
+                if (isCorrecting) {
+                    setIsCorrecting(false);
+                }
+                await showSummaryAndActions(newLeadData);
             } else if (action === 'SHOW_DAY_OPTIONS') {
                 setActionOptions([
                     { label: 'Segunda-feira', value: 'Segunda-feira' },
@@ -282,9 +290,9 @@ const App: React.FC = () => {
                     { label: 'Domingo', value: 'Domingo' },
                 ]);
                 setIsActionPending(true);
-            }
-             if (isCorrecting && newNextKeyFromAI === null) {
-                setIsCorrecting(false); 
+                setIsTyping(false);
+            } else {
+                setIsTyping(false);
             }
         } catch (error) {
             console.error("API Error, switching to fallback mode:", error);
@@ -297,8 +305,8 @@ const App: React.FC = () => {
             const fallbackQuestion: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: responseText };
             setMessages(prev => [...prev, fallbackQuestion]);
             setNextKey(fallbackNextKey);
-        } finally {
             setIsTyping(false);
+        } finally {
             setIsSending(false);
         }
     };
