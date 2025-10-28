@@ -15,6 +15,7 @@ export const useChatManager = (config: ChatConfig | null) => {
     const [nextKey, setNextKey] = useState<LeadDataKey | null>(null);
     const [isCorrecting, setIsCorrecting] = useState<boolean>(false);
     const [isFallbackMode, setIsFallbackMode] = useState<boolean>(false);
+    const [hasShownSummary, setHasShownSummary] = useState<boolean>(false);
 
     useEffect(() => {
         if (!config) return;
@@ -61,7 +62,10 @@ export const useChatManager = (config: ChatConfig | null) => {
         const finalLeadData = { ...data, start_datetime: finalDate };
         setLeadData(finalLeadData);
         
-        const summaryText = isFallbackMode ? getFallbackSummary(finalLeadData) : await getFinalSummary(finalLeadData, config);
+        const summaryText = (isFallbackMode || hasShownSummary) 
+            ? getFallbackSummary(finalLeadData) 
+            : await getFinalSummary(finalLeadData, config);
+            
         setLeadData(prev => ({ ...prev, final_summary: summaryText }));
 
         const summaryMessage: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: summaryText };
@@ -73,7 +77,10 @@ export const useChatManager = (config: ChatConfig | null) => {
         ]);
         setIsActionPending(true);
         setIsTyping(false);
-    }, [config, isFallbackMode]);
+        if (!hasShownSummary) {
+            setHasShownSummary(true);
+        }
+    }, [config, isFallbackMode, hasShownSummary]);
 
     const handleSendMessage = useCallback(async (text: string) => {
         if (isSending || isDone || !config) return;
@@ -118,7 +125,7 @@ export const useChatManager = (config: ChatConfig | null) => {
 
         try {
             let response;
-            if (isFallbackMode) {
+            if (isFallbackMode || hasShownSummary) {
                  response = getFallbackResponse(text, leadData, nextKey, config);
             } else {
                  response = await getAiResponse(currentHistory, leadData, config);
@@ -200,7 +207,7 @@ export const useChatManager = (config: ChatConfig | null) => {
         } finally {
             setIsSending(false);
         }
-    }, [config, isSending, isDone, messages, leadData, nextKey, isFallbackMode, isCorrecting, showSummaryAndActions]);
+    }, [config, isSending, isDone, messages, leadData, nextKey, isFallbackMode, isCorrecting, showSummaryAndActions, hasShownSummary]);
     
     const handleCorrection = useCallback(async (keyToCorrect: LeadDataKey) => {
         if (!config) return;
@@ -295,7 +302,6 @@ export const useChatManager = (config: ChatConfig | null) => {
             }
     
         } else if (value === 'correct') {
-            setIsFallbackMode(true);
             setIsCorrecting(true);
             const fieldLabels: Record<string, string> = {
                 client_name: 'Nome', topic: 'Objetivo', valor_credito: 'Valor do Crédito',
