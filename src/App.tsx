@@ -43,9 +43,6 @@ const App: React.FC = () => {
                 fbq('track', 'PageView');
             `;
             document.head.appendChild(fbPixelScript);
-            const noScript = document.createElement('noscript');
-            noScript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1"/>`;
-            document.head.appendChild(noScript);
         }
     }, []);
     
