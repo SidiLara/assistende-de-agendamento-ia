@@ -1,7 +1,7 @@
 import React from 'react';
-import { ChatHeaderProps } from './ChatHeaderProps';
+import { CabecalhoDoChatProps } from './CabecalhoDoChatProps';
 
-export const ChatHeader: React.FC<ChatHeaderProps> = ({ consultantName, consultantPhoto }) => {
+export const CabecalhoDoChat: React.FC<CabecalhoDoChatProps> = ({ consultantName, consultantPhoto }) => {
     return (
         <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-white dark:bg-gray-800 rounded-t-2xl">
             <div className="flex items-center space-x-4">

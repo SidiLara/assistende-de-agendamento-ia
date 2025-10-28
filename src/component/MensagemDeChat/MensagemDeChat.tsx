@@ -1,8 +1,8 @@
 import React from 'react';
-import { MessageSender } from '../model/mensagem/MensagemModel';
-import { ChatMessageProps } from './ChatMessageProps';
+import { MessageSender } from '../../model/mensagem/MensagemModel';
+import { MensagemDeChatProps } from './MensagemDeChatProps';
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+export const MensagemDeChat: React.FC<MensagemDeChatProps> = ({ message }) => {
     const isUser = message.sender === MessageSender.User;
 
     const wrapperClasses = `flex items-end ${isUser ? 'justify-end' : 'justify-start'}`;

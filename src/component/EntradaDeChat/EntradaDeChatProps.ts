@@ -1,6 +1,6 @@
-import { LeadDataKey } from '../model/lead/LeadModel';
+import { LeadDataKey } from '../../model/lead/LeadModel';
 
-export interface ChatInputProps {
+export interface EntradaDeChatProps {
     onSendMessage: (text: string) => void;
     isSending: boolean;
     isDone: boolean;

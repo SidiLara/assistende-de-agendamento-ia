@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, ChangeEvent } from 'react';
-import { ChatInputProps } from './ChatInputProps';
+import { EntradaDeChatProps } from './EntradaDeChatProps';
 
 const applyWhatsappMask = (value: string): string => {
     value = value.replace(/\D/g, '');
@@ -8,7 +8,7 @@ const applyWhatsappMask = (value: string): string => {
     return value.slice(0, 15);
 };
 
-export const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(({ onSendMessage, isSending, isDone, isActionPending, nextKey }, ref) => {
+export const EntradaDeChat = forwardRef<HTMLInputElement, EntradaDeChatProps>(({ onSendMessage, isSending, isDone, isActionPending, nextKey }, ref) => {
     const [inputValue, setInputValue] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -67,4 +67,4 @@ export const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(({ onSendM
     );
 });
 
-ChatInput.displayName = 'ChatInput';
+EntradaDeChat.displayName = 'EntradaDeChat';

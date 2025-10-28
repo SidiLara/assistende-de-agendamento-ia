@@ -3,7 +3,7 @@ interface PillOption {
     value: string;
 }
 
-export interface ActionPillsProps {
+export interface PillsDeAcaoProps {
     options: PillOption[];
     onSelect: (value: string, label?: string) => void;
 }

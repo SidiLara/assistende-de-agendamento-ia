@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Message, MessageSender } from '../model/mensagem/MensagemModel';
 import { LeadData, LeadDataKey } from '../model/lead/LeadModel';
 import { ChatConfig } from '../model/configuracao/ConfiguracaoChatModel';
-import { getAiResponse, sendLeadToCRM, getFallbackResponse, getFallbackSummary, getFinalSummary } from '../services/geminiService';
 import { calculateFullDate, parseHumanNumber } from '../utils/helpers';
+import { ChatService } from '../application/service/ChatService';
 
 const CORRECTION_FIELD_LABELS: Record<string, string> = {
     clientName: 'Nome',
@@ -16,7 +16,7 @@ const CORRECTION_FIELD_LABELS: Record<string, string> = {
     startDatetime: 'Data/Hora'
 };
 
-export const useChatManager = (config: ChatConfig | null) => {
+export const useChatManager = (config: ChatConfig | null, chatService: ChatService | null) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [leadData, setLeadData] = useState<Partial<LeadData>>({});
     const [isTyping, setIsTyping] = useState<boolean>(true);
@@ -30,7 +30,7 @@ export const useChatManager = (config: ChatConfig | null) => {
     const [hasShownSummary, setHasShownSummary] = useState<boolean>(false);
 
     useEffect(() => {
-        if (!config) return;
+        if (!config || !chatService) return;
 
         const urlParams = new URLSearchParams(window.location.search);
         const sourceParam = urlParams.get('origem') || urlParams.get('source') || urlParams.get('utm_source');
@@ -41,14 +41,14 @@ export const useChatManager = (config: ChatConfig | null) => {
             setIsTyping(true);
             const initialHistory: Message[] = [];
             try {
-                const { responseText, nextKey: newNextKeyFromAI } = await getAiResponse(initialHistory, initialData, config);
+                const { responseText, nextKey: newNextKeyFromAI } = await chatService.getAiResponse(initialHistory, initialData, config);
                 setMessages([{ id: Date.now(), sender: MessageSender.Bot, text: responseText }]);
                 setNextKey(newNextKeyFromAI);
             } catch (error) {
                 console.error("Initial API call failed, starting in fallback mode.", error);
                 setIsFallbackMode(true);
                 const fallbackNotice: Message = { id: Date.now(), sender: MessageSender.Bot, text: "Olá! Parece que estamos com instabilidade na conexão com nossa IA. Vamos continuar em um modo mais direto para garantir seu atendimento."};
-                const { responseText, nextKey } = getFallbackResponse("", initialData, null, config);
+                const { responseText, nextKey } = chatService.getFallbackResponse("", initialData, null, config);
                 const firstQuestion: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
                 setMessages([fallbackNotice, firstQuestion]);
                 setNextKey(nextKey);
@@ -56,11 +56,11 @@ export const useChatManager = (config: ChatConfig | null) => {
             setIsTyping(false);
         };
         fetchWelcomeMessage();
-    }, [config]);
+    }, [config, chatService]);
 
 
     const showSummaryAndActions = useCallback(async (data: Partial<LeadData>) => {
-        if (!config) return;
+        if (!config || !chatService) return;
 
         setIsTyping(true);
         
@@ -75,8 +75,8 @@ export const useChatManager = (config: ChatConfig | null) => {
         setLeadData(finalLeadData);
         
         const summaryText = (isFallbackMode || hasShownSummary) 
-            ? getFallbackSummary(finalLeadData) 
-            : await getFinalSummary(finalLeadData, config);
+            ? chatService.getFallbackSummary(finalLeadData) 
+            : await chatService.getFinalSummary(finalLeadData, config);
             
         setLeadData(prev => ({ ...prev, finalSummary: summaryText }));
 
@@ -92,10 +92,10 @@ export const useChatManager = (config: ChatConfig | null) => {
         if (!hasShownSummary) {
             setHasShownSummary(true);
         }
-    }, [config, isFallbackMode, hasShownSummary]);
+    }, [config, chatService, isFallbackMode, hasShownSummary]);
 
     const handleSendMessage = useCallback(async (text: string) => {
-        if (isSending || isDone || !config) return;
+        if (isSending || isDone || !config || !chatService) return;
 
         const userMessage: Message = { id: Date.now(), sender: MessageSender.User, text };
         const currentHistory = [...messages, userMessage];
@@ -138,9 +138,9 @@ export const useChatManager = (config: ChatConfig | null) => {
         try {
             let response;
             if (isFallbackMode || hasShownSummary) {
-                 response = getFallbackResponse(text, leadData, nextKey, config);
+                 response = chatService.getFallbackResponse(text, leadData, nextKey, config);
             } else {
-                 response = await getAiResponse(currentHistory, leadData, config);
+                 response = await chatService.getAiResponse(currentHistory, leadData, config);
             }
             
             const { updatedLeadData, responseText, action, nextKey: newNextKeyFromAI } = response;
@@ -211,7 +211,7 @@ export const useChatManager = (config: ChatConfig | null) => {
             const fallbackNotice: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: "Desculpe, estou com instabilidade na conexão. Para não te deixar sem resposta, vamos continuar de forma mais direta, ok?" };
             setMessages(prev => [...prev, fallbackNotice]);
 
-            const { responseText, nextKey: fallbackNextKey } = getFallbackResponse(text, leadData, nextKey, config);
+            const { responseText, nextKey: fallbackNextKey } = chatService.getFallbackResponse(text, leadData, nextKey, config);
             const fallbackQuestion: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: responseText };
             setMessages(prev => [...prev, fallbackQuestion]);
             setNextKey(fallbackNextKey);
@@ -219,10 +219,10 @@ export const useChatManager = (config: ChatConfig | null) => {
         } finally {
             setIsSending(false);
         }
-    }, [config, isSending, isDone, messages, leadData, nextKey, isFallbackMode, isCorrecting, showSummaryAndActions, hasShownSummary]);
+    }, [config, chatService, isSending, isDone, messages, leadData, nextKey, isFallbackMode, isCorrecting, showSummaryAndActions, hasShownSummary]);
     
     const handleCorrection = useCallback(async (keyToCorrect: LeadDataKey) => {
-        if (!config) return;
+        if (!config || !chatService) return;
 
         setActionOptions([]);
         setIsActionPending(false);
@@ -235,7 +235,7 @@ export const useChatManager = (config: ChatConfig | null) => {
         setNextKey(keyToCorrect);
         setIsTyping(true);
 
-        const { responseText, nextKey: newNextKey, action } = getFallbackResponse("", newLeadData, keyToCorrect, config);
+        const { responseText, nextKey: newNextKey, action } = chatService.getFallbackResponse("", newLeadData, keyToCorrect, config);
         if (responseText) {
             const botMessage: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
             setMessages(prev => [...prev, botMessage]);
@@ -255,11 +255,11 @@ export const useChatManager = (config: ChatConfig | null) => {
         }
         
         setIsTyping(false);
-    }, [config, leadData]);
+    }, [config, chatService, leadData]);
 
 
     const handlePillSelect = useCallback(async (value: string, label?: string) => {
-        if (!config) return;
+        if (!config || !chatService) return;
     
         if (value === 'confirm') {
             setActionOptions([]);
@@ -275,7 +275,7 @@ export const useChatManager = (config: ChatConfig | null) => {
             setMessages(prev => [...prev, sendingMessage]);
     
             try {
-                await sendLeadToCRM(leadData, currentMessages, config);
+                await chatService.sendLeadToCRM(leadData, currentMessages, config);
                 
                 if (window.fbq) {
                     window.fbq('track', 'Lead');
@@ -329,7 +329,7 @@ export const useChatManager = (config: ChatConfig | null) => {
         } else {
             handleSendMessage(label || value);
         }
-    }, [config, leadData, messages, isCorrecting, handleCorrection, handleSendMessage]);
+    }, [config, chatService, leadData, messages, isCorrecting, handleCorrection, handleSendMessage]);
 
     return {
         messages,

@@ -1,7 +1,7 @@
 import React from 'react';
-import { ActionPillsProps } from './ActionPillsProps';
+import { PillsDeAcaoProps } from './PillsDeAcaoProps';
 
-export const ActionPills: React.FC<ActionPillsProps> = ({ options, onSelect }) => {
+export const PillsDeAcao: React.FC<PillsDeAcaoProps> = ({ options, onSelect }) => {
     return (
         <div className="flex justify-start flex-wrap gap-2 py-2 mb-2">
             {options.map(option => (

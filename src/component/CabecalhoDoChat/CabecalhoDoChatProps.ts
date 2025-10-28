@@ -1,4 +1,4 @@
-export interface ChatHeaderProps {
+export interface CabecalhoDoChatProps {
     consultantName: string;
     consultantPhoto: string;
 }

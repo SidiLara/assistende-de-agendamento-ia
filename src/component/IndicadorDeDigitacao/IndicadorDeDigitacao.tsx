@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const TypingIndicator: React.FC = () => {
+export const IndicadorDeDigitacao: React.FC = () => {
     return (
         <div className="flex justify-start">
             <div className="px-5 py-4 shadow bg-gray-200 dark:bg-gray-700 rounded-2xl rounded-bl-lg">
