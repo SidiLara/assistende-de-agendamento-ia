@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { MensagemDeChat } from '../MensagemDeChat/MensagemDeChat';
-import { IndicadorDeDigitacao } from '../IndicadorDeDigitacao/IndicadorDeDigitacao';
+import { MensagemDeChat } from '../MensagemDeChat';
+import { IndicadorDeDigitacao } from '../IndicadorDeDigitacao';
 import { CorpoDoChatProps } from './CorpoDoChatProps';
 
 export const CorpoDoChat: React.FC<CorpoDoChatProps> = ({ messages, isTyping }) => {

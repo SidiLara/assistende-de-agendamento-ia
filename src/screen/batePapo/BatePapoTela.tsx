@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CabecalhoDoChat } from '../../component/CabecalhoDoChat/CabecalhoDoChat';
-import { CorpoDoChat } from '../../component/CorpoDoChat/CorpoDoChat';
-import { EntradaDeChat } from '../../component/EntradaDeChat/EntradaDeChat';
-import { PillsDeAcao } from '../../component/PillsDeAcao/PillsDeAcao';
+import { CabecalhoDoChat } from '../../component/CabecalhoDoChat';
+import { CorpoDoChat } from '../../component/CorpoDoChat';
+import { EntradaDeChat } from '../../component/EntradaDeChat';
+import { PillsDeAcao } from '../../component/PillsDeAcao';
 import { useChatManager } from '../../hooks/useChatManager';
 import { ChatConfig } from '../../model/configuracao/ConfiguracaoChatModel';
 import { ChatServiceImpl } from '../../infrastructure/service/ChatServiceImpl';
