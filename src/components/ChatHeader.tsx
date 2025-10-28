@@ -23,7 +23,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ consultantName, consulta
                 </div>
             </div>
             <img 
-                src="https://i.imgur.com/m0iSl1G.png"
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6trSojmXDyWHddIVPk0tj6HIPQjszY2dfDQ&s"
                 alt="Logo" 
                 className="h-8"
             />
