@@ -3,10 +3,9 @@ import React from 'react';
 interface ChatHeaderProps {
     consultantName: string;
     consultantPhoto: string;
-    logoUrl: string;
 }
 
-export const ChatHeader: React.FC<ChatHeaderProps> = ({ consultantName, consultantPhoto, logoUrl }) => {
+export const ChatHeader: React.FC<ChatHeaderProps> = ({ consultantName, consultantPhoto }) => {
     return (
         <div className="p-5 border-b border-gray-200 flex items-center justify-between bg-white rounded-t-2xl">
             <div className="flex items-center space-x-4">
@@ -24,7 +23,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ consultantName, consulta
                 </div>
             </div>
             <img 
-                src={logoUrl}
+                src="https://i.imgur.com/gK7FCIg.png"
                 alt="Logo Ademicon" 
                 className="h-10 w-auto object-contain"
             />

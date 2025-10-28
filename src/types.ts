@@ -28,6 +28,5 @@ export interface ChatConfig {
     consultantName: string;
     assistantName: string;
     consultantPhoto: string;
-    logoUrl: string;
     webhookId: string;
 }
