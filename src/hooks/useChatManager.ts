@@ -152,34 +152,38 @@ export const useChatManager = (config: ChatConfig | null) => {
             
             const newLeadData = { ...leadData, ...updatedLeadData };
             setLeadData(newLeadData);
-            setNextKey(newNextKeyFromAI);
-
-            if (responseText) {
-                const botMessage: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
-                setMessages(prev => [...prev, botMessage]);
-            }
-
-            const allDataNowCollected = newNextKeyFromAI === null;
             
-            if (allDataNowCollected) {
-                if (isCorrecting) {
-                    setIsCorrecting(false);
-                }
+            if (isCorrecting) {
+                setIsCorrecting(false);
+                setNextKey(null);
                 await showSummaryAndActions(newLeadData);
-            } else if (action === 'SHOW_DAY_OPTIONS') {
-                setActionOptions([
-                    { label: 'Segunda-feira', value: 'Segunda-feira' },
-                    { label: 'Terça-feira', value: 'Terça-feira' },
-                    { label: 'Quarta-feira', value: 'Quarta-feira' },
-                    { label: 'Quinta-feira', value: 'Quinta-feira' },
-                    { label: 'Sexta-feira', value: 'Sexta-feira' },
-                    { label: 'Sábado', value: 'Sábado' },
-                    { label: 'Domingo', value: 'Domingo' },
-                ]);
-                setIsActionPending(true);
-                setIsTyping(false);
             } else {
-                setIsTyping(false);
+                setNextKey(newNextKeyFromAI);
+
+                if (responseText) {
+                    const botMessage: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
+                    setMessages(prev => [...prev, botMessage]);
+                }
+
+                const allDataNowCollected = newNextKeyFromAI === null;
+                
+                if (allDataNowCollected) {
+                    await showSummaryAndActions(newLeadData);
+                } else if (action === 'SHOW_DAY_OPTIONS') {
+                    setActionOptions([
+                        { label: 'Segunda-feira', value: 'Segunda-feira' },
+                        { label: 'Terça-feira', value: 'Terça-feira' },
+                        { label: 'Quarta-feira', value: 'Quarta-feira' },
+                        { label: 'Quinta-feira', value: 'Quinta-feira' },
+                        { label: 'Sexta-feira', value: 'Sexta-feira' },
+                        { label: 'Sábado', value: 'Sábado' },
+                        { label: 'Domingo', value: 'Domingo' },
+                    ]);
+                    setIsActionPending(true);
+                    setIsTyping(false);
+                } else {
+                    setIsTyping(false);
+                }
             }
         } catch (error) {
             console.error("API Error, switching to fallback mode:", error);
