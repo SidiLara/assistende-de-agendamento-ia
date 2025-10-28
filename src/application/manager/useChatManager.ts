@@ -48,7 +48,12 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
             } catch (error) {
                 console.error("Initial API call failed, starting in fallback mode.", error);
                 setIsFallbackMode(true);
-                const fallbackNotice: Message = { id: Date.now(), sender: MessageSender.Bot, text: "Olá! Parece que estamos com instabilidade na conexão com nossa IA. Vamos continuar em um modo mais direto para garantir seu atendimento."};
+                const fallbackNotice: Message = { 
+                    id: Date.now(), 
+                    sender: MessageSender.Bot, 
+                    text: "Estamos com instabilidade na conexão com a IA. Para garantir seu atendimento, vamos continuar em um modo mais direto.",
+                    isNotice: true,
+                };
                 const { responseText, nextKey } = chatService.getFallbackResponse("", initialData, null, config);
                 const firstQuestion: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
                 setMessages([fallbackNotice, firstQuestion]);
@@ -209,7 +214,12 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
             console.error("API Error, switching to fallback mode:", error);
             setIsFallbackMode(true);
 
-            const fallbackNotice: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: "Desculpe, estou com instabilidade na conexão. Para não te deixar sem resposta, vamos continuar de forma mais direta, ok?" };
+            const fallbackNotice: Message = { 
+                id: Date.now() + 1, 
+                sender: MessageSender.Bot, 
+                text: "Desculpe, a instabilidade na conexão persiste. Continuaremos no modo direto para não te deixar sem resposta, ok?",
+                isNotice: true
+            };
             setMessages(prev => [...prev, fallbackNotice]);
 
             const { responseText, nextKey: fallbackNextKey } = chatService.getFallbackResponse(text, leadData, nextKey, config);
