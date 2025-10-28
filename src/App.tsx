@@ -101,8 +101,8 @@ const App: React.FC = () => {
         const appConfig: ChatConfig = {
             consultantName: urlParams.get('consultor') || 'Sidinei Lara',
             assistantName: urlParams.get('assistente') || 'Yannis',
-            consultantPhoto: urlParams.get('foto') || 'https://formaqui.fr/wp-content/uploads/2023/08/titre-professionnel-sams-1024x683.jpeg',
-            logoUrl: urlParams.get('logo') || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6trSojmXDyWHddIVPk0tj6HIPQjszY2dfDQ&s',
+            consultantPhoto: urlParams.get('foto') || 'https://i.imgur.com/3j2k2zC.png',
+            logoUrl: urlParams.get('logo') || 'https://i.imgur.com/b1f3b8E.png',
             webhookId: urlParams.get('webhook') || 'ud4aq9lrms2mfpce40ur6ac1papv68fi',
         }
         setConfig(appConfig);
@@ -245,9 +245,9 @@ const App: React.FC = () => {
                 setMessages(prev => [...prev, botMessage]);
             }
 
-            const shouldShowSummary = (newNextKeyFromAI === null) || isCorrecting;
+            const allDataCollected = newNextKeyFromAI === null && !isCorrecting;
 
-            if (shouldShowSummary) {
+            if (allDataCollected) {
                 setIsTyping(true);
                 
                 const dateTimeString = newLeadData.start_datetime || '';
@@ -260,8 +260,7 @@ const App: React.FC = () => {
                 const finalLeadData = { ...newLeadData, start_datetime: finalDate };
                 setLeadData(finalLeadData);
                 
-                const useFallbackSummary = isFallbackMode || isCorrecting;
-                const summaryText = useFallbackSummary ? getFallbackSummary(finalLeadData) : await getFinalSummary(finalLeadData, config);
+                const summaryText = isFallbackMode ? getFallbackSummary(finalLeadData) : await getFinalSummary(finalLeadData, config);
                 setLeadData(prev => ({ ...prev, final_summary: summaryText }));
 
                 const summaryMessage: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: summaryText };
@@ -273,9 +272,6 @@ const App: React.FC = () => {
                 ]);
                 setIsActionPending(true);
 
-                if (isCorrecting) {
-                    setIsCorrecting(false);
-                }
             } else if (action === 'SHOW_DAY_OPTIONS') {
                 setActionOptions([
                     { label: 'Segunda-feira', value: 'Segunda-feira' },
@@ -287,6 +283,9 @@ const App: React.FC = () => {
                     { label: 'Domingo', value: 'Domingo' },
                 ]);
                 setIsActionPending(true);
+            }
+             if (isCorrecting && newNextKeyFromAI === null) {
+                setIsCorrecting(false); 
             }
         } catch (error) {
             console.error("API Error, switching to fallback mode:", error);
@@ -360,6 +359,7 @@ const App: React.FC = () => {
             setIsTyping(false);
         } else if (value === 'correct') {
             setIsFallbackMode(true);
+            setIsCorrecting(true); // Set correcting mode
             const fieldLabels: Record<string, string> = {
                 client_name: 'Nome', topic: 'Objetivo', valor_credito: 'Valor do Crédito',
                 reserva_mensal: 'Reserva Mensal', client_whatsapp: 'WhatsApp', client_email: 'E-mail',
@@ -370,7 +370,6 @@ const App: React.FC = () => {
                 .map(key => ({ label: fieldLabels[key], value: key }));
 
             setActionOptions(correctionOptions);
-            setIsCorrecting(true);
         } else if (isCorrecting) {
             handleCorrection(value as LeadDataKey);
         } else {

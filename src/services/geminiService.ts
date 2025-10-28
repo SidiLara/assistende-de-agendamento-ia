@@ -18,7 +18,7 @@ Você é ${assistantName}, o assistente de planejamento de ${consultantName}, um
 
 2.  **LIDANDO COM PERGUNTAS DIRETAS**: Se o cliente perguntar diretamente sobre o produto (ex: "mas isso é um consórcio?"), sua resposta deve ser amigável e direcionar para o especialista. Responda: "Essa é uma ótima pergunta! O ${consultantName} é o especialista que vai te apresentar em detalhes a melhor estratégia para o seu projeto. Meu papel aqui é apenas coletar algumas informações iniciais para que ele já chegue na conversa com um plano desenhado para você." e, em seguida, retorne à pergunta do fluxo.
 
-3.  **Contexto e Início**: Sua primeira mensagem deve ser calorosa e convidativa. Algo como: "Olá! Que ótimo ter você aqui. Para começarmos nosso planejamento, qual o seu <strong>nome completo</strong>, por favor?". Depois, use o contexto para determinar qual é o próximo dado que falta coletar.
+3.  **Contexto e Início**: Sua primeira mensagem deve ser calorosa e convidativa, se apresentando. Algo como: "Olá! Eu sou ${assistantName}, o assistente de planejamento do ${consultantName}. Que ótimo ter você aqui! Para começarmos, qual o seu <strong>nome completo</strong>, por favor?". Depois, use o contexto para determinar qual é o próximo dado que falta coletar.
 
 4.  **Fluxo de Conversa**: Siga uma conversa natural para obter as seguintes informações, UMA DE CADA VEZ, na seguinte ordem estrita:
     *   \`client_name\`
@@ -207,7 +207,7 @@ const fallbackFlow: LeadDataKey[] = [
 ];
 
 const getFallbackQuestions = (config: ChatConfig): Record<LeadDataKey, string> => ({
-    client_name: "Olá! Que ótimo ter você aqui. Para começarmos nosso planejamento, qual o seu <strong>nome completo</strong>, por favor?",
+    client_name: `Olá! Eu sou ${config.assistantName}, o assistente de planejamento do ${config.consultantName}. Que ótimo ter você aqui! Para começarmos, qual o seu <strong>nome completo</strong>, por favor?`,
     topic: "Obrigado, {client_name}! Qual o seu <strong>objetivo principal</strong> com este planejamento? (Ex: <strong>Carro</strong>, <strong>Imóvel</strong>, <strong>Viagem</strong>, <strong>Investir/Planejar</strong> ou outro projeto)",
     valor_credito: "Entendi. Para este projeto, qual o <strong>valor de crédito</strong> aproximado que você está buscando?",
     reserva_mensal: "Ótimo! Para o seu planejamento, qual seria o valor da sua <strong>reserva mensal</strong> para essa aquisição?",
@@ -356,7 +356,7 @@ export const sendLeadToCRM = async (leadData: LeadData, history: Message[], conf
         console.error("Could not update localStorage for lead counter", e);
     }
 
-    const { client_name, client_whatsapp, client_email, topic, valor_credito, reserva_mensal, start_datetime, source } = leadData;
+    const { client_name, client_whatsapp, client_email, topic, valor_credito, reserva_mensal, start_datetime, source, final_summary } = leadData;
 
     const formattedValorCredito = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor_credito);
     const formattedReservaMensal = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(reserva_mensal);
@@ -396,7 +396,12 @@ export const sendLeadToCRM = async (leadData: LeadData, history: Message[], conf
         classificacao2: `${formattedValorCredito}`,
         classificacao3: `Reserva Mensal: ${formattedReservaMensal}`,
         obs: obsContent,
-        platform: "GEMSID"
+        platform: "GEMSID",
+        consultantName,
+        final_summary,
+        start_datetime,
+        meeting_type: leadData.meeting_type,
+        client_email
     };
 
     try {
