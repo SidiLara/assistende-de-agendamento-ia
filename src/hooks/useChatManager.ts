@@ -3,6 +3,16 @@ import { Message, MessageSender, LeadData, LeadDataKey, ChatConfig } from '../ty
 import { getAiResponse, sendLeadToCRM, getFallbackResponse, getFallbackSummary, getFinalSummary } from '../services/geminiService';
 import { calculateFullDate, parseHumanNumber } from '../utils/helpers';
 
+const CORRECTION_FIELD_LABELS: Record<string, string> = {
+    client_name: 'Nome',
+    topic: 'Objetivo',
+    valor_credito: 'Valor do Crédito',
+    reserva_mensal: 'Reserva Mensal',
+    client_whatsapp: 'WhatsApp',
+    client_email: 'E-mail',
+    meeting_type: 'Tipo de Reunião',
+    start_datetime: 'Data/Hora'
+};
 
 export const useChatManager = (config: ChatConfig | null) => {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -303,18 +313,17 @@ export const useChatManager = (config: ChatConfig | null) => {
     
         } else if (value === 'correct') {
             setIsCorrecting(true);
-            const fieldLabels: Record<string, string> = {
-                client_name: 'Nome', topic: 'Objetivo', valor_credito: 'Valor do Crédito',
-                reserva_mensal: 'Reserva Mensal', client_whatsapp: 'WhatsApp', client_email: 'E-mail',
-                meeting_type: 'Tipo de Reunião', start_datetime: 'Data/Hora'
-            };
             const correctionOptions = Object.keys(leadData)
-                .filter((key): key is LeadDataKey => key in fieldLabels && leadData[key as LeadDataKey] !== undefined && key !== 'source' && key !== 'final_summary')
-                .map(key => ({ label: fieldLabels[key], value: key }));
+                .filter((key): key is LeadDataKey => key in CORRECTION_FIELD_LABELS && leadData[key as LeadDataKey] !== undefined)
+                .map(key => ({ label: CORRECTION_FIELD_LABELS[key], value: key }));
     
             setActionOptions(correctionOptions);
         } else if (isCorrecting) {
-            handleCorrection(value as LeadDataKey);
+            if (value in CORRECTION_FIELD_LABELS) {
+                handleCorrection(value as LeadDataKey);
+            } else {
+                handleSendMessage(label || value);
+            }
         } else {
             handleSendMessage(label || value);
         }
