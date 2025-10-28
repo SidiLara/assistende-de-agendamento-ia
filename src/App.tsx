@@ -88,7 +88,7 @@ const App: React.FC = () => {
                 </div>
             </div>
              <footer className="text-center text-xs text-gray-600 dark:text-gray-400 p-4">
-                Powered by GEMSID | Direitos reservados para {config.consultantName}
+                Powered by Neural Chat | Direitos reservados para {config.consultantName}
             </footer>
         </div>
     );
