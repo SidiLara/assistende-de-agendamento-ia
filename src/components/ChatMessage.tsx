@@ -1,9 +1,6 @@
 import React from 'react';
-import { Message, MessageSender } from '../types';
-
-interface ChatMessageProps {
-    message: Message;
-}
+import { MessageSender } from '../model/mensagem/MensagemModel';
+import { ChatMessageProps } from './ChatMessageProps';
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     const isUser = message.sender === MessageSender.User;

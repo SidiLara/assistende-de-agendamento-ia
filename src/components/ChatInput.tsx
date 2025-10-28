@@ -1,13 +1,5 @@
 import React, { useState, forwardRef, ChangeEvent } from 'react';
-import { LeadDataKey } from '../types';
-
-interface ChatInputProps {
-    onSendMessage: (text: string) => void;
-    isSending: boolean;
-    isDone: boolean;
-    isActionPending: boolean;
-    nextKey: LeadDataKey | null;
-}
+import { ChatInputProps } from './ChatInputProps';
 
 const applyWhatsappMask = (value: string): string => {
     value = value.replace(/\D/g, '');
@@ -29,7 +21,7 @@ export const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(({ onSendM
     
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { value } = e.target;
-        if (nextKey === 'client_whatsapp') {
+        if (nextKey === 'clientWhatsapp') {
             setInputValue(applyWhatsappMask(value));
         } else {
             setInputValue(value);
@@ -44,11 +36,11 @@ export const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(({ onSendM
         placeholderText = "Selecione uma opção acima...";
     } else if (isSending) {
         placeholderText = "Aguarde...";
-    } else if (nextKey === 'client_whatsapp') {
+    } else if (nextKey === 'clientWhatsapp') {
         placeholderText = "(XX) 9XXXX-XXXX";
     }
 
-    const inputType = nextKey === 'client_whatsapp' ? 'tel' : 'text';
+    const inputType = nextKey === 'clientWhatsapp' ? 'tel' : 'text';
 
     return (
         <form onSubmit={handleSubmit} className="flex items-center space-x-3">

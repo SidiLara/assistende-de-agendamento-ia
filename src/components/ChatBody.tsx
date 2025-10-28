@@ -1,12 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { Message } from '../types';
 import { ChatMessage } from './ChatMessage';
 import { TypingIndicator } from './TypingIndicator';
-
-interface ChatBodyProps {
-    messages: Message[];
-    isTyping: boolean;
-}
+import { ChatBodyProps } from './ChatBodyProps';
 
 export const ChatBody: React.FC<ChatBodyProps> = ({ messages, isTyping }) => {
     const chatContainerRef = useRef<HTMLDivElement>(null);

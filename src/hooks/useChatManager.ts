@@ -1,17 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Message, MessageSender, LeadData, LeadDataKey, ChatConfig } from '../types';
+import { Message, MessageSender } from '../model/mensagem/MensagemModel';
+import { LeadData, LeadDataKey } from '../model/lead/LeadModel';
+import { ChatConfig } from '../model/configuracao/ConfiguracaoChatModel';
 import { getAiResponse, sendLeadToCRM, getFallbackResponse, getFallbackSummary, getFinalSummary } from '../services/geminiService';
 import { calculateFullDate, parseHumanNumber } from '../utils/helpers';
 
 const CORRECTION_FIELD_LABELS: Record<string, string> = {
-    client_name: 'Nome',
+    clientName: 'Nome',
     topic: 'Objetivo',
-    valor_credito: 'Valor do Crédito',
-    reserva_mensal: 'Reserva Mensal',
-    client_whatsapp: 'WhatsApp',
-    client_email: 'E-mail',
-    meeting_type: 'Tipo de Reunião',
-    start_datetime: 'Data/Hora'
+    creditAmount: 'Valor do Crédito',
+    monthlyInvestment: 'Reserva Mensal',
+    clientWhatsapp: 'WhatsApp',
+    clientEmail: 'E-mail',
+    meetingType: 'Tipo de Reunião',
+    startDatetime: 'Data/Hora'
 };
 
 export const useChatManager = (config: ChatConfig | null) => {
@@ -62,21 +64,21 @@ export const useChatManager = (config: ChatConfig | null) => {
 
         setIsTyping(true);
         
-        const dateTimeString = data.start_datetime || '';
+        const dateTimeString = data.startDatetime || '';
         const dayMatch = dateTimeString.match(/(\b(domingo|segunda-feira|terça-feira|quarta-feira|quinta-feira|sexta-feira|sábado)\b)/i);
         const timeMatch = dateTimeString.match(/(\d{1,2}[:h]?\d{0,2})/);
         const dayOfWeek = dayMatch ? dayMatch[1] : '';
         const time = timeMatch ? timeMatch[0] : '';
         const finalDate = calculateFullDate(dayOfWeek, time);
         
-        const finalLeadData = { ...data, start_datetime: finalDate };
+        const finalLeadData = { ...data, startDatetime: finalDate };
         setLeadData(finalLeadData);
         
         const summaryText = (isFallbackMode || hasShownSummary) 
             ? getFallbackSummary(finalLeadData) 
             : await getFinalSummary(finalLeadData, config);
             
-        setLeadData(prev => ({ ...prev, final_summary: summaryText }));
+        setLeadData(prev => ({ ...prev, finalSummary: summaryText }));
 
         const summaryMessage: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: summaryText };
         setMessages(prev => [...prev, summaryMessage]);
@@ -103,7 +105,7 @@ export const useChatManager = (config: ChatConfig | null) => {
         setActionOptions([]);
         setIsActionPending(false);
 
-        if (nextKey === 'client_whatsapp') {
+        if (nextKey === 'clientWhatsapp') {
             const justDigits = text.replace(/\D/g, '');
             if (justDigits.length < 10 || justDigits.length > 11) {
                 const errorMessage: Message = {
@@ -118,7 +120,7 @@ export const useChatManager = (config: ChatConfig | null) => {
             }
         }
 
-        if (nextKey === 'client_email') {
+        if (nextKey === 'clientEmail') {
             const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
             if (!text.match(emailRegex)) {
                 const errorMessage: Message = {
@@ -143,14 +145,14 @@ export const useChatManager = (config: ChatConfig | null) => {
             
             const { updatedLeadData, responseText, action, nextKey: newNextKeyFromAI } = response;
             
-            if (nextKey === 'valor_credito') {
-                let creditValue = updatedLeadData.valor_credito ? Number(updatedLeadData.valor_credito) : NaN;
+            if (nextKey === 'creditAmount') {
+                let creditValue = updatedLeadData.creditAmount ? Number(updatedLeadData.creditAmount) : NaN;
         
                 if (creditValue < 15000) {
                     const reParsedValue = parseHumanNumber(text, true);
                     if (!isNaN(reParsedValue) && reParsedValue >= 15000) {
                         creditValue = reParsedValue;
-                        updatedLeadData.valor_credito = creditValue;
+                        updatedLeadData.creditAmount = creditValue;
                     }
                 }
                 
@@ -227,7 +229,7 @@ export const useChatManager = (config: ChatConfig | null) => {
 
         const newLeadData = { ...leadData };
         delete newLeadData[keyToCorrect];
-        if (keyToCorrect === 'start_datetime') delete newLeadData.final_summary;
+        if (keyToCorrect === 'startDatetime') delete newLeadData.finalSummary;
         setLeadData(newLeadData);
 
         setNextKey(keyToCorrect);

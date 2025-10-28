@@ -1,9 +1,5 @@
 import React from 'react';
-
-interface ChatHeaderProps {
-    consultantName: string;
-    consultantPhoto: string;
-}
+import { ChatHeaderProps } from './ChatHeaderProps';
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ consultantName, consultantPhoto }) => {
     return (

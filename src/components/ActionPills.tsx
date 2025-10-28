@@ -1,14 +1,5 @@
 import React from 'react';
-
-interface PillOption {
-    label: string;
-    value: string;
-}
-
-interface ActionPillsProps {
-    options: PillOption[];
-    onSelect: (value: string, label?: string) => void;
-}
+import { ActionPillsProps } from './ActionPillsProps';
 
 export const ActionPills: React.FC<ActionPillsProps> = ({ options, onSelect }) => {
     return (
