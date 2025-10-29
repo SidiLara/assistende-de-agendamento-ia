@@ -1,8 +1,1 @@
-import { LeadData, LeadDataKey } from "./Lead";
-
-export type AiResponse = {
-    updatedLeadData: Partial<LeadData>;
-    responseText: string;
-    action: string | null;
-    nextKey: LeadDataKey | null;
-};
+export type { AiResponse } from './Chat.response';
