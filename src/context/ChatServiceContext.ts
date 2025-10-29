@@ -1,10 +1,10 @@
-import * as React from 'react';
+import { createContext, useContext } from 'react';
 import { ChatService } from '../application/service/ChatService';
 
-export const ChatServiceContext = React.createContext<ChatService | null>(null);
+export const ChatServiceContext = createContext<ChatService | null>(null);
 
 export const useChatService = (): ChatService => {
-    const context = React.useContext(ChatServiceContext);
+    const context = useContext(ChatServiceContext);
     if (!context) {
         throw new Error('useChatService must be used within a ChatServiceProvider');
     }

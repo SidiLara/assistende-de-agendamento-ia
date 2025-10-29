@@ -1,8 +1,7 @@
-import * as React from 'react';
 import { MessageSender } from '../../model/mensagem/MensagemModel';
 import { MensagemDeChatProps } from './MensagemDeChatProps';
 
-export const MensagemDeChat: React.FC<MensagemDeChatProps> = ({ message }) => {
+export const MensagemDeChat = ({ message }: MensagemDeChatProps) => {
     const isUser = message.sender === MessageSender.User;
     const isNotice = message.isNotice ?? false;
 

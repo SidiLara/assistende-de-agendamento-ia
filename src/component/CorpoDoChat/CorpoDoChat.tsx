@@ -1,12 +1,12 @@
-import * as React from 'react';
+import { useRef, useEffect } from 'react';
 import { MensagemDeChat } from '../MensagemDeChat';
 import { IndicadorDeDigitacao } from '../IndicadorDeDigitacao';
 import { CorpoDoChatProps } from './CorpoDoChatProps';
 
-export const CorpoDoChat: React.FC<CorpoDoChatProps> = ({ messages, isTyping }) => {
-    const chatContainerRef = React.useRef<HTMLDivElement>(null);
+export const CorpoDoChat = ({ messages, isTyping }: CorpoDoChatProps) => {
+    const chatContainerRef = useRef<HTMLDivElement>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }

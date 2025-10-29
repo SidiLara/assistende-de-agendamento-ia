@@ -1,7 +1,6 @@
-import * as React from 'react';
 import { PillsDeAcaoProps } from './PillsDeAcaoProps';
 
-export const PillsDeAcao: React.FC<PillsDeAcaoProps> = ({ options, onSelect }) => {
+export const PillsDeAcao = ({ options, onSelect }: PillsDeAcaoProps) => {
     return (
         <div className="flex justify-start flex-wrap gap-2 py-2 mb-2">
             {options.map(option => (

@@ -1,7 +1,6 @@
-import * as React from 'react';
 import { CabecalhoDoChatProps } from './CabecalhoDoChatProps';
 
-export const CabecalhoDoChat: React.FC<CabecalhoDoChatProps> = ({ consultantName, consultantPhoto }) => {
+export const CabecalhoDoChat = ({ consultantName, consultantPhoto }: CabecalhoDoChatProps) => {
     return (
         <div className="p-5 border-b border-gray-200 dark:border-dark-tertiary flex items-center justify-between bg-white dark:bg-dark-secondary rounded-t-2xl">
             <div className="flex items-center space-x-4">

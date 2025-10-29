@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { forwardRef, useState, FormEvent, ChangeEvent } from 'react';
 import { EntradaDeChatProps } from './EntradaDeChatProps';
 
 const applyWhatsappMask = (value: string): string => {
@@ -8,10 +8,10 @@ const applyWhatsappMask = (value: string): string => {
     return value.slice(0, 15);
 };
 
-export const EntradaDeChat = React.forwardRef<HTMLInputElement, EntradaDeChatProps>(({ onSendMessage, isSending, isDone, isActionPending, nextKey }, ref) => {
-    const [inputValue, setInputValue] = React.useState('');
+export const EntradaDeChat = forwardRef<HTMLInputElement, EntradaDeChatProps>(({ onSendMessage, isSending, isDone, isActionPending, nextKey }, ref) => {
+    const [inputValue, setInputValue] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (inputValue.trim() && !isSending && !isDone && !isActionPending) {
             onSendMessage(inputValue);
@@ -19,7 +19,7 @@ export const EntradaDeChat = React.forwardRef<HTMLInputElement, EntradaDeChatPro
         }
     };
     
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { value } = e.target;
         if (nextKey === 'clientWhatsapp') {
             setInputValue(applyWhatsappMask(value));
