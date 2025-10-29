@@ -77,13 +77,13 @@ const BatePapoPagina: React.FC = () => {
     return (
         <div className="flex flex-col h-screen font-sans">
             <div className="flex-1 min-h-0 flex justify-center items-center p-4">
-                <div className="w-full max-w-xl h-full max-h-[90vh] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col">
+                <div className="w-full max-w-xl h-full max-h-[90vh] bg-white dark:bg-dark-secondary rounded-2xl shadow-2xl flex flex-col">
                     <CabecalhoDoChat 
                         consultantName={config.consultantName}
                         consultantPhoto={config.consultantPhoto}
                     />
                     <CorpoDoChat messages={messages} isTyping={isTyping} />
-                    <div className="p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-b-2xl">
+                    <div className="p-5 border-t border-gray-200 dark:border-dark-tertiary bg-white dark:bg-dark-secondary rounded-b-2xl">
                         {isActionPending && <PillsDeAcao options={actionOptions} onSelect={handlePillSelect} />}
                         <EntradaDeChat ref={inputRef} onSendMessage={handleSendMessage} isSending={isSending} isDone={isDone} isActionPending={isActionPending} nextKey={nextKey} />
                     </div>

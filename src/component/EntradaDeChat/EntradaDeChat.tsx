@@ -50,7 +50,7 @@ export const EntradaDeChat = forwardRef<HTMLInputElement, EntradaDeChatProps>(({
                 value={inputValue}
                 onChange={handleChange}
                 placeholder={placeholderText}
-                className="flex-1 w-full px-5 py-3 border-2 bg-transparent border-brand-green rounded-full focus:outline-none focus:ring-2 focus:ring-brand-green focus:border-transparent transition-colors duration-200 disabled:bg-gray-100 disabled:border-gray-300 dark:text-gray-100 dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:border-gray-600"
+                className="flex-1 w-full px-5 py-3 border-2 bg-transparent border-brand-green-light rounded-full focus:outline-none focus:ring-2 focus:ring-brand-green-light focus:border-transparent transition-colors duration-200 disabled:bg-gray-100 disabled:border-gray-300 dark:text-gray-100 dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:border-gray-600"
                 autoComplete="off"
                 disabled={isDisabled}
             />
