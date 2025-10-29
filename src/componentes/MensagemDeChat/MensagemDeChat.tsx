@@ -1,4 +1,4 @@
-import { MessageSender } from '../../servicos/modelos/Mensagem';
+import { MessageSender } from '../../servicos/modelos/MensagemModel';
 import { MensagemDeChatProps } from './MensagemDeChat.props';
 
 export const MensagemDeChat = ({ message }: MensagemDeChatProps) => {

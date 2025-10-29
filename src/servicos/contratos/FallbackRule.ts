@@ -1,6 +1,6 @@
-import { AiResponse } from "../modelos/ChatResponse";
-import { ChatConfig } from "../modelos/ConfiguracaoChat";
-import { LeadData, LeadDataKey } from "../modelos/Lead";
+import { AiResponse } from "../modelos/Chat.response";
+import { ChatConfig } from "../modelos/ConfiguracaoChatModel";
+import { LeadData, LeadDataKey } from "../modelos/LeadModel";
 
 export interface FallbackRule {
     getFallbackResponse(

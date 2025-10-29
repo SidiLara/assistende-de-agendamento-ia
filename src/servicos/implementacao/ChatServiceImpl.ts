@@ -1,11 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
-import { Message } from "../modelos/Mensagem";
-import { LeadData, LeadDataKey } from "../modelos/Lead";
-import { ChatConfig } from "../modelos/ConfiguracaoChat";
+import { Message } from "../modelos/MensagemModel";
+import { LeadData } from "../modelos/LeadModel";
+import { ChatConfig } from "../modelos/ConfiguracaoChatModel";
 import { ChatService } from "../contratos/ChatService";
-import { AiResponse } from "../modelos/ChatResponse";
+import { AiResponse } from "../modelos/Chat.response";
 import { FallbackRule } from "../contratos/FallbackRule";
-import { createSystemPrompt, leadDataSchema, createFinalSummaryPrompt, createInternalSummaryPrompt } from "../prompts/Chat.prompts";
+import { createSystemPrompt, leadDataSchema, createFinalSummaryPrompt, createInternalSummaryPrompt } from "../prompts/ChatPrompts";
 
 const BASE_MAKE_URL = "https://hook.us2.make.com/";
 
@@ -138,7 +138,7 @@ export class ChatServiceImpl implements ChatService {
     public getFallbackResponse(
         lastUserMessage: string,
         currentData: Partial<LeadData>,
-        keyToCollect: LeadDataKey | null,
+        keyToCollect: any | null,
         config: ChatConfig
     ): AiResponse {
         return this.fallbackRule.getFallbackResponse(lastUserMessage, currentData, keyToCollect, config);

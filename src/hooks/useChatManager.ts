@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Message, MessageSender } from '../servicos/modelos/Mensagem';
-import { LeadData, LeadDataKey } from '../servicos/modelos/Lead';
-import { ChatConfig } from '../servicos/modelos/ConfiguracaoChat';
+import { Message, MessageSender } from '../servicos/modelos/MensagemModel';
+import { LeadData, LeadDataKey } from '../servicos/modelos/LeadModel';
+import { ChatConfig } from '../servicos/modelos/ConfiguracaoChatModel';
 import { calculateFullDate } from '../utils/formatadores/DateAndTime';
 import { parseHumanNumber } from '../utils/formatadores/Number';
 import { ChatService } from '../servicos/contratos/ChatService';
