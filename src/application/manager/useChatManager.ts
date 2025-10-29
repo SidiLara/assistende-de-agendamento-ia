@@ -27,7 +27,7 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
     const [isActionPending, setIsActionPending] = React.useState<boolean>(false);
     const [nextKey, setNextKey] = React.useState<LeadDataKey | null>(null);
     const [isCorrecting, setIsCorrecting] = React.useState<boolean>(false);
-    const [isFallbackMode, setIsFallbackMode] = React.useState<boolean>(false);
+    const [isFallbackMode, setIsFallbackMode] = React.useState<boolean>(true);
     const [hasShownSummary, setHasShownSummary] = React.useState<boolean>(false);
 
     React.useEffect(() => {
@@ -41,28 +41,36 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
         const fetchWelcomeMessage = async () => {
             setIsTyping(true);
             const initialHistory: Message[] = [];
-            try {
-                const { responseText, nextKey: newNextKeyFromAI } = await chatService.getAiResponse(initialHistory, initialData, config);
-                setMessages([{ id: Date.now(), sender: MessageSender.Bot, text: responseText }]);
-                setNextKey(newNextKeyFromAI);
-            } catch (error) {
-                console.error("Initial API call failed, starting in fallback mode.", error);
-                setIsFallbackMode(true);
-                const fallbackNotice: Message = { 
-                    id: Date.now(), 
-                    sender: MessageSender.Bot, 
-                    text: "Estamos com instabilidade na conexão com a IA. Para garantir seu atendimento, vamos continuar em um modo mais direto.",
-                    isNotice: true,
-                };
+            if (isFallbackMode) {
+                console.log("Application starting in fallback mode.");
                 const { responseText, nextKey } = chatService.getFallbackResponse("", initialData, null, config);
-                const firstQuestion: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
-                setMessages([fallbackNotice, firstQuestion]);
+                const firstQuestion: Message = { id: Date.now(), sender: MessageSender.Bot, text: responseText };
+                setMessages([firstQuestion]);
                 setNextKey(nextKey);
+            } else {
+                try {
+                    const { responseText, nextKey: newNextKeyFromAI } = await chatService.getAiResponse(initialHistory, initialData, config);
+                    setMessages([{ id: Date.now(), sender: MessageSender.Bot, text: responseText }]);
+                    setNextKey(newNextKeyFromAI);
+                } catch (error) {
+                    console.error("Initial API call failed, switching to fallback mode.", error);
+                    setIsFallbackMode(true);
+                    const fallbackNotice: Message = { 
+                        id: Date.now(), 
+                        sender: MessageSender.Bot, 
+                        text: "Estamos com instabilidade na conexão com a IA. Para garantir seu atendimento, vamos continuar em um modo mais direto.",
+                        isNotice: true,
+                    };
+                    const { responseText, nextKey } = chatService.getFallbackResponse("", initialData, null, config);
+                    const firstQuestion: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
+                    setMessages([fallbackNotice, firstQuestion]);
+                    setNextKey(nextKey);
+                }
             }
             setIsTyping(false);
         };
         fetchWelcomeMessage();
-    }, [config, chatService]);
+    }, [config, chatService, isFallbackMode]);
 
 
     const showSummaryAndActions = React.useCallback(async (data: Partial<LeadData>) => {
