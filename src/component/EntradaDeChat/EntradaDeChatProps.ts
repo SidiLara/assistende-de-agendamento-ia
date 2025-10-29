@@ -1,7 +1,7 @@
 import { LeadDataKey } from '../../model/lead/LeadModel';
+import { EntradaDeChatEvent } from './EntradaDeChatEvent';
 
-export interface EntradaDeChatProps {
-    onSendMessage: (text: string) => void;
+export interface EntradaDeChatProps extends EntradaDeChatEvent {
     isSending: boolean;
     isDone: boolean;
     isActionPending: boolean;

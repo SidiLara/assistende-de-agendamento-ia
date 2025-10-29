@@ -5,7 +5,6 @@ import { EntradaDeChat } from '../../component/EntradaDeChat';
 import { PillsDeAcao } from '../../component/PillsDeAcao';
 import { useChatManager } from '../../application/manager/useChatManager';
 import { ChatConfig } from '../../model/configuracao/ConfiguracaoChatModel';
-import { ChatServiceImpl } from '../../infrastructure/service/ChatServiceImpl';
 import { FallbackRuleImpl } from '../../infrastructure/rule/FallbackRuleImpl';
 
 declare global {
@@ -14,12 +13,10 @@ declare global {
   }
 }
 
-const fallbackRule = new FallbackRuleImpl();
-const chatService = new ChatServiceImpl(fallbackRule);
-
-const BatePapoTela: React.FC = () => {
+const BatePapoPagina: React.FC = () => {
     const [config, setConfig] = useState<ChatConfig | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const fallbackRule = new FallbackRuleImpl();
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -61,7 +58,7 @@ const BatePapoTela: React.FC = () => {
         nextKey,
         handleSendMessage,
         handlePillSelect,
-    } = useChatManager(config, chatService);
+    } = useChatManager(config, fallbackRule);
 
     useEffect(() => {
         if (!isTyping && !isActionPending && !isDone) {
@@ -99,4 +96,4 @@ const BatePapoTela: React.FC = () => {
     );
 };
 
-export default BatePapoTela;
+export default BatePapoPagina;

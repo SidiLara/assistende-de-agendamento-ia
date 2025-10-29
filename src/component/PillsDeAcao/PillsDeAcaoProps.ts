@@ -1,9 +1,10 @@
+import { PillsDeAcaoEvent } from "./PillsDeAcaoEvent";
+
 interface PillOption {
     label: string;
     value: string;
 }
 
-export interface PillsDeAcaoProps {
+export interface PillsDeAcaoProps extends PillsDeAcaoEvent {
     options: PillOption[];
-    onSelect: (value: string, label?: string) => void;
 }
