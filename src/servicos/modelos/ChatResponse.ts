@@ -1,4 +1,4 @@
-import { LeadData, LeadDataKey } from "./LeadModel";
+import { LeadData, LeadDataKey } from "./Lead";
 
 export type AiResponse = {
     updatedLeadData: Partial<LeadData>;

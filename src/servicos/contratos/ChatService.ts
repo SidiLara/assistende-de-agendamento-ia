@@ -1,7 +1,7 @@
-import { Message } from "../modelos/Mensagem.model";
-import { LeadData, LeadDataKey } from "../modelos/Lead.model";
-import { ChatConfig } from "../modelos/ConfiguracaoChat.model";
-import { AiResponse } from "../modelos/Chat.response";
+import { Message } from "../modelos/Mensagem";
+import { LeadData, LeadDataKey } from "../modelos/Lead";
+import { ChatConfig } from "../modelos/ConfiguracaoChat";
+import { AiResponse } from "../modelos/ChatResponse";
 
 export interface ChatService {
     getAiResponse(history: Message[], currentData: Partial<LeadData>, config: ChatConfig): Promise<AiResponse>;

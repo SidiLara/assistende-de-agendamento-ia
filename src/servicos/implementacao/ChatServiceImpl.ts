@@ -1,9 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
-import { Message } from "../modelos/Mensagem.model";
-import { LeadData, LeadDataKey } from "../modelos/Lead.model";
-import { ChatConfig } from "../modelos/ConfiguracaoChat.model";
+import { Message } from "../modelos/Mensagem";
+import { LeadData, LeadDataKey } from "../modelos/Lead";
+import { ChatConfig } from "../modelos/ConfiguracaoChat";
 import { ChatService } from "../contratos/ChatService";
-import { AiResponse } from "../modelos/Chat.response";
+import { AiResponse } from "../modelos/ChatResponse";
 import { FallbackRule } from "../contratos/FallbackRule";
 import { createSystemPrompt, leadDataSchema, createFinalSummaryPrompt, createInternalSummaryPrompt } from "../prompts/Chat.prompts";
 

@@ -1,6 +1,6 @@
-import { AiResponse } from "../modelos/Chat.response";
-import { ChatConfig } from "../modelos/ConfiguracaoChat.model";
-import { LeadData, LeadDataKey } from "../modelos/Lead.model";
+import { AiResponse } from "../modelos/ChatResponse";
+import { ChatConfig } from "../modelos/ConfiguracaoChat";
+import { LeadData, LeadDataKey } from "../modelos/Lead";
 import { FallbackRule } from "../contratos/FallbackRule";
 import { parseHumanNumber } from "../../utils/formatadores/Number";
 

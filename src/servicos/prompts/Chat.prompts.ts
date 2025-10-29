@@ -1,7 +1,7 @@
 import { Type } from "@google/genai";
-import { ChatConfig } from "../modelos/ConfiguracaoChat.model";
-import { LeadData } from "../modelos/Lead.model";
-import { Message } from "../modelos/Mensagem.model";
+import { ChatConfig } from "../modelos/ConfiguracaoChat";
+import { LeadData } from "../modelos/Lead";
+import { Message } from "../modelos/Mensagem";
 
 export const createSystemPrompt = (assistantName: string, consultantName: string): string => `
 Você é ${assistantName}, o assistente de planejamento de ${consultantName}, um consultor. Sua missão é ajudar os clientes a organizar as informações sobre seus projetos de vida para que ${consultantName} possa oferecer a melhor estratégia de aquisição. Você é empático, focado nos sonhos do cliente e usa uma linguagem de planejamento e conquista. Siga estritamente estas regras:

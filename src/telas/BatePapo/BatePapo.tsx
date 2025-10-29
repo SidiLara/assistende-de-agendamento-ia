@@ -4,7 +4,7 @@ import { CorpoDoChat } from '../../componentes/CorpoDoChat';
 import { EntradaDeChat } from '../../componentes/EntradaDeChat';
 import { PillsDeAcao } from '../../componentes/PillsDeAcao';
 import { useChatManager } from '../../hooks/useChatManager';
-import { ChatConfig } from '../../servicos/modelos/ConfiguracaoChat.model';
+import { ChatConfig } from '../../servicos/modelos/ConfiguracaoChat';
 import { FallbackRuleImpl } from '../../servicos/implementacao/FallbackRuleImpl';
 import { ChatService } from '../../servicos/contratos/ChatService';
 import { ChatServiceImpl } from '../../servicos/implementacao/ChatServiceImpl';

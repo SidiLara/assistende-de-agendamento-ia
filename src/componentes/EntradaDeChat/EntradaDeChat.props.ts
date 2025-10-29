@@ -1,4 +1,4 @@
-import { LeadDataKey } from '../../servicos/modelos/Lead.model';
+import { LeadDataKey } from '../../servicos/modelos/Lead';
 
 export interface EntradaDeChatProps {
     onSendMessage: (text: string) => void;
