@@ -6,15 +6,5 @@ export default defineConfig({
   plugins: [react()],
   define: {
     'process.env': process.env
-  },
-  build: {
-    rollupOptions: {
-      external: [
-        'react',
-        'react-dom',
-        'react-router-dom',
-        '@google/genai'
-      ]
-    }
   }
 })
