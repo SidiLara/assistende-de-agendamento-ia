@@ -1,5 +1,4 @@
 import * as React from 'react';
-import '../../index.css';
 import { CabecalhoDoChat } from '../../component/CabecalhoDoChat';
 import { CorpoDoChat } from '../../component/CorpoDoChat';
 import { EntradaDeChat } from '../../component/EntradaDeChat';
