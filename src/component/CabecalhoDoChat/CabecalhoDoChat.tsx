@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { CabecalhoDoChatProps } from './CabecalhoDoChatProps';
 
 export const CabecalhoDoChat: React.FC<CabecalhoDoChatProps> = ({ consultantName, consultantPhoto }) => {

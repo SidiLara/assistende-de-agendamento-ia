@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import * as React from 'react';
 import { CabecalhoDoChat } from '../../component/CabecalhoDoChat';
 import { CorpoDoChat } from '../../component/CorpoDoChat';
 import { EntradaDeChat } from '../../component/EntradaDeChat';
@@ -16,11 +16,11 @@ declare global {
 }
 
 const BatePapoPagina: React.FC = () => {
-    const [config, setConfig] = useState<ChatConfig | null>(null);
-    const [chatService, setChatService] = useState<ChatService | null>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
+    const [config, setConfig] = React.useState<ChatConfig | null>(null);
+    const [chatService, setChatService] = React.useState<ChatService | null>(null);
+    const inputRef = React.useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
+    React.useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         
         const appConfig: ChatConfig = {
@@ -66,7 +66,7 @@ const BatePapoPagina: React.FC = () => {
         handlePillSelect,
     } = useChatManager(config, chatService);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (!isTyping && !isActionPending && !isDone) {
             inputRef.current?.focus();
         }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import * as React from 'react';
 import { Message, MessageSender } from '../../model/mensagem/MensagemModel';
 import { LeadData, LeadDataKey } from '../../model/lead/LeadModel';
 import { ChatConfig } from '../../model/configuracao/ConfiguracaoChatModel';
@@ -18,19 +18,19 @@ const CORRECTION_FIELD_LABELS: Record<string, string> = {
 };
 
 export const useChatManager = (config: ChatConfig | null, chatService: ChatService | null) => {
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [leadData, setLeadData] = useState<Partial<LeadData>>({});
-    const [isTyping, setIsTyping] = useState<boolean>(true);
-    const [isSending, setIsSending] = useState<boolean>(false);
-    const [isDone, setIsDone] = useState<boolean>(false);
-    const [actionOptions, setActionOptions] = useState<{ label: string; value: string; }[]>([]);
-    const [isActionPending, setIsActionPending] = useState<boolean>(false);
-    const [nextKey, setNextKey] = useState<LeadDataKey | null>(null);
-    const [isCorrecting, setIsCorrecting] = useState<boolean>(false);
-    const [isFallbackMode, setIsFallbackMode] = useState<boolean>(false);
-    const [hasShownSummary, setHasShownSummary] = useState<boolean>(false);
+    const [messages, setMessages] = React.useState<Message[]>([]);
+    const [leadData, setLeadData] = React.useState<Partial<LeadData>>({});
+    const [isTyping, setIsTyping] = React.useState<boolean>(true);
+    const [isSending, setIsSending] = React.useState<boolean>(false);
+    const [isDone, setIsDone] = React.useState<boolean>(false);
+    const [actionOptions, setActionOptions] = React.useState<{ label: string; value: string; }[]>([]);
+    const [isActionPending, setIsActionPending] = React.useState<boolean>(false);
+    const [nextKey, setNextKey] = React.useState<LeadDataKey | null>(null);
+    const [isCorrecting, setIsCorrecting] = React.useState<boolean>(false);
+    const [isFallbackMode, setIsFallbackMode] = React.useState<boolean>(false);
+    const [hasShownSummary, setHasShownSummary] = React.useState<boolean>(false);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (!config || !chatService) return;
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -65,7 +65,7 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
     }, [config, chatService]);
 
 
-    const showSummaryAndActions = useCallback(async (data: Partial<LeadData>) => {
+    const showSummaryAndActions = React.useCallback(async (data: Partial<LeadData>) => {
         if (!config || !chatService) return;
 
         setIsTyping(true);
@@ -100,7 +100,7 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
         }
     }, [config, chatService, isFallbackMode, hasShownSummary]);
 
-    const handleSendMessage = useCallback(async (text: string) => {
+    const handleSendMessage = React.useCallback(async (text: string) => {
         if (isSending || isDone || !config || !chatService) return;
 
         const userMessage: Message = { id: Date.now(), sender: MessageSender.User, text };
@@ -232,7 +232,7 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
         }
     }, [config, chatService, isSending, isDone, messages, leadData, nextKey, isFallbackMode, isCorrecting, showSummaryAndActions, hasShownSummary]);
     
-    const handleCorrection = useCallback(async (keyToCorrect: LeadDataKey) => {
+    const handleCorrection = React.useCallback(async (keyToCorrect: LeadDataKey) => {
         if (!config || !chatService) return;
 
         setActionOptions([]);
@@ -269,7 +269,7 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
     }, [config, chatService, leadData]);
 
 
-    const handlePillSelect = useCallback(async (value: string, label?: string) => {
+    const handlePillSelect = React.useCallback(async (value: string, label?: string) => {
         if (!config || !chatService) return;
     
         if (value === 'confirm') {

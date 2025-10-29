@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { MessageSender } from '../../model/mensagem/MensagemModel';
 import { MensagemDeChatProps } from './MensagemDeChatProps';
 
