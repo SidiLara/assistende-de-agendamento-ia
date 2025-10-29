@@ -6,6 +6,8 @@ import { PillsDeAcao } from '../../component/PillsDeAcao';
 import { useChatManager } from '../../application/manager/useChatManager';
 import { ChatConfig } from '../../model/configuracao/ConfiguracaoChatModel';
 import { FallbackRuleImpl } from '../../infrastructure/rule/FallbackRuleImpl';
+import { ChatService } from '../../application/service/ChatService';
+import { ChatServiceImpl } from '../../infrastructure/service/ChatServiceImpl';
 
 declare global {
   interface Window {
@@ -15,8 +17,8 @@ declare global {
 
 const BatePapoPagina: React.FC = () => {
     const [config, setConfig] = useState<ChatConfig | null>(null);
+    const [chatService, setChatService] = useState<ChatService | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const fallbackRule = new FallbackRuleImpl();
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -28,6 +30,10 @@ const BatePapoPagina: React.FC = () => {
             webhookId: urlParams.get('webhook') || 'ud4aq9lrms2mfpce40ur6ac1papv68fi',
         };
         setConfig(appConfig);
+
+        const fallbackRule = new FallbackRuleImpl();
+        const service = new ChatServiceImpl(fallbackRule);
+        setChatService(service);
 
         const pixelId = urlParams.get('pixelId');
         if (pixelId && !window.fbq) {
@@ -58,7 +64,7 @@ const BatePapoPagina: React.FC = () => {
         nextKey,
         handleSendMessage,
         handlePillSelect,
-    } = useChatManager(config, fallbackRule);
+    } = useChatManager(config, chatService);
 
     useEffect(() => {
         if (!isTyping && !isActionPending && !isDone) {
