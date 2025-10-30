@@ -2,10 +2,14 @@
 // which is available in the AI Studio environment but not declared in a default
 // browser-targeted TypeScript project. This resolves the TS2580 build error.
 
-// Fix: Augment the existing NodeJS namespace to add the API_KEY property to ProcessEnv.
-// This avoids redeclaring the 'process' variable, which can conflict with
-// global types provided by the build environment (e.g., Vite).
+// FIX: The `declare var process` block was removed from this file to resolve a
+// "Cannot redeclare block-scoped variable" error. The `process` global is
+// already defined in the environment, so only the `NodeJS.ProcessEnv` interface
+// needs to be augmented to add type support for `process.env.API_KEY`.
+
+// Declares the NodeJS namespace which is used by the process declaration.
 declare namespace NodeJS {
+  // Extends the ProcessEnv interface to include our specific API_KEY.
   interface ProcessEnv {
     API_KEY: string;
   }
