@@ -1,2 +1,2 @@
-export { EntradaDeChat } from './EntradaDeChat';
+export * from './EntradaDeChat';
 export type { EntradaDeChatProps } from './EntradaDeChat.props';

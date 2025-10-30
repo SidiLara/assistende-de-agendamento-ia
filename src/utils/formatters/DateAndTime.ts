@@ -1,3 +1,30 @@
+export const generateTimeSlots = (): string[] => {
+    const createRandomTime = (startHour: number, endHour: number): string => {
+        const hour = Math.floor(Math.random() * (endHour - startHour)) + startHour;
+        const minute = Math.random() < 0.5 ? 0 : 30;
+        return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    };
+
+    const morning = createRandomTime(7, 12);
+    const afternoon = createRandomTime(13, 18);
+    const evening = createRandomTime(18, 22);
+
+    // Garante que não haja duplicatas e retorna ordenado
+    const slots = Array.from(new Set([morning, afternoon, evening]));
+    slots.sort();
+
+    // Se por acaso houver duplicata, adiciona mais um horário para garantir 3 opções
+    while (slots.length < 3) {
+        const newSlot = createRandomTime(7, 22);
+        if (!slots.includes(newSlot)) {
+            slots.push(newSlot);
+        }
+        slots.sort();
+    }
+    
+    return slots;
+};
+
 export const calculateFullDate = (dayOfWeek: string, time: string): string => {
     const now = new Date();
     

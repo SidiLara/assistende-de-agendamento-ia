@@ -1,2 +1,2 @@
-export { IndicadorDeDigitacao } from './IndicadorDeDigitacao';
+export * from './IndicadorDeDigitacao';
 export type { IndicadorDeDigitacaoProps } from './IndicadorDeDigitacao.props';

@@ -1,11 +1,11 @@
-export enum MessageSender {
+export enum RemetenteMensagem {
     User = 'user',
     Bot = 'bot',
 }
 
-export interface Message {
+export interface Mensagem {
     id: number;
-    sender: MessageSender;
+    sender: RemetenteMensagem;
     text: string;
     isNotice?: boolean;
 }

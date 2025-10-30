@@ -1,8 +1,8 @@
-import { MessageSender } from '../../servicos/modelos/MensagemModel';
+import { RemetenteMensagem } from '../../servicos/chat/modelos/MensagemModel';
 import { MensagemDeChatProps } from './MensagemDeChat.props';
 
 export const MensagemDeChat = ({ message }: MensagemDeChatProps) => {
-    const isUser = message.sender === MessageSender.User;
+    const isUser = message.sender === RemetenteMensagem.User;
     const isNotice = message.isNotice ?? false;
 
     if (isNotice) {

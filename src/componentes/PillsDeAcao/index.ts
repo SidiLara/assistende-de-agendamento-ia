@@ -1,2 +1,2 @@
-export { PillsDeAcao } from './PillsDeAcao';
+export * from './PillsDeAcao';
 export type { PillsDeAcaoProps } from './PillsDeAcao.props';

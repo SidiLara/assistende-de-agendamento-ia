@@ -1,10 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Message, MessageSender } from '../servicos/modelos/MensagemModel';
-import { LeadData, LeadDataKey } from '../servicos/modelos/LeadModel';
-import { ChatConfig } from '../servicos/modelos/ConfiguracaoChatModel';
-import { calculateFullDate } from '../utils/formatadores/DateAndTime';
-import { parseHumanNumber } from '../utils/formatadores/Number';
-import { ChatService } from '../servicos/contratos/ChatService';
+import * as React from 'react';
+import { Mensagem, RemetenteMensagem } from '../servicos/chat/modelos/MensagemModel';
+import { Lead, LeadKey } from '../servicos/chat/modelos/LeadModel';
+import { ConfiguracaoChat } from '../servicos/chat/modelos/ConfiguracaoChatModel';
+import { calculateFullDate } from '../utils/formatters/DateAndTime';
+import { ServicoChat } from '../servicos/chat/ChatService';
 
 const CORRECTION_FIELD_LABELS: Record<string, string> = {
     clientName: 'Nome',
@@ -17,63 +16,56 @@ const CORRECTION_FIELD_LABELS: Record<string, string> = {
     startDatetime: 'Data/Hora'
 };
 
-export const useChatManager = (config: ChatConfig | null, chatService: ChatService | null) => {
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [leadData, setLeadData] = useState<Partial<LeadData>>({});
-    const [isTyping, setIsTyping] = useState<boolean>(true);
-    const [isSending, setIsSending] = useState<boolean>(false);
-    const [isDone, setIsDone] = useState<boolean>(false);
-    const [actionOptions, setActionOptions] = useState<{ label: string; value: string; }[]>([]);
-    const [isActionPending, setIsActionPending] = useState<boolean>(false);
-    const [nextKey, setNextKey] = useState<LeadDataKey | null>(null);
-    const [isCorrecting, setIsCorrecting] = useState<boolean>(false);
-    const [isFallbackMode, setIsFallbackMode] = useState<boolean>(true);
-    const [hasShownSummary, setHasShownSummary] = useState<boolean>(false);
+export const useChatManager = (config: ConfiguracaoChat | null, chatService: ServicoChat | null) => {
+    const [messages, setMessages] = React.useState<Mensagem[]>([]);
+    const [leadData, setLeadData] = React.useState<Partial<Lead>>({});
+    const [isTyping, setIsTyping] = React.useState<boolean>(true);
+    const [isSending, setIsSending] = React.useState<boolean>(false);
+    const [isDone, setIsDone] = React.useState<boolean>(false);
+    const [actionOptions, setActionOptions] = React.useState<{ label: string; value: string; }[]>([]);
+    const [isActionPending, setIsActionPending] = React.useState<boolean>(false);
+    const [nextKey, setNextKey] = React.useState<LeadKey | null>(null);
+    const [isCorrecting, setIsCorrecting] = React.useState<boolean>(false);
+    const [isFallbackMode, setIsFallbackMode] = React.useState<boolean>(false);
+    const [hasShownSummary, setHasShownSummary] = React.useState<boolean>(false);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (!config || !chatService) return;
 
         const urlParams = new URLSearchParams(window.location.search);
         const sourceParam = urlParams.get('origem') || urlParams.get('source') || urlParams.get('utm_source');
-        const initialData: Partial<LeadData> = { source: sourceParam || 'Direto' };
+        const initialData: Partial<Lead> = { source: sourceParam || 'Direto' };
         setLeadData(initialData);
 
         const fetchWelcomeMessage = async () => {
             setIsTyping(true);
-            const initialHistory: Message[] = [];
-            if (isFallbackMode) {
-                console.log("Application starting in fallback mode.");
+
+            const initialHistory: Mensagem[] = [];
+            try {
+                const { responseText, nextKey: newNextKeyFromAI } = await chatService.getAiResponse(initialHistory, initialData, config);
+                setMessages([{ id: Date.now(), sender: RemetenteMensagem.Bot, text: responseText }]);
+                setNextKey(newNextKeyFromAI);
+            } catch (error) {
+                console.error("Initial API call failed, switching to fallback mode.", error);
+                setIsFallbackMode(true);
+                const fallbackNotice: Mensagem = { 
+                    id: Date.now(), 
+                    sender: RemetenteMensagem.Bot, 
+                    text: "A Chave de API parece inválida ou houve um erro de conexão. Para garantir seu atendimento, vamos continuar em um modo mais direto.",
+                    isNotice: true,
+                };
                 const { responseText, nextKey } = chatService.getFallbackResponse("", initialData, null, config);
-                const firstQuestion: Message = { id: Date.now(), sender: MessageSender.Bot, text: responseText };
-                setMessages([firstQuestion]);
+                const firstQuestion: Mensagem = { id: Date.now() + 1, sender: RemetenteMensagem.Bot, text: responseText };
+                setMessages([fallbackNotice, firstQuestion]);
                 setNextKey(nextKey);
-            } else {
-                try {
-                    const { responseText, nextKey: newNextKeyFromAI } = await chatService.getAiResponse(initialHistory, initialData, config);
-                    setMessages([{ id: Date.now(), sender: MessageSender.Bot, text: responseText }]);
-                    setNextKey(newNextKeyFromAI);
-                } catch (error) {
-                    console.error("Initial API call failed, switching to fallback mode.", error);
-                    setIsFallbackMode(true);
-                    const fallbackNotice: Message = { 
-                        id: Date.now(), 
-                        sender: MessageSender.Bot, 
-                        text: "Estamos com instabilidade na conexão com a IA. Para garantir seu atendimento, vamos continuar em um modo mais direto.",
-                        isNotice: true,
-                    };
-                    const { responseText, nextKey } = chatService.getFallbackResponse("", initialData, null, config);
-                    const firstQuestion: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
-                    setMessages([fallbackNotice, firstQuestion]);
-                    setNextKey(nextKey);
-                }
             }
             setIsTyping(false);
         };
         fetchWelcomeMessage();
-    }, [config, chatService, isFallbackMode]);
+    }, [config, chatService]);
 
 
-    const showSummaryAndActions = useCallback(async (data: Partial<LeadData>) => {
+    const showSummaryAndActions = React.useCallback(async (data: Partial<Lead>) => {
         if (!config || !chatService) return;
 
         setIsTyping(true);
@@ -94,7 +86,7 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
             
         setLeadData(prev => ({ ...prev, finalSummary: summaryText }));
 
-        const summaryMessage: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: summaryText };
+        const summaryMessage: Mensagem = { id: Date.now() + 2, sender: RemetenteMensagem.Bot, text: summaryText };
         setMessages(prev => [...prev, summaryMessage]);
 
         setActionOptions([
@@ -108,10 +100,10 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
         }
     }, [config, chatService, isFallbackMode, hasShownSummary]);
 
-    const handleSendMessage = useCallback(async (text: string) => {
+    const handleSendMessage = React.useCallback(async (text: string) => {
         if (isSending || isDone || !config || !chatService) return;
 
-        const userMessage: Message = { id: Date.now(), sender: MessageSender.User, text };
+        const userMessage: Mensagem = { id: Date.now(), sender: RemetenteMensagem.User, text };
         const currentHistory = [...messages, userMessage];
         setMessages(currentHistory);
         setIsSending(true);
@@ -122,9 +114,9 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
         if (nextKey === 'clientWhatsapp') {
             const justDigits = text.replace(/\D/g, '');
             if (justDigits.length < 10 || justDigits.length > 11) {
-                const errorMessage: Message = {
+                const errorMessage: Mensagem = {
                     id: Date.now() + 1,
-                    sender: MessageSender.Bot,
+                    sender: RemetenteMensagem.Bot,
                     text: "Hmm, não consegui identificar um número de WhatsApp válido. Por favor, insira o número com DDD no formato <strong>(XX) 9XXXX-XXXX</strong>."
                 };
                 setMessages(prev => [...prev, errorMessage]);
@@ -137,10 +129,10 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
         if (nextKey === 'clientEmail') {
             const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
             if (!text.match(emailRegex)) {
-                const errorMessage: Message = {
+                const errorMessage: Mensagem = {
                     id: Date.now() + 1,
-                    sender: MessageSender.Bot,
-                    text: "Opa, esse e-mail não parece válido. Por favor, poderia verificar e inserir novamente?"
+                    sender: RemetenteMensagem.Bot,
+                    text: "Parece que o e-mail informado não é válido. Por favor, verifique e tente novamente."
                 };
                 setMessages(prev => [...prev, errorMessage]);
                 setIsTyping(false);
@@ -148,207 +140,170 @@ export const useChatManager = (config: ChatConfig | null, chatService: ChatServi
                 return;
             }
         }
-
+        
+        let response;
         try {
-            let response;
-            if (isFallbackMode || hasShownSummary) {
-                 response = chatService.getFallbackResponse(text, leadData, nextKey, config);
+            if (isFallbackMode) {
+                response = chatService.getFallbackResponse(text, leadData, nextKey, config);
             } else {
-                 response = await chatService.getAiResponse(currentHistory, leadData, config);
+                response = await chatService.getAiResponse(currentHistory, leadData, config);
             }
-            
-            const { updatedLeadData, responseText, action, nextKey: newNextKeyFromAI } = response;
-            
-            if (nextKey === 'creditAmount') {
-                let creditValue = updatedLeadData.creditAmount ? Number(updatedLeadData.creditAmount) : NaN;
-        
-                if (creditValue < 15000) {
-                    const reParsedValue = parseHumanNumber(text, true);
-                    if (!isNaN(reParsedValue) && reParsedValue >= 15000) {
-                        creditValue = reParsedValue;
-                        updatedLeadData.creditAmount = creditValue;
-                    }
-                }
-                
-                if (isNaN(creditValue) || creditValue < 15000) {
-                    const errorMessage: Message = {
-                        id: Date.now() + 1,
-                        sender: MessageSender.Bot,
-                        text: "Entendi. Para que a gente possa encontrar o melhor plano, o <strong>valor mínimo de crédito</strong> é de R$ 15.000,00. Qual seria o <strong>valor que você tem em mente</strong>?"
-                    };
-                    setMessages(prev => [...prev, errorMessage]);
-                    setIsTyping(false);
-                    setIsSending(false);
-                    return;
-                }
-            }
-            
-            const newLeadData = { ...leadData, ...updatedLeadData };
+
+            const newLeadData = { ...leadData, ...response.updatedLeadData };
             setLeadData(newLeadData);
-            
-            if (isCorrecting) {
-                setIsCorrecting(false);
-                setNextKey(null);
-                await showSummaryAndActions(newLeadData);
-            } else {
-                setNextKey(newNextKeyFromAI);
 
-                if (responseText) {
-                    const botMessage: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
-                    setMessages(prev => [...prev, botMessage]);
-                }
-
-                const allDataNowCollected = newNextKeyFromAI === null;
-                
-                if (allDataNowCollected) {
-                    await showSummaryAndActions(newLeadData);
-                } else if (action === 'SHOW_DAY_OPTIONS') {
-                    setActionOptions([
-                        { label: 'Segunda-feira', value: 'Segunda-feira' },
-                        { label: 'Terça-feira', value: 'Terça-feira' },
-                        { label: 'Quarta-feira', value: 'Quarta-feira' },
-                        { label: 'Quinta-feira', value: 'Quinta-feira' },
-                        { label: 'Sexta-feira', value: 'Sexta-feira' },
-                        { label: 'Sábado', value: 'Sábado' },
-                        { label: 'Domingo', value: 'Domingo' },
-                    ]);
-                    setIsActionPending(true);
-                    setIsTyping(false);
-                } else {
-                    setIsTyping(false);
-                }
+            if (response.responseText) {
+                const botMessage: Mensagem = { id: Date.now() + 1, sender: RemetenteMensagem.Bot, text: response.responseText };
+                setMessages(prev => [...prev, botMessage]);
             }
-        } catch (error) {
-            console.error("API Error, switching to fallback mode:", error);
-            setIsFallbackMode(true);
 
-            const fallbackNotice: Message = { 
-                id: Date.now() + 1, 
-                sender: MessageSender.Bot, 
-                text: "Desculpe, a instabilidade na conexão persiste. Continuaremos no modo direto para não te deixar sem resposta, ok?",
-                isNotice: true
-            };
-            setMessages(prev => [...prev, fallbackNotice]);
-
-            const { responseText, nextKey: fallbackNextKey } = chatService.getFallbackResponse(text, leadData, nextKey, config);
-            const fallbackQuestion: Message = { id: Date.now() + 2, sender: MessageSender.Bot, text: responseText };
-            setMessages(prev => [...prev, fallbackQuestion]);
-            setNextKey(fallbackNextKey);
-            setIsTyping(false);
-        } finally {
-            setIsSending(false);
-        }
-    }, [config, chatService, isSending, isDone, messages, leadData, nextKey, isFallbackMode, isCorrecting, showSummaryAndActions, hasShownSummary]);
-    
-    const handleCorrection = useCallback(async (keyToCorrect: LeadDataKey) => {
-        if (!config || !chatService) return;
-
-        setActionOptions([]);
-        setIsActionPending(false);
-
-        const newLeadData = { ...leadData };
-        delete newLeadData[keyToCorrect];
-        if (keyToCorrect === 'startDatetime') delete newLeadData.finalSummary;
-        setLeadData(newLeadData);
-
-        setNextKey(keyToCorrect);
-        setIsTyping(true);
-
-        const { responseText, nextKey: newNextKey, action } = chatService.getFallbackResponse("", newLeadData, keyToCorrect, config);
-        if (responseText) {
-            const botMessage: Message = { id: Date.now() + 1, sender: MessageSender.Bot, text: responseText };
-            setMessages(prev => [...prev, botMessage]);
-        }
-        setNextKey(newNextKey);
-        if (action === 'SHOW_DAY_OPTIONS') {
-            setActionOptions([
-                { label: 'Segunda-feira', value: 'Segunda-feira' },
-                { label: 'Terça-feira', value: 'Terça-feira' },
-                { label: 'Quarta-feira', value: 'Quarta-feira' },
-                { label: 'Quinta-feira', value: 'Quinta-feira' },
-                { label: 'Sexta-feira', value: 'Sexta-feira' },
-                { label: 'Sábado', value: 'Sábado' },
-                { label: 'Domingo', value: 'Domingo' },
-            ]);
-            setIsActionPending(true);
-        }
-        
-        setIsTyping(false);
-    }, [config, chatService, leadData]);
-
-
-    const handlePillSelect = useCallback(async (value: string, label?: string) => {
-        if (!config || !chatService) return;
-    
-        if (value === 'confirm') {
-            setActionOptions([]);
-            setIsActionPending(false);
-            setIsTyping(true);
-            const currentMessages = [...messages];
-    
-            const sendingMessage: Message = {
-                id: Date.now(),
-                sender: MessageSender.Bot,
-                text: "Um momento, estou confirmando os detalhes e enviando para o consultor..."
-            };
-            setMessages(prev => [...prev, sendingMessage]);
-    
-            try {
-                await chatService.sendLeadToCRM(leadData, currentMessages, config);
-                
-                if (window.fbq) {
-                    window.fbq('track', 'Lead');
-                }
-                
-                setMessages(prev => {
-                    const newMessages = prev.filter(m => m.id !== sendingMessage.id);
-                    const finalMessage: Message = { 
-                        id: Date.now() + 1, 
-                        sender: MessageSender.Bot, 
-                        text: `Perfeito! Seu agendamento foi confirmado. ${config.consultantName} entrará em contato com você em breve. Obrigado!` 
-                    };
-                    return [...newMessages, finalMessage];
-                });
-                setIsDone(true);
-    
-            } catch (error) {
-                console.error("Failed to send lead to CRM:", error);
-                setMessages(prev => {
-                    const newMessages = prev.filter(m => m.id !== sendingMessage.id);
-                    const errorMessage: Message = { 
-                        id: Date.now() + 1, 
-                        sender: MessageSender.Bot, 
-                        text: "Opa! Tivemos um problema ao registrar seu agendamento. Por favor, poderia tentar confirmar novamente?" 
-                    };
-                    return [...newMessages, errorMessage];
-                });
-                
-                setActionOptions([
-                    { label: 'Confirmar Agendamento', value: 'confirm' },
-                    { label: 'Corrigir Informações', value: 'correct' },
+            if (response.action === 'SHOW_DAY_OPTIONS') {
+                 setActionOptions([
+                    { label: 'Segunda-feira', value: 'Segunda-feira' },
+                    { label: 'Terça-feira', value: 'Terça-feira' },
+                    { label: 'Quarta-feira', value: 'Quarta-feira' },
+                    { label: 'Quinta-feira', value: 'Quinta-feira' },
+                    { label: 'Sexta-feira', value: 'Sexta-feira' },
+                    { label: 'Sábado', value: 'Sábado' },
+                    { label: 'Domingo', value: 'Domingo' },
                 ]);
                 setIsActionPending(true);
-            } finally {
-                setIsTyping(false);
             }
+
+            setNextKey(response.nextKey);
+
+            if (response.nextKey === null) {
+                await showSummaryAndActions(newLeadData);
+            }
+
+        } catch (error) {
+            console.error("API call failed, switching to fallback mode.", error);
+            setIsFallbackMode(true);
+            const fallbackNotice: Mensagem = { 
+                id: Date.now() + 1, 
+                sender: RemetenteMensagem.Bot, 
+                text: "Tivemos um problema com a conexão. Para não te deixar esperando, vamos continuar de forma mais direta.",
+                isNotice: true,
+            };
+            const fallbackResponse = chatService.getFallbackResponse(text, leadData, nextKey, config);
+            const newLeadData = { ...leadData, ...fallbackResponse.updatedLeadData };
+            setLeadData(newLeadData);
+            
+            const fallbackQuestion: Mensagem = { id: Date.now() + 2, sender: RemetenteMensagem.Bot, text: fallbackResponse.responseText };
+            setMessages(prev => [...prev, fallbackNotice, fallbackQuestion]);
+            setNextKey(fallbackResponse.nextKey);
+        } finally {
+            setIsTyping(false);
+            setIsSending(false);
+        }
+    }, [isSending, isDone, config, chatService, messages, nextKey, leadData, isFallbackMode, showSummaryAndActions]);
+
+    const handlePillSelect = React.useCallback(async (value: string, label?: string) => {
+        if (!config || !chatService) return;
+    
+        setActionOptions([]);
+        setIsActionPending(false);
+    
+        if (value === 'confirm') {
+            setIsTyping(true);
+            try {
+                if (window.fbq) {
+                    window.fbq('track', 'Schedule');
+                }
+                await chatService.sendLeadToCRM(leadData, messages, config);
+                const confirmationMessage: Mensagem = { id: Date.now(), sender: RemetenteMensagem.Bot, text: "Tudo certo! Seu agendamento foi confirmado. Em breve, um de nossos consultores entrará em contato com você. Obrigado!" };
+                setMessages(prev => [...prev, confirmationMessage]);
+                setIsDone(true);
+            } catch (error) {
+                console.error("Failed to send lead to CRM:", error);
+                const errorMessage: Mensagem = { id: Date.now(), sender: RemetenteMensagem.Bot, text: "Opa, tivemos um problema ao confirmar seu agendamento. Nossa equipe já foi notificada. Por favor, aguarde que entraremos em contato." };
+                setMessages(prev => [...prev, errorMessage]);
+            }
+            setIsTyping(false);
     
         } else if (value === 'correct') {
             setIsCorrecting(true);
-            const correctionOptions = Object.keys(leadData)
-                .filter((key): key is LeadDataKey => key in CORRECTION_FIELD_LABELS && leadData[key as LeadDataKey] !== undefined)
-                .map(key => ({ label: CORRECTION_FIELD_LABELS[key], value: key }));
-    
+            const correctionOptions = Object.entries(leadData)
+                .filter(([key]) => CORRECTION_FIELD_LABELS[key])
+                .map(([key, value]) => ({
+                    label: `${CORRECTION_FIELD_LABELS[key]}: ${key === 'creditAmount' || key === 'monthlyInvestment' ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value as number) : value}`,
+                    value: key
+                }));
             setActionOptions(correctionOptions);
+            setIsActionPending(true);
+            const correctionPrompt: Mensagem = { id: Date.now(), sender: RemetenteMensagem.Bot, text: "Sem problemas! O que você gostaria de corrigir?" };
+            setMessages(prev => [...prev, correctionPrompt]);
+    
         } else if (isCorrecting) {
-            if (value in CORRECTION_FIELD_LABELS) {
-                handleCorrection(value as LeadDataKey);
+            if (value === 'startDatetime') {
+                setIsCorrecting(false);
+                setLeadData(prev => {
+                    const { startDatetime, ...rest } = prev;
+                    return rest;
+                });
+                
+                const rescheduleMessage: Mensagem = { 
+                    id: Date.now(), 
+                    sender: RemetenteMensagem.Bot, 
+                    text: "Ok, vamos reagendar. Por favor, escolha o melhor <strong>dia da semana</strong> para a nossa conversa." 
+                };
+                setMessages(prev => [...prev, rescheduleMessage]);
+                
+                setActionOptions([
+                    { label: 'Segunda-feira', value: 'Segunda-feira' },
+                    { label: 'Terça-feira', value: 'Terça-feira' },
+                    { label: 'Quarta-feira', value: 'Quarta-feira' },
+                    { label: 'Quinta-feira', value: 'Quinta-feira' },
+                    { label: 'Sexta-feira', value: 'Sexta-feira' },
+                    { label: 'Sábado', value: 'Sábado' },
+                    { label: 'Domingo', value: 'Domingo' },
+                ]);
+                setIsActionPending(true);
+                setNextKey('startDatetime');
             } else {
-                handleSendMessage(label || value);
+                setNextKey(value as LeadKey);
+                setLeadData(prev => {
+                    const keyToRemove = value as LeadKey;
+                    const { [keyToRemove]: _, ...rest } = prev;
+                    return rest;
+                });
+                setIsCorrecting(false);
+                const askAgainMessage: Mensagem = { id: Date.now(), sender: RemetenteMensagem.Bot, text: `Ok, vamos ajustar. Por favor, me informe o novo valor para: <strong>${CORRECTION_FIELD_LABELS[value]}</strong>.` };
+                setMessages(prev => [...prev, askAgainMessage]);
             }
-        } else {
-            handleSendMessage(label || value);
+    
+        } else { // Day or Time selection
+            const selectedText = label || value;
+            const userMessage: Mensagem = { id: Date.now(), sender: RemetenteMensagem.User, text: selectedText };
+            setMessages(prev => [...prev, userMessage]);
+            setIsTyping(true);
+            
+            // Check if it's a time selection (because a day is already set)
+            if (leadData.startDatetime && !leadData.startDatetime.includes('às')) {
+                const finalDateTime = `${leadData.startDatetime} às ${value}`;
+                const finalData = { ...leadData, startDatetime: finalDateTime };
+                setLeadData(finalData);
+                // All date/time info collected, proceed to summary
+                showSummaryAndActions(finalData);
+            } else { // It's a day selection
+                const updatedData = { ...leadData, startDatetime: selectedText };
+                setLeadData(updatedData);
+        
+                const response = chatService.getFallbackResponse(selectedText, updatedData, 'startDatetime', config);
+        
+                if (response.responseText) {
+                    const botMessage: Mensagem = { id: Date.now() + 1, sender: RemetenteMensagem.Bot, text: response.responseText };
+                    setMessages(prev => [...prev, botMessage]);
+                }
+                if (response.options) {
+                    setActionOptions(response.options);
+                    setIsActionPending(true);
+                }
+                setNextKey(response.nextKey);
+            }
+            setIsTyping(false);
         }
-    }, [config, chatService, leadData, messages, isCorrecting, handleCorrection, handleSendMessage]);
+    }, [config, chatService, leadData, messages, isCorrecting, showSummaryAndActions]);
 
     return {
         messages,

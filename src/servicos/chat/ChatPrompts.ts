@@ -1,7 +1,7 @@
 import { Type } from "@google/genai";
-import { ChatConfig } from "../modelos/ConfiguracaoChatModel";
-import { LeadData } from "../modelos/LeadModel";
-import { Message } from "../modelos/MensagemModel";
+import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
+import { Lead } from "./modelos/LeadModel";
+import { Mensagem } from "./modelos/MensagemModel";
 
 export const createSystemPrompt = (assistantName: string, consultantName: string): string => `
 Você é ${assistantName}, o assistente de planejamento de ${consultantName}, um consultor. Sua missão é ajudar os clientes a organizar as informações sobre seus projetos de vida para que ${consultantName} possa oferecer a melhor estratégia de aquisição. Você é empático, focado nos sonhos do cliente e usa uma linguagem de planejamento e conquista. Siga estritamente estas regras:
@@ -56,7 +56,7 @@ export const leadDataSchema = {
     required: ["responseText", "nextKey"]
 };
 
-export const createFinalSummaryPrompt = (leadData: Partial<LeadData>, config: ChatConfig): string => `Crie um resumo de confirmação conciso e amigável para um agendamento com ${config.consultantName}, baseado nos dados JSON a seguir.
+export const createFinalSummaryPrompt = (leadData: Partial<Lead>, config: ConfiguracaoChat): string => `Crie um resumo de confirmação conciso e amigável para um agendamento com ${config.consultantName}, baseado nos dados JSON a seguir.
 NÃO inclua uma saudação inicial (como "Olá"). Comece diretamente com uma frase como "Perfeito, {clientName}! Por favor, confirme se os dados para nosso planejamento estão corretos:".
 Formate a saída em HTML. Use a tag <strong> para destacar informações chave (nome, valores, data/hora). Use <br> para quebras de linha.
 O tom deve ser profissional e positivo.
@@ -66,7 +66,7 @@ Dados:
 ${JSON.stringify(leadData, null, 2)}`;
 
 
-export const createInternalSummaryPrompt = (leadData: Partial<LeadData>, history: Message[], formattedCreditAmount: string, formattedMonthlyInvestment: string, consultantName: string): string => {
+export const createInternalSummaryPrompt = (leadData: Partial<Lead>, history: Mensagem[], formattedCreditAmount: string, formattedMonthlyInvestment: string, consultantName: string): string => {
     const conversationHistory = history.map(m => `${m.sender === 'bot' ? 'Assistente' : 'Cliente'}: ${m.text.replace(/<[^>]*>/g, '')}`).join('\n');
 
     const dataForPrompt = {

@@ -1,6 +1,4 @@
-import { IndicadorDeDigitacaoProps } from './IndicadorDeDigitacao.props';
-
-export const IndicadorDeDigitacao = (_props: IndicadorDeDigitacaoProps) => {
+export const IndicadorDeDigitacao = () => {
     return (
         <div className="flex justify-start">
             <div className="px-5 py-4 shadow bg-gray-200 dark:bg-gray-700 rounded-2xl rounded-bl-lg">

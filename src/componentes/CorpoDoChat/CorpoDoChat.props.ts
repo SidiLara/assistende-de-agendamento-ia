@@ -1,6 +1,6 @@
-import { Message } from '../../servicos/modelos/MensagemModel';
+import { Mensagem } from '../../servicos/chat/modelos/MensagemModel';
 
 export interface CorpoDoChatProps {
-    messages: Message[];
+    messages: Mensagem[];
     isTyping: boolean;
 }

@@ -1,14 +1,14 @@
-import { FC, useState, useEffect, useRef } from 'react';
+import * as React from 'react';
 import { CabecalhoDoChat } from '../../componentes/CabecalhoDoChat';
 import { CorpoDoChat } from '../../componentes/CorpoDoChat';
 import { EntradaDeChat } from '../../componentes/EntradaDeChat';
 import { PillsDeAcao } from '../../componentes/PillsDeAcao';
 import { useChatManager } from '../../hooks/useChatManager';
-import { ChatConfig } from '../../servicos/modelos/ConfiguracaoChatModel';
-import { FallbackRuleImpl } from '../../servicos/implementacao/FallbackRuleImpl';
-import { ChatService } from '../../servicos/contratos/ChatService';
-import { ChatServiceImpl } from '../../servicos/implementacao/ChatServiceImpl';
-import { BatePapoProps } from './BatePapo.props';
+import { ConfiguracaoChat } from '../../servicos/chat/modelos/ConfiguracaoChatModel';
+import { RegraFallbackImpl } from '../../servicos/chat/FallbackRuleImpl';
+import { ServicoChat } from '../../servicos/chat/ChatService';
+import { ServicoChatImpl } from '../../servicos/chat/ChatServiceImpl';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 declare global {
   interface Window {
@@ -16,15 +16,18 @@ declare global {
   }
 }
 
-export const BatePapo: FC<BatePapoProps> = () => {
-    const [config, setConfig] = useState<ChatConfig | null>(null);
-    const [chatService, setChatService] = useState<ChatService | null>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
+export const BatePapo: React.FC = () => {
+    // State for chat
+    const [config, setConfig] = React.useState<ConfiguracaoChat | null>(null);
+    const [chatService, setChatService] = React.useState<ServicoChat | null>(null);
+    
+    const inputRef = React.useRef<HTMLInputElement>(null);
+    const { theme, toggleTheme } = useDarkMode();
 
-    useEffect(() => {
+    React.useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         
-        const appConfig: ChatConfig = {
+        const appConfig: ConfiguracaoChat = {
             consultantName: urlParams.get('consultor') || 'Sidinei Lara',
             assistantName: urlParams.get('assistente') || 'Yannis',
             consultantPhoto: urlParams.get('foto') || 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=128&h=128&fit=crop&crop=faces',
@@ -32,8 +35,8 @@ export const BatePapo: FC<BatePapoProps> = () => {
         };
         setConfig(appConfig);
 
-        const fallbackRule = new FallbackRuleImpl();
-        const service = new ChatServiceImpl(fallbackRule);
+        const fallbackRule = new RegraFallbackImpl();
+        const service = new ServicoChatImpl(fallbackRule, process.env.API_KEY);
         setChatService(service);
 
         const pixelId = urlParams.get('pixelId');
@@ -67,27 +70,29 @@ export const BatePapo: FC<BatePapoProps> = () => {
         handlePillSelect,
     } = useChatManager(config, chatService);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (!isTyping && !isActionPending && !isDone) {
             inputRef.current?.focus();
         }
     }, [isTyping, isActionPending, isDone]);
 
-    if (!config) {
+    if (!chatService || !config) {
         return (
-            <div className="flex justify-center items-center h-screen">
+            <div className="flex justify-center items-center h-screen bg-gray-200 dark:bg-dark-primary">
                 <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-brand-green"></div>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col h-screen font-sans">
+        <div className="flex flex-col h-screen font-sans bg-gray-200 dark:bg-dark-primary">
             <div className="flex-1 min-h-0 flex justify-center items-center p-4">
                 <div className="w-full max-w-xl h-full max-h-[90vh] bg-white dark:bg-dark-secondary rounded-2xl shadow-2xl flex flex-col">
                     <CabecalhoDoChat 
                         consultantName={config.consultantName}
                         consultantPhoto={config.consultantPhoto}
+                        theme={theme}
+                        toggleTheme={toggleTheme}
                     />
                     <CorpoDoChat messages={messages} isTyping={isTyping} />
                     <div className="p-5 border-t border-gray-200 dark:border-dark-tertiary bg-white dark:bg-dark-secondary rounded-b-2xl">

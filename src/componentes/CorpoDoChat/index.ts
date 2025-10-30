@@ -1,2 +1,2 @@
-export { CorpoDoChat } from './CorpoDoChat';
+export * from './CorpoDoChat';
 export type { CorpoDoChatProps } from './CorpoDoChat.props';

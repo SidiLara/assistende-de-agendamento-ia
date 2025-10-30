@@ -1,83 +1,81 @@
 import { GoogleGenAI } from "@google/genai";
-import { Message } from "../modelos/MensagemModel";
-import { LeadData } from "../modelos/LeadModel";
-import { ChatConfig } from "../modelos/ConfiguracaoChatModel";
-import { ChatService } from "../contratos/ChatService";
-import { AiResponse } from "../modelos/Chat.response";
-import { FallbackRule } from "../contratos/FallbackRule";
-import { createSystemPrompt, leadDataSchema, createFinalSummaryPrompt, createInternalSummaryPrompt } from "../prompts/ChatPrompts";
+import { Mensagem } from "./modelos/MensagemModel";
+import { Lead, LeadKey } from "./modelos/LeadModel";
+import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
+import { ServicoChat } from "./ChatService";
+import { RespostaAi } from "./modelos/AiResponse";
+import { RegraFallback } from "./FallbackRule";
+import { createSystemPrompt, leadDataSchema, createFinalSummaryPrompt, createInternalSummaryPrompt } from "./ChatPrompts";
 
 const BASE_MAKE_URL = "https://hook.us2.make.com/";
 
-const getAiClient = () => {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-        throw new Error("API key is missing.");
-    }
-    return new GoogleGenAI({ apiKey });
-};
-
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const callApiWithRetry = async <T>(apiFn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> => {
-    let lastError: any;
-    for (let i = 0; i < retries; i++) {
-        try {
-            return await apiFn();
-        } catch (error: any) {
-            lastError = error;
-            const errorMessage = error.toString().toLowerCase();
-            if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('unavailable') || errorMessage.includes('rate limit')) {
-                 if (i < retries - 1) {
-                    const waitTime = delay * Math.pow(2, i);
-                    console.warn(`API call failed due to transient error, retrying in ${waitTime}ms...`);
-                    await sleep(waitTime);
-                }
-            } else {
-                throw lastError;
-            }
+export class ServicoChatImpl implements ServicoChat {
+    private fallbackRule: RegraFallback;
+    private ai?: GoogleGenAI;
+
+    constructor(fallbackRule: RegraFallback, apiKey?: string) {
+        this.fallbackRule = fallbackRule;
+        if (apiKey) {
+            this.ai = new GoogleGenAI({ apiKey });
         }
     }
-    throw lastError;
-};
 
-const callGenerativeApi = async (apiCall: (ai: GoogleGenAI) => Promise<any>) => {
-    try {
-        const ai = getAiClient();
-        return await callApiWithRetry(() => apiCall(ai));
-    } catch (error) {
-        console.error("API call failed after retries.", error);
-        throw new Error("API call failed, switching to local script.");
+    private async callApiWithRetry<T>(apiFn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+        let lastError: any;
+        for (let i = 0; i < retries; i++) {
+            try {
+                return await apiFn();
+            } catch (error: any) {
+                lastError = error;
+                const errorMessage = error.toString().toLowerCase();
+                if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('unavailable') || errorMessage.includes('rate limit')) {
+                     if (i < retries - 1) {
+                        const waitTime = delay * Math.pow(2, i);
+                        console.warn(`API call failed due to transient error, retrying in ${waitTime}ms...`);
+                        await sleep(waitTime);
+                    }
+                } else {
+                    throw lastError;
+                }
+            }
+        }
+        throw lastError;
     }
-};
 
-const getInternalSummaryForCRM = async (leadData: Partial<LeadData>, history: Message[], formattedCreditAmount: string, formattedMonthlyInvestment: string, consultantName: string): Promise<string> => {
-    const internalSummaryPrompt = createInternalSummaryPrompt(leadData, history, formattedCreditAmount, formattedMonthlyInvestment, consultantName);
+    private async callGenerativeApi(apiFn: () => Promise<any>) {
+        if (!this.ai) {
+            throw new Error("O serviço de IA não foi inicializado. Verifique a Chave de API.");
+        }
+        try {
+            return await this.callApiWithRetry(apiFn);
+        } catch (error) {
+            console.error("API call failed after retries.", error);
+            throw new Error("API call failed, switching to local script.");
+        }
+    }
     
-    try {
-        const response = await callGenerativeApi(ai => ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: internalSummaryPrompt,
-        }));
-        return response.text.trim();
-    } catch (error) {
-        console.error("Failed to generate internal CRM summary:", error);
-        return "Não foi possível gerar o relatório narrativo da conversa.";
-    }
-};
-
-export class ChatServiceImpl implements ChatService {
-    private fallbackRule: FallbackRule;
-
-    constructor(fallbackRule: FallbackRule) {
-        this.fallbackRule = fallbackRule;
+    private async getInternalSummaryForCRM(leadData: Partial<Lead>, history: Mensagem[], formattedCreditAmount: string, formattedMonthlyInvestment: string, consultantName: string): Promise<string> {
+        const internalSummaryPrompt = createInternalSummaryPrompt(leadData, history, formattedCreditAmount, formattedMonthlyInvestment, consultantName);
+        
+        try {
+            const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: internalSummaryPrompt,
+            }));
+            return response.text.trim();
+        } catch (error) {
+            console.error("Failed to generate internal CRM summary:", error);
+            return "Não foi possível gerar o relatório narrativo da conversa.";
+        }
     }
 
     public async getAiResponse(
-        history: Message[],
-        currentData: Partial<LeadData>,
-        config: ChatConfig
-    ): Promise<AiResponse> {
+        history: Mensagem[],
+        currentData: Partial<Lead>,
+        config: ConfiguracaoChat
+    ): Promise<RespostaAi> {
         const contextMessage = `[CONTEXTO] Dados já coletados: ${JSON.stringify(currentData)}. Analise o histórico e o contexto para determinar a próxima pergunta.`;
         
         const contents: {role: 'user' | 'model', parts: {text: string}[]}[] = [{
@@ -94,7 +92,7 @@ export class ChatServiceImpl implements ChatService {
         
         const systemInstruction = createSystemPrompt(config.assistantName, config.consultantName);
 
-        const response = await callGenerativeApi(ai => ai.models.generateContent({
+        const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
             model: "gemini-2.5-flash",
             contents,
             config: {
@@ -124,10 +122,10 @@ export class ChatServiceImpl implements ChatService {
         }
     }
 
-    public async getFinalSummary(leadData: Partial<LeadData>, config: ChatConfig): Promise<string> {
+    public async getFinalSummary(leadData: Partial<Lead>, config: ConfiguracaoChat): Promise<string> {
         const summaryPrompt = createFinalSummaryPrompt(leadData, config);
 
-        const response = await callGenerativeApi(ai => ai.models.generateContent({
+        const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
             model: "gemini-2.5-flash",
             contents: summaryPrompt,
         }));
@@ -137,18 +135,18 @@ export class ChatServiceImpl implements ChatService {
 
     public getFallbackResponse(
         lastUserMessage: string,
-        currentData: Partial<LeadData>,
-        keyToCollect: any | null,
-        config: ChatConfig
-    ): AiResponse {
+        currentData: Partial<Lead>,
+        keyToCollect: LeadKey | null,
+        config: ConfiguracaoChat
+    ): RespostaAi {
         return this.fallbackRule.getFallbackResponse(lastUserMessage, currentData, keyToCollect, config);
     }
 
-    public getFallbackSummary(leadData: Partial<LeadData>): string {
+    public getFallbackSummary(leadData: Partial<Lead>): string {
         return this.fallbackRule.getFallbackSummary(leadData);
     }
 
-    public async sendLeadToCRM(leadData: Partial<LeadData>, history: Message[], config: ChatConfig) {
+    public async sendLeadToCRM(leadData: Partial<Lead>, history: Mensagem[], config: ConfiguracaoChat) {
         const { webhookId, consultantName } = config;
         const MAKE_URL = `${BASE_MAKE_URL}${webhookId}`;
         
@@ -173,7 +171,7 @@ export class ChatServiceImpl implements ChatService {
         const formattedCreditAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(creditAmount);
         const formattedMonthlyInvestment = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(monthlyInvestment);
 
-        const narrativeReport = await getInternalSummaryForCRM(leadData, history, formattedCreditAmount, formattedMonthlyInvestment, consultantName);
+        const narrativeReport = await this.getInternalSummaryForCRM(leadData, history, formattedCreditAmount, formattedMonthlyInvestment, consultantName);
 
         let notesContent = `Lead: ${currentLeadNumber}\n\n`;
         notesContent += "RELATÓRIO DA CONVERSA (IA):\n";

@@ -1,0 +1,1 @@
+export { BatePapo } from './BatePapo';

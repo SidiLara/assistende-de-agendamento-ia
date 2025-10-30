@@ -1,5 +1,5 @@
-import { Message } from '../../servicos/modelos/MensagemModel';
+import { Mensagem } from '../../servicos/chat/modelos/MensagemModel';
 
 export interface MensagemDeChatProps {
-    message: Message;
+    message: Mensagem;
 }

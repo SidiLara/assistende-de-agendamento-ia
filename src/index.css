@@ -17,11 +17,6 @@
   animation: slide-in-fade-in 0.4s ease-out forwards;
 }
 
-
-body {
-  @apply bg-gray-200 dark:bg-dark-primary;
-}
-
 .chat-container::-webkit-scrollbar {
   width: 6px;
 }

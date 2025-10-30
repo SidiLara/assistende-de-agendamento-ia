@@ -4,6 +4,6 @@ interface PillOption {
 }
 
 export interface PillsDeAcaoProps {
-    onSelect: (value: string, label?: string) => void;
     options: PillOption[];
+    onSelect: (value: string, label?: string) => void;
 }

@@ -1,5 +1,5 @@
 {
-  "name": "Assistente de Agendamento IA",
+  "name": "Chat Ia Main",
   "description": "Um assistente de chat inteligente desenvolvido com a API Gemini para capturar informações de leads e agendar consultorias. O assistente guia os usuários através de um fluxo de conversa natural, coleta dados essenciais e os resume para confirmação.",
   "requestFramePermissions": []
 }

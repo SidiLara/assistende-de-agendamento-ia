@@ -1,4 +1,4 @@
-export interface ChatConfig {
+export interface ConfiguracaoChat {
     consultantName: string;
     assistantName: string;
     consultantPhoto: string;

@@ -1,6 +1,6 @@
-PADRÃO DE ARQUITETURA: React Native
+PADRÃO DE ARQUITETURA: React (Web / AI Studio)
 
-Este documento define as regras de arquitetura para todos os projetos React Native. Você DEVE seguir estas regras em todas as respostas de código.
+Este documento define as regras de arquitetura para todos os projetos React Web. Você DEVE seguir estas regras em todas as respostas de código.
 
 1. Filosofia Central
 
@@ -20,7 +20,7 @@ componentes/: Componentes reutilizáveis (Atomic Design: átomos, moléculas).
 
 modulos/: Seções complexas da aplicação (organismos).
 
-telas/: As telas/cenas da aplicação.
+paginas/: As páginas/rotas da aplicação.
 
 servicos/: Lógica de negócio (ex: formatação de dados).
 
@@ -34,11 +34,13 @@ utils/: Funções puras e utilitários (ex: formatarData).
 
 assets/: Imagens, fontes, etc.
 
-navigation/: Configuração de rotas (React Navigation).
+navigation/: Configuração de rotas.
 
 Estrutura Visual (Exemplos em Português)
 
 /
+├── public/
+│   └── index.html      (ARQUIVO RAIZ)
 ├── src/
 │   ├── assets/         (Técnica - en)
 │   ├── core/           (Técnica - en)
@@ -54,7 +56,7 @@ Estrutura Visual (Exemplos em Português)
 │   │   ├── Cabecalho/  <-- (Nome em Português)
 │   │   └── Rodape/     <-- (Nome em Português)
 │   │
-│   ├── telas/          (Domínio - pt)
+│   ├── paginas/        (Domínio - pt)
 │   │   ├── Inicio/     <-- (Nome em Português)
 │   │   └── Perfil/     <-- (Nome em Português)
 │   │
@@ -62,21 +64,23 @@ Estrutura Visual (Exemplos em Português)
 │       ├── autenticacao/
 │       └── usuario/
 │
-└── App.tsx             (ARQUIVO RAIZ)
+└── index.tsx           (ARQUIVO RAIZ)
+
 
 
 3. Padrão de Componentes (Obrigatório)
 
 NENHUM componente deve ser um arquivo único (Botao.tsx). Todo componente DEVE ser uma pasta para co-localizar seus arquivos (lógica, tipos, estilos).
 
-Esta é a estrutura obrigatória para CADA componente (seja em componentes/, modulos/ ou telas/):
+Esta é a estrutura obrigatória para CADA componente (seja em componentes/, modulos/ ou paginas/):
 
 └── [NomeDoComponenteEmPortugues]/  <-- (Ex: Botao, CartaoUsuario, etc.)
     ├── index.ts                     // Exportador (Barrel file)
     ├── [Nome].tsx                   // Lógica principal e JSX (Ex: Botao.tsx)
     ├── [Nome].props.ts              // Tipos (Props e Interfaces) (Ex: Botao.props.ts)
-    ├── [Nome].style.ts              // Estilização (StyleSheet ou Styled-Components)
+    ├── [Nome].style.ts              // Estilização (Styled-Components ou CSS Modules)
     └── (Opcional) [Nome].hook.ts    // Hook customizado para lógica complexa
+
 
 
 Exemplo de Conteúdo dos Arquivos (Componente: "Botao")
@@ -90,31 +94,27 @@ export interface BotaoProps {
 }
 
 
+
 Botao.style.ts (Define a "aparência")
 
-import { StyleSheet } from 'react-native';
-// Ou import styled from 'styled-components/native';
+import styled from 'styled-components';
+// (Ou pode ser um arquivo .css para CSS Modules)
 
-export const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#007bff',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 5,
-  },
-  texto: {
-    color: '#FFFFFF',
-    textAlign: 'center',
-  }
-});
+export const Container = styled.button`
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+`;
+
 
 
 Botao.tsx (Define o "comportamento")
 
 import React from 'react';
-import { TouchableOpacity, Text } from 'react-native';
 import { BotaoProps } from './Botao.props';
-import { styles } from './Botao.style';
+import { Container } from './Botao.style';
 
 export const Botao: React.FC<BotaoProps> = ({ 
   titulo, 
@@ -124,13 +124,12 @@ export const Botao: React.FC<BotaoProps> = ({
   // Lógica do componente (se houver)
   
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
-      <Text style={styles.texto}>
-        {titulo}
-      </Text>
-    </TouchableOpacity>
+    <Container onClick={onPress}>
+      {titulo}
+    </Container>
   );
 };
+
 
 
 index.ts (Define a "exportação")
@@ -139,17 +138,18 @@ export { Botao } from './Botao';
 export type { BotaoProps } from './Botao.props';
 
 
+
 4. Nomenclatura (Híbrida - REGRA CRÍTICA)
 
 A nomenclatura segue a regra da pasta onde o arquivo está.
 
 Regra de Domínio (Pastas em Português):
 
-OBRIGATÓRIO: Dentro de componentes/, modulos/, telas/, os nomes das pastas de componentes, arquivos e interfaces DEVEM ser em Português (PascalCase).
+OBRIGATÓRIO: Dentro de componentes/, modulos/, paginas/, os nomes das pastas de componentes, arquivos e interfaces DEVEM ser em Português (PascalCase).
 
-Correto: src/componentes/BotaoPrincipal/, src/telas/TelaDeLogin/.
+Correto: src/componentes/BotaoPrincipal/, src/paginas/TelaDeLogin/.
 
-ERRADO: src/componentes/MainButton/, src/telas/LoginScreen/.
+ERRADO: src/componentes/MainButton/, src/paginas/LoginScreen/.
 
 Interfaces e Props seguem o nome do componente: BotaoPrincipalProps.
 
@@ -173,10 +173,10 @@ Para Refatoração
 
 Analisar: Receba o código monolítico.
 
-Renomear Pastas de Domínio: Mude pastas de negócio para Português (ex: screens -> telas, components -> componentes).
+Renomear Pastas de Domínio: Mude pastas de negócio para Português (ex: screens -> paginas, components -> componentes).
 
 Renomear Pastas de Componentes: Mude os nomes das pastas de componentes para Português (ex: MainButton -> BotaoPrincipal, Header -> Cabecalho).
 
 Fatorar Componentes: Pegue cada arquivo de componente (ex: Login.tsx) e quebre-o na estrutura de pastas (Login/index.ts, Login.tsx, Login.props.ts, Login.style.ts).
 
-Mover Arquivos Raiz: Garanta que App.tsx esteja na raiz
+Mover Arquivos Raiz: Garanta que index.tsx e index.html (ou App.tsx) estejam na raiz, fora da pasta src/ (ou conforme o padrão do framework, mas sempre no nível superior).

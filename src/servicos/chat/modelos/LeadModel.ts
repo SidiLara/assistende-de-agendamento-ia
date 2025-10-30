@@ -1,4 +1,4 @@
-export interface LeadData {
+export interface Lead {
     clientName: string;
     topic: 'Imóvel' | 'Automóvel' | 'Investimento' | 'Viagem' | 'Outro';
     creditAmount: number;
@@ -11,4 +11,4 @@ export interface LeadData {
     source?: string;
 }
 
-export type LeadDataKey = keyof LeadData;
+export type LeadKey = keyof Lead;
