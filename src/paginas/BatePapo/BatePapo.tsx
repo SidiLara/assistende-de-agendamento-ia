@@ -35,7 +35,8 @@ export const BatePapo: React.FC = () => {
         };
         setConfig(appConfig);
 
-        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+        // Fix: Per @google/genai guidelines, API key must be from process.env.API_KEY.
+        const apiKey = process.env.API_KEY;
         if (!apiKey) {
             console.warn("Chave de API do Gemini não encontrada. O aplicativo será executado em modo de fallback. Certifique-se de configurar a variável de ambiente API_KEY em seu ambiente de hospedagem (ex: Vercel).");
         }

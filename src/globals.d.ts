@@ -1,21 +1,13 @@
-// This file defines global types available in the AI Studio environment.
-// It prevents TypeScript errors for environment-provided variables like `process`.
-
-// By declaring `process` on the `Window` interface, we avoid conflicts
-// with Node.js global types and accurately model how environment variables
-// are exposed in the browser-based AI Studio context.
+// Fix: Add type definition for process.env.API_KEY to support @google/genai guidelines
+// without causing TypeScript errors.
 declare global {
-  interface Window {
-    // The `process` object is provided by the AI Studio environment.
-    process: {
-      env: {
-        // The API_KEY is injected by the environment for Gemini API access.
-        API_KEY: string;
-      };
-    };
+  namespace NodeJS {
+    interface ProcessEnv {
+      readonly API_KEY?: string;
+    }
   }
 }
 
-// This export statement is necessary to make this file a module,
-// which allows `declare global` to work correctly.
+// Este arquivo é mantido para futuras declarações de tipos globais, se necessário.
+// A tipagem de variáveis de ambiente foi movida para vite-env.d.ts
 export {};
