@@ -15,10 +15,11 @@ export const BatePapo: React.FC = () => {
     const chatConfig = React.useMemo(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const consultantNameFromUrl = urlParams.get('consultor') || urlParams.get('consultant');
+        const assistantNameFromUrl = urlParams.get('assistente') || urlParams.get('assistant');
         
         return {
             consultantName: consultantNameFromUrl || 'Consultor Sidinei Lara',
-            assistantName: 'Yannis',
+            assistantName: assistantNameFromUrl || 'Yannis',
             consultantPhoto: 'https://lh3.googleusercontent.com/pw/AP1GczNjDUpGj9SrkxSb0twW-X4VpKtzDwhNTEirCxk1fyEGfo6NTNIOW7qM2kifnymFOrJ0v6LuSn6sThGMj3_E_Vxgf2ld3-IHsDdewbd7aqtuCP6xqELBx3IC0_10oKCQyiEKXTyl6aBCi5crsAyGEHda7A=w801-h801-s-no-gm',
             webhookId: 'your-webhook-id-here'
         };
