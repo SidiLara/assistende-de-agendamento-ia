@@ -5,6 +5,7 @@ import { EntradaDeChat } from '../../componentes/EntradaDeChat';
 import { PillsDeAcao } from '../../componentes/PillsDeAcao';
 import { useChatManager } from '../../hooks/useChatManager';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 import { ConfiguracaoChat } from '../../servicos/chat/modelos/ConfiguracaoChatModel';
 import { ServicoChatImpl } from '../../servicos/chat/ChatServiceImpl';
 import { RegraFallbackImpl } from '../../servicos/chat/FallbackRuleImpl';
@@ -12,8 +13,8 @@ import { RegraFallbackImpl } from '../../servicos/chat/FallbackRuleImpl';
 // In a real app, this would come from a config file or API.
 const chatConfig: ConfiguracaoChat = {
     consultantName: 'Glauber',
-    assistantName: 'G.E.M.S.',
-    consultantPhoto: 'https://lh3.googleusercontent.com/a/ACg8ocK_345-c4h033p8Sbv52nO0j58GmsGgsIuU7s0-x-7oBPA=s576-c-no',
+    assistantName: 'Yannis',
+    consultantPhoto: 'https://i.imgur.com/Q9q2C4N.png', // Avatar do Yannis
     webhookId: 'your-webhook-id-here' // This should be configured.
 };
 
@@ -33,6 +34,7 @@ export const BatePapo: React.FC = () => {
         handleSendMessage,
         handlePillSelect,
     } = useChatManager(chatConfig, chatService);
+    const { playAudio, isPlaying, isLoading } = useAudioPlayer(chatService);
 
     const inputRef = React.useRef<HTMLInputElement>(null);
     const isChatStarted = messages.length > 0;
@@ -45,7 +47,6 @@ export const BatePapo: React.FC = () => {
 
     return (
         <div className="flex flex-col h-screen bg-gray-50 dark:bg-dark-primary text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
-            {/* O cabeçalho só é renderizado como uma barra superior se o chat tiver começado */}
             {isChatStarted && (
                  <header className="flex-shrink-0 z-10 bg-white dark:bg-dark-secondary shadow-md dark:shadow-slate-900">
                     <CabecalhoDoChat
@@ -61,7 +62,6 @@ export const BatePapo: React.FC = () => {
 
             <main className="flex-1 flex flex-col overflow-hidden">
                 <div className={`flex-1 overflow-y-auto p-4 md:p-6 flex flex-col ${!isChatStarted ? 'justify-center' : ''}`}>
-                    {/* A tela de boas-vindas é mostrada aqui quando o chat não começou */}
                     {!isChatStarted && (
                         <div className="mb-auto mt-auto">
                             <CabecalhoDoChat
@@ -74,8 +74,16 @@ export const BatePapo: React.FC = () => {
                             />
                         </div>
                     )}
-                    {/* O corpo do chat só aparece quando há mensagens */}
-                    {isChatStarted && <CorpoDoChat messages={messages} isTyping={isTyping} consultantPhoto={chatConfig.consultantPhoto} />}
+                    {isChatStarted && (
+                        <CorpoDoChat 
+                            messages={messages} 
+                            isTyping={isTyping} 
+                            consultantPhoto={chatConfig.consultantPhoto}
+                            onPlayAudio={playAudio}
+                            isPlaying={isPlaying}
+                            isLoading={isLoading}
+                        />
+                    )}
                 </div>
                 
                 <div className="p-4 md:px-6 md:pb-6 bg-transparent">

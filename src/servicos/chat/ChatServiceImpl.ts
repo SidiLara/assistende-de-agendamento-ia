@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Modality } from "@google/genai";
 import { Mensagem, RemetenteMensagem } from "./modelos/MensagemModel";
 import { Lead, LeadKey } from "./modelos/LeadModel";
 import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
@@ -73,6 +73,40 @@ export class ServicoChatImpl implements ServicoChat {
         } catch (error) {
             console.error("Failed to generate internal CRM summary:", error);
             return "Não foi possível gerar o relatório narrativo da conversa.";
+        }
+    }
+
+    public async generateSpeech(text: string): Promise<string | null> {
+        if (!this.ai) {
+            console.warn("AI service not initialized. Cannot generate speech.");
+            return null;
+        }
+    
+        const plainText = text.replace(/<[^>]*>/g, '');
+    
+        try {
+            const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
+                model: "gemini-2.5-flash-preview-tts",
+                contents: [{ parts: [{ text: plainText }] }],
+                config: {
+                    responseModalities: [Modality.AUDIO],
+                    speechConfig: {
+                        voiceConfig: {
+                          prebuiltVoiceConfig: { voiceName: 'Kore' },
+                        },
+                    },
+                },
+            }));
+    
+            const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+            if (base64Audio) {
+                return base64Audio;
+            }
+            return null;
+    
+        } catch (error) {
+            console.error("Falha ao gerar áudio:", error);
+            return null;
         }
     }
 

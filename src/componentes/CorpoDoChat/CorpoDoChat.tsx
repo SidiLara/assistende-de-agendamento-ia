@@ -3,7 +3,7 @@ import { MensagemDeChat } from '../MensagemDeChat';
 import { IndicadorDeDigitacao } from '../IndicadorDeDigitacao';
 import { CorpoDoChatProps } from './CorpoDoChat.props';
 
-export const CorpoDoChat: React.FC<CorpoDoChatProps> = ({ messages, isTyping, consultantPhoto }) => {
+export const CorpoDoChat: React.FC<CorpoDoChatProps> = ({ messages, isTyping, consultantPhoto, onPlayAudio, isPlaying, isLoading }) => {
     const chatContainerRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
@@ -15,7 +15,14 @@ export const CorpoDoChat: React.FC<CorpoDoChatProps> = ({ messages, isTyping, co
     return (
         <div ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-4 chat-container bg-transparent">
             {messages.map((msg) => (
-                <MensagemDeChat key={msg.id} message={msg} consultantPhoto={consultantPhoto} />
+                <MensagemDeChat 
+                    key={msg.id} 
+                    message={msg} 
+                    consultantPhoto={consultantPhoto}
+                    onPlayAudio={onPlayAudio}
+                    isPlaying={isPlaying(msg.id)}
+                    isLoading={isLoading(msg.id)}
+                />
             ))}
             {isTyping && <IndicadorDeDigitacao />}
         </div>
