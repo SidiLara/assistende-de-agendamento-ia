@@ -1,3 +1,5 @@
+// FIX: Added React import. JSX syntax requires 'React' to be in scope.
+import * as React from 'react';
 import { RemetenteMensagem } from '../../servicos/chat/modelos/MensagemModel';
 import { MensagemDeChatProps } from './MensagemDeChat.props';
 
