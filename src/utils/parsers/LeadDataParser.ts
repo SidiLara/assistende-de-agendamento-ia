@@ -1,6 +1,6 @@
 import { Lead } from '../../servicos/chat/modelos/LeadModel';
-// FIX: Standardizing import to use lowercase file to avoid casing conflicts.
-import { parseHumanNumber } from '../formatters/number';
+// FIX: Standardizing import to use PascalCase file to avoid casing conflicts.
+import { parseHumanNumber } from '../formatters/Number';
 
 /**
  * Tenta extrair um nome de uma frase de saudação.

@@ -1,7 +1,7 @@
 import { Lead, LeadKey } from "../../modelos/LeadModel";
 import { extractAllData, extractName } from "../../../../utils/parsers";
-// FIX: Standardizing import to use lowercase file to avoid casing conflicts.
-import { parseHumanNumber } from "../../../../utils/formatters/number";
+// FIX: Standardizing import to use PascalCase file to avoid casing conflicts.
+import { parseHumanNumber } from "../../../../utils/formatters/Number";
 
 export class ManipuladorDadosFallback {
     public handle(

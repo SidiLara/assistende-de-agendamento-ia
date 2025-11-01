@@ -1,1 +1,1 @@
-export * from './inputValidator';
+export * from './InputValidator';
