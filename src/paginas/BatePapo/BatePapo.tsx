@@ -57,7 +57,7 @@ export const BatePapo: React.FC = () => {
 
     return (
         <div className="bg-gray-100 dark:bg-black min-h-screen w-full flex items-center justify-center p-0 md:p-4">
-            <div className="w-full h-screen md:h-auto md:max-h-[95vh] md:max-w-4xl md:rounded-2xl md:shadow-xl flex flex-col bg-gray-50 dark:bg-dark-primary text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 overflow-hidden relative">
+            <div className="w-full h-screen md:h-auto md:max-h-[95vh] md:max-w-4xl md:rounded-2xl md:shadow-xl flex flex-col bg-transparent text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 overflow-hidden relative">
                 {isChatStarted && (
                     <header className="flex-shrink-0 z-10 bg-white dark:bg-dark-secondary shadow-md dark:shadow-slate-900">
                         <CabecalhoDoChat
