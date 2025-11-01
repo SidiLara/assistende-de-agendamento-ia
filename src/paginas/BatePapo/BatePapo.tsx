@@ -20,7 +20,7 @@ export const BatePapo: React.FC = () => {
         return {
             consultantName: consultantNameFromUrl || 'Consultor Sidinei Lara',
             assistantName: assistantNameFromUrl || 'Yannis',
-            consultantPhoto: 'https://lh3.googleusercontent.com/pw/AP1GczNjDUpGj9SrkxSb0twW-X4VpKtzDwhNTEirCxk1fyEGfo6NTNIOW7qM2kifnymFOrJ0v6LuSn6sThGMj3_E_Vxgf2ld3-IHsDdewbd7aqtuCP6xqELBx3IC0_10oKCQyiEKXTyl6aBCi5crsAyGEHda7A=w801-h801-s-no-gm',
+            consultantPhoto: 'https://avatar.iran.liara.run/public/4',
             webhookId: 'your-webhook-id-here'
         };
     }, []);

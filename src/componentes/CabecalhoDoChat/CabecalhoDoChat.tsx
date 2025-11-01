@@ -19,7 +19,7 @@ export const CabecalhoDoChat = ({ consultantName, assistantName, consultantPhoto
             !isChatStarted ? 'flex-col justify-center text-center p-5' : 'flex-row justify-between p-5'
         }`}>
             {/* Lado Esquerdo: Avatar + Texto */}
-            <div className={`flex items-center transition-all duration-700 ease-in-out ${!isChatStarted ? 'flex-col' : 'flex-row space-x-4'}`}>
+            <div className={`flex items-center transition-all duration-700 ease-in-out ${!isChatStarted ? 'flex-col w-full' : 'flex-row space-x-4'}`}>
                 <div className="relative">
                     <img
                         className={`rounded-full object-cover border-4 border-white dark:border-dark-tertiary shadow-lg transition-all duration-700 ease-in-out ${
@@ -31,13 +31,13 @@ export const CabecalhoDoChat = ({ consultantName, assistantName, consultantPhoto
                     <span className={`absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-brand-green ring-2 ring-dark-primary transition-opacity duration-500 ${isChatStarted ? 'opacity-100' : 'opacity-0'}`}></span>
                 </div>
                 {/* Container de altura fixa para evitar "pulos" de layout durante a transição do texto */}
-                <div className={`relative ${!isChatStarted ? 'h-24' : 'h-10'} flex items-center`}>
+                <div className={`relative flex items-center w-full ${!isChatStarted ? 'h-24' : 'h-10'}`}>
                     {/* Texto de Boas-vindas */}
-                    <div className={`absolute inset-0 flex flex-col justify-center items-center transition-opacity duration-500 ${!isChatStarted ? 'opacity-100' : 'opacity-0'}`}>
+                    <div className={`absolute inset-0 flex flex-col justify-center items-center text-center transition-opacity duration-500 ${!isChatStarted ? 'opacity-100' : 'opacity-0'}`}>
                         <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-brand-green-light dark:from-brand-blue dark:to-brand-green-light">
                             Olá, sou o {assistantName}
                         </h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-2">Como posso ajudar a planejar seu projeto hoje?</p>
+                        <p className="text-gray-500 dark:text-gray-400 mt-2 max-w-sm">Como posso ajudar a planejar seu projeto hoje?</p>
                     </div>
                     {/* Texto do Cabeçalho Ativo */}
                     <div className={`absolute inset-0 flex flex-col justify-center text-left transition-opacity duration-500 ${isChatStarted ? 'opacity-100' : 'opacity-0'}`}>
