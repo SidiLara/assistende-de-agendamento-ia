@@ -4,7 +4,7 @@ import { ServicoChat } from '../ChatService';
 import { validateEmail, validateWhatsapp } from '../../../utils/validators';
 // FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
-import { UserMessageHandlerParams } from '../ChatInterfaces';
+import { UserMessageHandlerParams } from '../InterfacesChat';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';
 import { SummaryHandler } from './SummaryHandler';
 
@@ -81,10 +81,7 @@ export class UserMessageHandler implements ManipuladorAcao<UserMessageHandlerPar
 
         finalResult.updatedLeadData = newLeadData;
         finalResult.newNextKey = response.nextKey;
-        if (response.triggeredObjectionText) {
-            finalResult.newTriggeredObjection = response.triggeredObjectionText;
-        }
-
+        
         if (response.nextKey === null) {
             const summaryResult = await this.summaryHandler.handle({ leadData: newLeadData, isFallbackMode });
             finalResult = {

@@ -6,5 +6,4 @@ export type RespostaAi = {
     action: string | null;
     nextKey: LeadKey | null;
     options?: { label: string; value: string; }[];
-    triggeredObjectionText?: string;
 };

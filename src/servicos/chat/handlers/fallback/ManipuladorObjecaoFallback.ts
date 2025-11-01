@@ -33,7 +33,6 @@ export class ManipuladorObjecaoFallback {
                         responseText: responseText,
                         action: nextKeyToAsk === 'startDatetime' ? 'SHOW_DAY_OPTIONS' : null,
                         nextKey: nextKeyToAsk,
-                        triggeredObjectionText: objecao.pergunta,
                     };
                 }
             }

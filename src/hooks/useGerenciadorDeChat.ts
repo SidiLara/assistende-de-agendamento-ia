@@ -18,7 +18,6 @@ export const useGerenciadorDeChat = (config: ConfiguracaoChat | null, chatServic
     const [nextKey, setNextKey] = React.useState<LeadKey | null>(null);
     const [isCorrecting, setIsCorrecting] = React.useState<boolean>(false);
     const [isFallbackMode, setIsFallbackMode] = React.useState<boolean>(false);
-    const [triggeredObjections, setTriggeredObjections] = React.useState<string[]>([]);
     
     const chatFlowHandler = React.useMemo<IManipuladorFluxoChat | null>(() => {
         if (!chatService || !config) return null;
@@ -42,7 +41,6 @@ export const useGerenciadorDeChat = (config: ConfiguracaoChat | null, chatServic
         if (result.newNextKey !== undefined) setNextKey(result.newNextKey);
         if (result.newIsCorrecting !== undefined) setIsCorrecting(result.newIsCorrecting);
         if (result.newIsDone !== undefined) setIsDone(result.newIsDone);
-        if (result.newTriggeredObjection) setTriggeredObjections(prev => [...prev, result.newTriggeredObjection!]);
     };
 
     const handleSendMessage = React.useCallback(async (text: string) => {
@@ -100,7 +98,6 @@ export const useGerenciadorDeChat = (config: ConfiguracaoChat | null, chatServic
                 leadData,
                 isCorrecting,
                 isFallbackMode,
-                triggeredObjections,
                 currentHistory: messages,
              });
              updateStateFromFlowResult(result);
@@ -111,7 +108,7 @@ export const useGerenciadorDeChat = (config: ConfiguracaoChat | null, chatServic
         } finally {
             setIsTyping(false);
         }
-    }, [chatFlowHandler, leadData, messages, isCorrecting, isFallbackMode, triggeredObjections]);
+    }, [chatFlowHandler, leadData, messages, isCorrecting, isFallbackMode]);
 
     return {
         messages,

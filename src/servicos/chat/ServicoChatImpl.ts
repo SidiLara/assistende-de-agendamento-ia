@@ -5,8 +5,6 @@ import { ServicoChat } from "./ServicoChat";
 import { SendCrmOptions } from "./InterfacesChat";
 import { RespostaAi } from "./modelos/RespostaAi";
 import { RegraFallback } from "./RegraFallback";
-import { baseDeConhecimento } from "./conhecimento";
-import { getFallbackQuestions, fallbackFlow } from "./ConfiguracaoFallback";
 import { ICrmApiService, IGeminiApiService } from "../api/InterfacesApi";
 
 export class ServicoChatImpl implements ServicoChat {
@@ -25,33 +23,7 @@ export class ServicoChatImpl implements ServicoChat {
         currentData: Partial<Lead>,
         config: ConfiguracaoChat
     ): Promise<RespostaAi> {
-        const lastUserMessage = history[history.length - 1]?.text.toLowerCase() || '';
-        if (lastUserMessage) {
-            for (const objecao of baseDeConhecimento) {
-                for (const palavra of objecao.palavrasChave) {
-                    if (lastUserMessage.includes(palavra)) {
-                        const fallbackQuestions = getFallbackQuestions(config);
-                        const nextKeyToAsk = fallbackFlow.find(key => !currentData.hasOwnProperty(key)) || 'clientName';
-                        let nextQuestion = fallbackQuestions[nextKeyToAsk];
-                        
-                        if (nextQuestion.includes('{clientName}') && currentData.clientName) {
-                            nextQuestion = nextQuestion.replace('{clientName}', currentData.clientName.split(' ')[0]);
-                        }
-                        
-                        const responseText = `${objecao.resposta} Para continuarmos, ${nextQuestion.charAt(0).toLowerCase() + nextQuestion.slice(1)}`;
-                        
-                        return {
-                            updatedLeadData: {},
-                            responseText,
-                            action: nextKeyToAsk === 'startDatetime' ? 'SHOW_DAY_OPTIONS' : null,
-                            nextKey: nextKeyToAsk,
-                            triggeredObjectionText: objecao.pergunta,
-                        };
-                    }
-                }
-            }
-        }
-        
+        // A lógica de objeção agora é tratada diretamente pelo prompt do Gemini para respostas mais inteligentes e contextuais.
         return await this.geminiApi.generateAiResponse(history, currentData, config);
     }
 
@@ -80,6 +52,8 @@ export class ServicoChatImpl implements ServicoChat {
             const project = leadData.topic || '(não informado)';
             narrativeReport = `Cliente quer fazer ${project}, precisa de ${formattedCreditAmount} e consegue pagar até ${formattedMonthlyInvestment} por mês.`;
             
+            // A lógica de objeções foi centralizada na IA, então o array de objeções pode não ser mais populado da mesma forma.
+            // Mantendo a estrutura para compatibilidade, mas pode ser simplificado no futuro.
             const uniqueObjections = [...new Set(options.objections)];
             if (uniqueObjections.length > 0) {
                 narrativeReport += ` Teve algumas objeções: ${uniqueObjections.join(', ')}.`;

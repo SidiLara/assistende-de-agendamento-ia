@@ -21,7 +21,6 @@ export interface PillSelectionHandlerParams {
     leadData: Partial<Lead>;
     isCorrecting: boolean;
     isFallbackMode: boolean;
-    triggeredObjections: string[];
     currentHistory: Mensagem[];
 }
 

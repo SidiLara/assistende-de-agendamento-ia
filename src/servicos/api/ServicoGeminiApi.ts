@@ -12,11 +12,13 @@ export class ServicoGeminiApi implements IGeminiApiService {
     private ai?: GoogleGenAI;
 
     constructor() {
-        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+        // FIX: API key must be read from process.env.API_KEY as per guidelines.
+        const apiKey = process.env.API_KEY;
         if (apiKey) {
             this.ai = new GoogleGenAI({ apiKey });
         } else {
-            console.warn("Chave de API do Gemini não encontrada. O aplicativo será executado em modo de fallback. Certifique-se de que a variável de ambiente VITE_GEMINI_API_KEY está configurada.");
+            // FIX: Updated warning message to reference API_KEY consistently.
+            console.warn("Chave de API do Gemini não encontrada. O aplicativo será executado em modo de fallback. Certifique-se de que a variável de ambiente API_KEY está configurada.");
         }
     }
 
@@ -44,7 +46,8 @@ export class ServicoGeminiApi implements IGeminiApiService {
 
     private async callGenerativeApi(apiFn: () => Promise<any>) {
         if (!this.ai) {
-            throw new Error("O serviço de IA não foi inicializado. Verifique se a Chave de API (VITE_GEMINI_API_KEY) está configurada no ambiente.");
+            // FIX: Updated error message to reference API_KEY.
+            throw new Error("O serviço de IA não foi inicializado. Verifique se a Chave de API (API_KEY) está configurada no ambiente.");
         }
         try {
             return await this.callApiWithRetry(apiFn);
@@ -121,7 +124,8 @@ export class ServicoGeminiApi implements IGeminiApiService {
         
         try {
             const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
-                model: "gemini-2.5-flash",
+                // FIX: Corrected model name from 'gemini-2.5-flash' to 'gemini-2.5-pro' for complex tasks.
+                model: "gemini-2.5-pro",
                 contents: internalSummaryPrompt,
             }));
             return response.text.trim();
