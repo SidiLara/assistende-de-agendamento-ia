@@ -137,7 +137,7 @@ export class RegraFallbackImpl implements RegraFallback {
                 if (lowerCaseMessage.includes(palavra)) {
                     // Responde à objeção e mantém o fluxo onde estava
                     return {
-                        updatedLeadData: currentData, // Nenhum dado novo foi coletado
+                        updatedLeadData: {}, // Nenhum dado novo foi coletado
                         responseText: objecao.resposta,
                         action: null,
                         nextKey: keyToCollect, // Pergunta a mesma coisa novamente após a resposta
