@@ -3,9 +3,9 @@ import { Lead } from "./modelos/LeadModel";
 import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
 import { ServicoChat } from "./ServicoChat";
 import { SendCrmOptions } from "./InterfacesChat";
-import { RespostaAi } from "./modelos/RespostaAi";
+import { RespostaAi } from "./modelos/AiResponse";
 import { RegraFallback } from "./RegraFallback";
-import { ICrmApiService, IGeminiApiService } from "../api/InterfacesApi";
+import { ICrmApiService, IGeminiApiService } from "../api/ApiInterfaces";
 
 export class ServicoChatImpl implements ServicoChat {
     private fallbackRule: RegraFallback;

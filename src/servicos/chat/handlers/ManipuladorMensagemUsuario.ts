@@ -79,9 +79,6 @@ export class ManipuladorMensagemUsuario implements ManipuladorAcao<UserMessageHa
 
         finalResult.updatedLeadData = newLeadData;
         finalResult.newNextKey = response.nextKey;
-        if (response.triggeredObjectionText) {
-            finalResult.newTriggeredObjection = response.triggeredObjectionText;
-        }
 
         if (response.nextKey === null) {
             const summaryResult = await this.summaryHandler.handle({ leadData: newLeadData, isFallbackMode });

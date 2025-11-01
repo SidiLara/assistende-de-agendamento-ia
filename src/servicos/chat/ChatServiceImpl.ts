@@ -40,12 +40,12 @@ export class ServicoChatImpl implements ServicoChat {
                         
                         const responseText = `${objecao.resposta} Para continuarmos, ${nextQuestion.charAt(0).toLowerCase() + nextQuestion.slice(1)}`;
                         
+                        // FIX: Removed 'triggeredObjectionText' as it does not exist on the 'RespostaAi' type.
                         return {
                             updatedLeadData: {},
                             responseText,
                             action: nextKeyToAsk === 'startDatetime' ? 'SHOW_DAY_OPTIONS' : null,
                             nextKey: nextKeyToAsk,
-                            triggeredObjectionText: objecao.pergunta,
                         };
                     }
                 }

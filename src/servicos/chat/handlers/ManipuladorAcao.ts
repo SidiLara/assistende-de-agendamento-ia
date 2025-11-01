@@ -9,8 +9,6 @@ export interface ResultadoFluxo {
     newNextKey?: LeadKey | null;
     newIsCorrecting?: boolean;
     newIsDone?: boolean;
-    // FIX: Added optional property to fix type error in ManipuladorMensagemUsuario.
-    newTriggeredObjection?: string;
 }
 
 export interface ManipuladorAcao<T> {
