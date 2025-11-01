@@ -7,7 +7,6 @@ import { generateTimeSlots } from "../../utils/formatters/DateAndTime";
 
 const extractName = (message: string): string => {
     const cleanedMessage = message.trim();
-    // Patterns to match introductory phrases. The (.+) will capture the name.
     const patterns = [
         /^meu nome é\s*(.+)/i,
         /^me chamo\s*(.+)/i,
@@ -18,18 +17,19 @@ const extractName = (message: string): string => {
         /^o meu é\s*(.+)/i,
     ];
 
-    let extractedName = cleanedMessage; // Default to the whole message
-
     for (const pattern of patterns) {
         const match = cleanedMessage.match(pattern);
         if (match && match[1]) {
-            extractedName = match[1].trim();
-            break; // Found a match, no need to check other patterns
+            const extractedName = match[1].trim();
+            return extractedName
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
         }
     }
     
-    // Capitalize each part of the name for better formatting.
-    return extractedName
+    // If no pattern matches, assume the whole message is the name
+    return cleanedMessage
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
@@ -54,58 +54,69 @@ const getFallbackQuestions = (config: ConfiguracaoChat): Record<LeadKey, string>
 });
 
 /**
- * Extrai múltiplos dados de uma única mensagem do usuário usando regex.
+ * Extrai múltiplos dados de uma única mensagem do usuário usando regex aprimorados.
  * @param message A mensagem do usuário.
- * @param currentData Os dados já coletados.
  * @returns Um objeto com os novos dados extraídos.
  */
-const extractAllData = (message: string, currentData: Partial<Lead>): Partial<Lead> => {
+const extractAllData = (message: string): Partial<Lead> => {
     const extracted: Partial<Lead> = {};
+    let remainingMessage = message;
 
     // Extrair Tópico
-    if (!currentData.topic) {
-        if (/(imóvel|casa|apto|apartamento|terreno)/i.test(message)) extracted.topic = 'Imóvel';
-        else if (/(carro|automóvel|veículo|moto)/i.test(message)) extracted.topic = 'Automóvel';
-        else if (/(viagem|viajar)/i.test(message)) extracted.topic = 'Viagem';
-        else if (/(investimento|investir|planejar|planejamento)/i.test(message)) extracted.topic = 'Investimento';
-    }
-
-    // Extrair Valor do Crédito
-    if (!currentData.creditAmount) {
-        const creditMatch = message.match(/(?:crédito|valor|preciso|busco)\s*(?:de\s+)?(?:R\$\s*)?([\d.,\s]+(?:mil|k)?)/i);
-        if (creditMatch && creditMatch[1]) {
-            const amount = parseHumanNumber(creditMatch[1], true);
-            if (!isNaN(amount)) extracted.creditAmount = amount;
+    const topicPatterns = {
+        'Imóvel': /(imóvel|casa|apto|apartamento|terreno)/i,
+        'Automóvel': /(carro|automóvel|veículo|moto)/i,
+        'Viagem': /(viagem|viajar)/i,
+        'Investimento': /(investimento|investir|planejar|planejamento|outro)/i
+    };
+    for (const [topic, pattern] of Object.entries(topicPatterns)) {
+        if (pattern.test(remainingMessage)) {
+            extracted.topic = topic as Lead['topic'];
+            break;
         }
     }
 
-    // Extrair Investimento Mensal
-    if (!currentData.monthlyInvestment) {
-        const investmentMatch = message.match(/(?:mensal|por mês|parcela|reserva)\s*(?:de\s+)?(?:R\$\s*)?([\d.,\s]+(?:mil|k)?)/i);
-        if (investmentMatch && investmentMatch[1]) {
-            const amount = parseHumanNumber(investmentMatch[1], false);
-            if (!isNaN(amount)) extracted.monthlyInvestment = amount;
+    // Extrair Valor do Crédito (com maior flexibilidade)
+    const creditMatch = remainingMessage.match(/(?:crédito|valor|preciso de|busco|de|na faixa de|em torno de)\s*(?:de\s+)?(?:R\$\s*)?([\d.,\s]+(?:mil|k)?)/i);
+    if (creditMatch && creditMatch[1]) {
+        const amount = parseHumanNumber(creditMatch[1], true);
+        if (!isNaN(amount)) {
+            extracted.creditAmount = amount;
+            remainingMessage = remainingMessage.replace(creditMatch[0], '');
+        }
+    }
+
+    // Extrair Investimento Mensal (com maior flexibilidade)
+    const investmentMatch = remainingMessage.match(/(?:mensal|por mês|parcela|reserva|investir)\s*(?:de\s+)?(?:R\$\s*)?([\d.,\s]+(?:mil|k)?)/i);
+    if (investmentMatch && investmentMatch[1]) {
+        const amount = parseHumanNumber(investmentMatch[1], false);
+        if (!isNaN(amount)) {
+            extracted.monthlyInvestment = amount;
+            remainingMessage = remainingMessage.replace(investmentMatch[0], '');
         }
     }
 
     // Extrair Email
-    if (!currentData.clientEmail) {
-        const emailMatch = message.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-        if (emailMatch) extracted.clientEmail = emailMatch[0];
+    const emailMatch = remainingMessage.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    if (emailMatch) {
+        extracted.clientEmail = emailMatch[0];
+        remainingMessage = remainingMessage.replace(emailMatch[0], '');
     }
     
     // Extrair WhatsApp
-    if (!currentData.clientWhatsapp) {
-        const whatsappMatch = message.match(/\(?\s*(\d{2})\s*\)?\s*(9?\d{4}[-.\s]?\d{4})/);
-        if (whatsappMatch) {
-            extracted.clientWhatsapp = `(${whatsappMatch[1]}) ${whatsappMatch[2]}`.replace(/[-.\s]/g, '');
-        }
+    const whatsappMatch = remainingMessage.match(/\(?\s*(\d{2})\s*\)?\s*(9?\d{4})[-.\s]?(\d{4})/);
+    if (whatsappMatch) {
+        extracted.clientWhatsapp = `(${whatsappMatch[1]}) ${whatsappMatch[2]}${whatsappMatch[3]}`;
+        remainingMessage = remainingMessage.replace(whatsappMatch[0], '');
     }
 
     // Extrair Tipo de Reunião
-    if (!currentData.meetingType) {
-        if (/(video|online|chamada|virtual)/i.test(message)) extracted.meetingType = 'Videochamada';
-        else if (/(presencial|pessoalmente|escritório)/i.test(message)) extracted.meetingType = 'Presencial';
+    if (/(video|online|chamada|virtual)/i.test(remainingMessage)) extracted.meetingType = 'Videochamada';
+    else if (/(presencial|pessoalmente|escritório)/i.test(remainingMessage)) extracted.meetingType = 'Presencial';
+
+    // Se ainda sobrar texto e não houver nome, assume que é o nome
+    if (remainingMessage.trim().length > 2 && !extracted.clientName) {
+        extracted.clientName = extractName(remainingMessage);
     }
 
     return extracted;
@@ -121,39 +132,29 @@ export class RegraFallbackImpl implements RegraFallback {
         let updatedLeadData = { ...currentData };
 
         // 1. Tenta extrair qualquer dado da última mensagem do usuário de forma inteligente
-        if (lastUserMessage) {
-            const extractedData = extractAllData(lastUserMessage, updatedLeadData);
-            updatedLeadData = { ...updatedLeadData, ...extractedData };
-        }
+        const extractedData = extractAllData(lastUserMessage);
+        updatedLeadData = { ...updatedLeadData, ...extractedData };
         
-        // 2. Processa a resposta direta para a pergunta anterior (keyToCollect)
+        // 2. Processa a resposta direta para a pergunta anterior (keyToCollect), se não foi extraída na etapa 1
         if (keyToCollect && lastUserMessage) {
             if (keyToCollect === 'clientName' && !updatedLeadData.clientName) {
                 updatedLeadData.clientName = extractName(lastUserMessage);
             } else if (keyToCollect === 'startDatetime' && updatedLeadData.startDatetime && !updatedLeadData.startDatetime.includes('às')) {
-                // Este bloco lida com a entrada de horário após um dia já ter sido fornecido.
-                // Quando um botão de dia da semana é clicado, `lastUserMessage` é o dia, e `updatedLeadData.startDatetime`
-                // também é o dia. Nesse caso, não devemos concatenar, mas prosseguir para pedir o horário na etapa 3.
                 if (lastUserMessage !== updatedLeadData.startDatetime) {
                     updatedLeadData.startDatetime = `${updatedLeadData.startDatetime} às ${lastUserMessage}`;
                 }
             } else if (keyToCollect === 'creditAmount' && !updatedLeadData.creditAmount) {
                 const numericValue = parseHumanNumber(lastUserMessage, true);
-                if (!isNaN(numericValue)) updatedLeadData[keyToCollect] = numericValue;
+                if (!isNaN(numericValue)) updatedLeadData.creditAmount = numericValue;
             } else if (keyToCollect === 'monthlyInvestment' && !updatedLeadData.monthlyInvestment) {
                 const numericValue = parseHumanNumber(lastUserMessage, false);
-                if (!isNaN(numericValue)) updatedLeadData[keyToCollect] = numericValue;
-            } else if (!updatedLeadData[keyToCollect]) { // Apenas preenche se ainda não foi extraído
+                if (!isNaN(numericValue)) updatedLeadData.monthlyInvestment = numericValue;
+            } else if (!updatedLeadData[keyToCollect]) {
                 (updatedLeadData as Record<string, unknown>)[keyToCollect] = lastUserMessage;
             }
-        } else if (!keyToCollect && lastUserMessage && !updatedLeadData.clientName) {
-            // Caso especial para a primeira mensagem do usuário.
-            // Assume que a primeira mensagem é o nome do cliente.
-            updatedLeadData.clientName = extractName(lastUserMessage);
         }
 
-
-        // 3. Lógica específica para agendamento (dia e depois hora)
+        // Lógica específica para agendamento (dia e depois hora)
         if (keyToCollect === 'startDatetime' && updatedLeadData.startDatetime && !updatedLeadData.startDatetime.includes('às')) {
              const timeSlots = generateTimeSlots();
              const timeOptions = timeSlots.map(time => ({ label: time, value: time }));
@@ -161,13 +162,13 @@ export class RegraFallbackImpl implements RegraFallback {
             return {
                 updatedLeadData,
                 responseText: "Ótimo. Agora, por favor, escolha um dos <strong>horários disponíveis</strong> abaixo:",
-                action: null, // A interface vai usar as 'options'
+                action: null,
                 nextKey: 'startDatetime',
                 options: timeOptions
             };
         }
 
-        // 4. Encontra a próxima informação que falta no fluxo
+        // Encontra a próxima informação que falta no fluxo
         const nextKey = fallbackFlow.find(key => {
              if (key === 'startDatetime') {
                 return !(updatedLeadData.startDatetime && updatedLeadData.startDatetime.includes('às'));
@@ -175,12 +176,11 @@ export class RegraFallbackImpl implements RegraFallback {
             return !updatedLeadData.hasOwnProperty(key);
         }) || null;
 
-        // Se não falta mais nada, finaliza para mostrar o resumo
         if (!nextKey) {
             return { updatedLeadData, responseText: "", action: null, nextKey: null };
         }
 
-        // 5. Monta a próxima pergunta
+        // Monta a próxima pergunta
         const fallbackQuestions = getFallbackQuestions(config);
         let responseText = fallbackQuestions[nextKey];
         if (nextKey === 'topic' && updatedLeadData.clientName) {
