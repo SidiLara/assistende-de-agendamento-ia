@@ -7,7 +7,7 @@ import { useGerenciadorDeChat } from '../../hooks/useGerenciadorDeChat';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ServicoChatImpl } from '../../servicos/chat/ServicoChatImpl';
 import { RegraFallbackImpl } from '../../servicos/chat/RegraFallbackImpl';
-import { ServicoCrmApi, ServicoGeminiApi } from '../../servicos/api';
+import { CrmApiService, GeminiApiService } from '../../servicos/api';
 
 export const BatePapo: React.FC = () => {
     const { theme, toggleTheme } = useDarkMode();
@@ -26,8 +26,8 @@ export const BatePapo: React.FC = () => {
 
     const chatService = React.useMemo(() => {
         const fallbackRule = new RegraFallbackImpl();
-        const geminiApi = new ServicoGeminiApi();
-        const crmApi = new ServicoCrmApi();
+        const geminiApi = new GeminiApiService();
+        const crmApi = new CrmApiService();
         return new ServicoChatImpl(fallbackRule, geminiApi, crmApi);
     }, []);
 

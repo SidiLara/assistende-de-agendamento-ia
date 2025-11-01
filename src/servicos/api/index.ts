@@ -1,3 +1,3 @@
-export * from './ServicoGeminiApi';
-export * from './ServicoCrmApi';
-export * from './InterfacesApi';
+export * from './GeminiApiService';
+export * from './CrmApiService';
+export * from './ApiInterfaces';

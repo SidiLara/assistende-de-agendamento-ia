@@ -1,1 +1,2 @@
-export * from './leadDataParser';
+// FIX: Corrected export to use PascalCase for consistency.
+export * from './LeadDataParser';

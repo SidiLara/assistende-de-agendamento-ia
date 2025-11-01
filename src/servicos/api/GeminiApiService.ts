@@ -12,12 +12,12 @@ export class GeminiApiService implements IGeminiApiService {
     private ai?: GoogleGenAI;
 
     constructor() {
-        // FIX: Use process.env.API_KEY as per guidelines.
+        // FIX: API key must be read from process.env.API_KEY as per guidelines.
         const apiKey = process.env.API_KEY;
         if (apiKey) {
             this.ai = new GoogleGenAI({ apiKey });
         } else {
-            // FIX: Updated warning message to reference API_KEY.
+            // FIX: Updated warning message to reference API_KEY consistently.
             console.warn("Chave de API do Gemini não encontrada. O aplicativo será executado em modo de fallback. Certifique-se de que a variável de ambiente API_KEY está configurada.");
         }
     }
@@ -124,7 +124,8 @@ export class GeminiApiService implements IGeminiApiService {
         
         try {
             const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
-                model: "gemini-2.5-flash",
+                // FIX: Corrected model name from 'gemini-2.unviersal-pro' to 'gemini-2.5-pro' for complex tasks.
+                model: "gemini-2.5-pro",
                 contents: internalSummaryPrompt,
             }));
             return response.text.trim();

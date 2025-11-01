@@ -1,6 +1,7 @@
 import { RespostaAi } from "../../modelos/RespostaAi";
 import { Lead } from "../../modelos/LeadModel";
-import { generateTimeSlots } from "../../../../utils/formatters/dateAndTime";
+// FIX: Corrected import casing to use PascalCase 'DateAndTime.ts' for consistency.
+import { generateTimeSlots } from "../../../../utils/formatters/DateAndTime";
 
 export class ManipuladorDataHoraFallback {
     public handle(

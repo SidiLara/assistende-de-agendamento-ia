@@ -1,8 +1,11 @@
-declare namespace NodeJS {
-  interface ProcessEnv {
-    // FIX: Use API_KEY to align with coding guidelines.
-    API_KEY: string;
-  }
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_GEMINI_API_KEY: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
 }
 
 interface Window {
