@@ -11,3 +11,8 @@ declare namespace NodeJS {
     API_KEY: string;
   }
 }
+
+// FIX: Add declaration for Facebook Pixel function to avoid TypeScript errors.
+interface Window {
+  fbq?(...args: any[]): void;
+}

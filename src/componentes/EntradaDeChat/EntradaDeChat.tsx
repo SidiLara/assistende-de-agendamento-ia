@@ -8,7 +8,7 @@ const applyWhatsappMask = (value: string): string => {
     return value.slice(0, 15);
 };
 
-export const EntradaDeChat = React.forwardRef<HTMLInputElement, EntradaDeChatProps>(({ onSendMessage, isSending, isDone, isActionPending, nextKey }, ref) => {
+export const EntradaDeChat = React.forwardRef<HTMLInputElement, EntradaDeChatProps>(({ onSendMessage, isSending, isDone, isActionPending, nextKey, assistantName }, ref) => {
     const [inputValue, setInputValue] = React.useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -29,7 +29,7 @@ export const EntradaDeChat = React.forwardRef<HTMLInputElement, EntradaDeChatPro
     };
 
     const isDisabled = isSending || isDone || isActionPending;
-    let placeholderText = "Peça ao Gemini...";
+    let placeholderText = `Peça ao ${assistantName}...`;
     if (isDone) {
         placeholderText = "Agendamento concluído!";
     } else if (isActionPending) {
@@ -38,9 +38,11 @@ export const EntradaDeChat = React.forwardRef<HTMLInputElement, EntradaDeChatPro
         placeholderText = "Aguarde...";
     } else if (nextKey === 'clientWhatsapp') {
         placeholderText = "(XX) 9XXXX-XXXX";
+    } else if (nextKey === 'clientEmail') {
+        placeholderText = "seu@email.com";
     }
 
-    const inputType = nextKey === 'clientWhatsapp' ? 'tel' : 'text';
+    const inputType = nextKey === 'clientWhatsapp' ? 'tel' : nextKey === 'clientEmail' ? 'email' : 'text';
 
     return (
         <form onSubmit={handleSubmit} className="flex items-center space-x-3">

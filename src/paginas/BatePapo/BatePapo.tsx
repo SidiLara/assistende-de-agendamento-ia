@@ -4,47 +4,24 @@ import { CorpoDoChat } from '../../componentes/CorpoDoChat';
 import { EntradaDeChat } from '../../componentes/EntradaDeChat';
 import { PillsDeAcao } from '../../componentes/PillsDeAcao';
 import { useChatManager } from '../../hooks/useChatManager';
-import { ConfiguracaoChat } from '../../servicos/chat/modelos/ConfiguracaoChatModel';
-import { RegraFallbackImpl } from '../../servicos/chat/FallbackRuleImpl';
-import { ServicoChat } from '../../servicos/chat/ChatService';
-import { ServicoChatImpl } from '../../servicos/chat/ChatServiceImpl';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { ConfiguracaoChat } from '../../servicos/chat/modelos/ConfiguracaoChatModel';
+import { ServicoChatImpl } from '../../servicos/chat/ChatServiceImpl';
+import { RegraFallbackImpl } from '../../servicos/chat/FallbackRuleImpl';
 
-declare global {
-  interface Window {
-    fbq?: (...args: any[]) => void;
-  }
-}
+// In a real app, this would come from a config file or API.
+const chatConfig: ConfiguracaoChat = {
+    consultantName: 'Glauber',
+    assistantName: 'G.E.M.S.',
+    consultantPhoto: 'https://lh3.googleusercontent.com/a/ACg8ocK_345-c4h033p8Sbv52nO0j58GmsGgsIuU7s0-x-7oBPA=s576-c-no',
+    webhookId: 'your-webhook-id-here' // This should be configured.
+};
+
+const fallbackRule = new RegraFallbackImpl();
+const chatService = new ServicoChatImpl(fallbackRule);
 
 export const BatePapo: React.FC = () => {
-    const [config, setConfig] = React.useState<ConfiguracaoChat | null>(null);
-    const [chatService, setChatService] = React.useState<ServicoChat | null>(null);
-    const [isChatStarted, setIsChatStarted] = React.useState(false);
-    
-    const inputRef = React.useRef<HTMLInputElement>(null);
     const { theme, toggleTheme } = useDarkMode();
-
-    React.useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        const appConfig: ConfiguracaoChat = {
-            consultantName: urlParams.get('consultor') || 'Sidinei Lara',
-            assistantName: urlParams.get('assistente') || 'Yannis',
-            consultantPhoto: urlParams.get('foto') || 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=128&h=128&fit=crop&crop=faces',
-            webhookId: urlParams.get('webhook') || 'ud4aq9lrms2mfpce40ur6ac1papv68fi',
-        };
-        setConfig(appConfig);
-
-        const fallbackRule = new RegraFallbackImpl();
-        const service = new ServicoChatImpl(fallbackRule);
-        setChatService(service);
-
-        const pixelId = urlParams.get('pixelId');
-        if (pixelId && !window.fbq) {
-            // ... (código do pixel do FB permanece o mesmo)
-        }
-    }, []);
-    
     const {
         messages,
         isTyping,
@@ -55,61 +32,67 @@ export const BatePapo: React.FC = () => {
         nextKey,
         handleSendMessage,
         handlePillSelect,
-    } = useChatManager(config, chatService);
+    } = useChatManager(chatConfig, chatService);
+
+    const inputRef = React.useRef<HTMLInputElement>(null);
+    const isChatStarted = messages.length > 0;
 
     React.useEffect(() => {
-        if (messages.length > 0 && !isChatStarted) {
-            const timer = setTimeout(() => {
-                setIsChatStarted(true);
-            }, 300); // Pequeno delay para garantir que a mensagem inicial seja renderizada antes da transição
-            return () => clearTimeout(timer);
-        }
-    }, [messages, isChatStarted]);
-
-    React.useEffect(() => {
-        if (isChatStarted && !isTyping && !isActionPending && !isDone) {
+        if (!isActionPending && !isSending && !isDone) {
             inputRef.current?.focus();
         }
-    }, [isChatStarted, isTyping, isActionPending, isDone]);
-
-    if (!config) {
-        return (
-            <div className="flex justify-center items-center h-screen bg-gray-200 dark:bg-dark-primary">
-                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-        );
-    }
+    }, [isActionPending, isSending, isDone, messages]);
 
     return (
-        <div className="flex flex-col h-screen font-sans bg-gray-200 dark:bg-dark-primary transition-colors duration-500 ease-in-out">
-            <main className={`flex-1 min-h-0 flex flex-col transition-all duration-700 ease-in-out ${isChatStarted ? 'justify-start items-center' : 'justify-center items-center'}`}>
-                <div className={`w-full flex flex-col transition-all duration-700 ease-in-out h-full max-w-2xl ${isChatStarted ? 'justify-between' : 'justify-center h-auto'}`}>
-                    
-                    <CabecalhoDoChat 
-                        consultantName={config.consultantName}
-                        assistantName={config.assistantName}
-                        consultantPhoto={config.consultantPhoto}
+        <div className="flex flex-col h-screen bg-gray-50 dark:bg-dark-primary text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
+            {/* O cabeçalho só é renderizado como uma barra superior se o chat tiver começado */}
+            {isChatStarted && (
+                 <header className="flex-shrink-0 z-10 bg-white dark:bg-dark-secondary shadow-md dark:shadow-slate-900">
+                    <CabecalhoDoChat
+                        consultantName={chatConfig.consultantName}
+                        assistantName={chatConfig.assistantName}
+                        consultantPhoto={chatConfig.consultantPhoto}
                         theme={theme}
                         toggleTheme={toggleTheme}
                         isChatStarted={isChatStarted}
                     />
-                    
-                    <div className={`flex-1 min-h-0 w-full transition-opacity duration-500 ease-in-out ${isChatStarted ? 'opacity-100' : 'opacity-0 h-0'}`}>
-                        {isChatStarted && <CorpoDoChat messages={messages} isTyping={isTyping} />}
-                    </div>
-                    
-                    <div className={`p-5 w-full transition-all duration-700 ease-in-out`}>
-                        {isChatStarted && isActionPending && <PillsDeAcao options={actionOptions} onSelect={handlePillSelect} />}
-                        <div className={`${isChatStarted ? '' : 'mt-8'}`}>
-                            <EntradaDeChat ref={inputRef} onSendMessage={handleSendMessage} isSending={isSending} isDone={isDone} isActionPending={isActionPending} nextKey={nextKey} />
+                </header>
+            )}
+
+            <main className="flex-1 flex flex-col overflow-hidden">
+                <div className={`flex-1 overflow-y-auto p-4 md:p-6 flex flex-col ${!isChatStarted ? 'justify-center' : ''}`}>
+                    {/* A tela de boas-vindas é mostrada aqui quando o chat não começou */}
+                    {!isChatStarted && (
+                        <div className="mb-auto mt-auto">
+                            <CabecalhoDoChat
+                                consultantName={chatConfig.consultantName}
+                                assistantName={chatConfig.assistantName}
+                                consultantPhoto={chatConfig.consultantPhoto}
+                                theme={theme}
+                                toggleTheme={toggleTheme}
+                                isChatStarted={isChatStarted}
+                            />
                         </div>
-                    </div>
+                    )}
+                    {/* O corpo do chat só aparece quando há mensagens */}
+                    {isChatStarted && <CorpoDoChat messages={messages} isTyping={isTyping} consultantPhoto={chatConfig.consultantPhoto} />}
+                </div>
+                
+                <div className="p-4 md:px-6 md:pb-6 bg-transparent">
+                    {isActionPending && actionOptions.length > 0 && (
+                        <PillsDeAcao options={actionOptions} onSelect={handlePillSelect} />
+                    )}
+                    <EntradaDeChat
+                        ref={inputRef}
+                        onSendMessage={handleSendMessage}
+                        isSending={isSending}
+                        isDone={isDone}
+                        isActionPending={isActionPending}
+                        nextKey={nextKey}
+                        assistantName={chatConfig.assistantName}
+                    />
                 </div>
             </main>
-
-             <footer className={`text-center text-xs text-gray-600 dark:text-gray-400 p-4 transition-opacity duration-500 ${isChatStarted ? 'opacity-100' : 'opacity-0'}`}>
-                Powered by Neural Chat | Direitos reservados para {config.consultantName}
-            </footer>
         </div>
     );
 };

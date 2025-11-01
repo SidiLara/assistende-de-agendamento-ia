@@ -42,7 +42,7 @@ export const useChatManager = (config: ConfiguracaoChat | null, chatService: Ser
     }, [config]);
 
 
-    const showSummaryAndActions = React.useCallback(async (data: Partial<Lead>) => {
+    const showSummaryAndActions = React. useCallback(async (data: Partial<Lead>) => {
         if (!config || !chatService) return;
 
         setIsTyping(true);
@@ -184,8 +184,9 @@ export const useChatManager = (config: ConfiguracaoChat | null, chatService: Ser
         if (value === 'confirm') {
             setIsTyping(true);
             try {
-                if (window.fbq) {
-                    window.fbq('track', 'Schedule');
+                // FIX: Add type assertion to window to fix TypeScript error for 'fbq'
+                if ((window as any).fbq) {
+                    (window as any).fbq('track', 'Schedule');
                 }
                 await chatService.sendLeadToCRM(leadData, messages, config);
                 const confirmationMessage: Mensagem = { id: Date.now(), sender: RemetenteMensagem.Bot, text: "Tudo certo! Seu agendamento foi confirmado. Em breve, um de nossos consultores entrará em contato com você. Obrigado!" };

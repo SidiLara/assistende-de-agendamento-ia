@@ -6,4 +6,5 @@ export interface EntradaDeChatProps {
     isDone: boolean;
     isActionPending: boolean;
     nextKey: LeadKey | null;
+    assistantName: string;
 }

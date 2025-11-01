@@ -41,7 +41,7 @@ const fallbackFlow: LeadKey[] = [
 ];
 
 const getFallbackQuestions = (config: ConfiguracaoChat): Record<LeadKey, string> => ({
-    clientName: `Olá! Eu sou ${config.assistantName}, o assistente de planejamento do ${config.consultantName}. Que ótimo ter você aqui! Para começarmos, qual o seu <strong>nome completo</strong>, por favor?`,
+    clientName: `Que ótimo ter você aqui! Para começarmos, qual o seu <strong>nome completo</strong>, por favor?`,
     topic: "Obrigado, {clientName}! Qual o seu <strong>objetivo principal</strong> com este planejamento? (Ex: <strong>Carro</strong>, <strong>Imóvel</strong>, <strong>Viagem</strong>, <strong>Investir/Planejar</strong> ou outro projeto)",
     creditAmount: "Entendi. Para este projeto, qual o <strong>valor de crédito</strong> aproximado que você está buscando?",
     monthlyInvestment: "Ótimo! Para o seu planejamento, qual seria o valor da sua <strong>reserva mensal</strong> para essa aquisição?",
@@ -146,7 +146,12 @@ export class RegraFallbackImpl implements RegraFallback {
             } else if (!updatedLeadData[keyToCollect]) { // Apenas preenche se ainda não foi extraído
                 (updatedLeadData as Record<string, unknown>)[keyToCollect] = lastUserMessage;
             }
+        } else if (!keyToCollect && lastUserMessage && !updatedLeadData.clientName) {
+            // Caso especial para a primeira mensagem do usuário.
+            // Assume que a primeira mensagem é o nome do cliente.
+            updatedLeadData.clientName = extractName(lastUserMessage);
         }
+
 
         // 3. Lógica específica para agendamento (dia e depois hora)
         if (keyToCollect === 'startDatetime' && updatedLeadData.startDatetime && !updatedLeadData.startDatetime.includes('às')) {

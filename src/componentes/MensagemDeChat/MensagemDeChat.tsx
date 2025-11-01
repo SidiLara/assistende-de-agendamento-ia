@@ -1,7 +1,7 @@
 import { RemetenteMensagem } from '../../servicos/chat/modelos/MensagemModel';
 import { MensagemDeChatProps } from './MensagemDeChat.props';
 
-export const MensagemDeChat = ({ message }: MensagemDeChatProps) => {
+export const MensagemDeChat = ({ message, consultantPhoto }: MensagemDeChatProps) => {
     const isUser = message.sender === RemetenteMensagem.User;
     const isNotice = message.isNotice ?? false;
 
@@ -18,7 +18,7 @@ export const MensagemDeChat = ({ message }: MensagemDeChatProps) => {
         );
     }
 
-    const wrapperClasses = `flex items-end ${isUser ? 'justify-end' : 'justify-start'}`;
+    const wrapperClasses = `flex items-end gap-3 ${isUser ? 'justify-end' : 'justify-start'}`;
     const bubbleClasses = `max-w-md shadow-md py-3 px-5 text-base ${
         isUser
             ? 'bg-blue-600 text-white rounded-2xl rounded-br-lg'
@@ -27,6 +27,13 @@ export const MensagemDeChat = ({ message }: MensagemDeChatProps) => {
 
     return (
         <div className={`${wrapperClasses} animate-message`}>
+            {!isUser && (
+                <img
+                    src={consultantPhoto}
+                    alt="Avatar do Assistente"
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                />
+            )}
              <div 
                 className={bubbleClasses}
                 dangerouslySetInnerHTML={{ __html: message.text }}
