@@ -6,23 +6,29 @@ import { PillsDeAcao } from '../../componentes/PillsDeAcao';
 import { useChatManager } from '../../hooks/useChatManager';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
-import { ConfiguracaoChat } from '../../servicos/chat/modelos/ConfiguracaoChatModel';
 import { ServicoChatImpl } from '../../servicos/chat/ChatServiceImpl';
 import { RegraFallbackImpl } from '../../servicos/chat/FallbackRuleImpl';
 
-// In a real app, this would come from a config file or API.
-const chatConfig: ConfiguracaoChat = {
-    consultantName: 'Glauber',
-    assistantName: 'Yannis',
-    consultantPhoto: 'https://lh3.googleusercontent.com/pw/AP1GczNjDUpGj9SrkxSb0twW-X4VpKtzDwhNTEirCxk1fyEGfo6NTNIOW7qM2kifnymFOrJ0v6LuSn6sThGMj3_E_Vxgf2ld3-IHsDdewbd7aqtuCP6xqELBx3IC0_10oKCQyiEKXTyl6aBCi5crsAyGEHda7A=w801-h801-s-no-gm', // Avatar do Yannis
-    webhookId: 'your-webhook-id-here' // This should be configured.
-};
-
-const fallbackRule = new RegraFallbackImpl();
-const chatService = new ServicoChatImpl(fallbackRule);
-
 export const BatePapo: React.FC = () => {
     const { theme, toggleTheme } = useDarkMode();
+
+    const chatConfig = React.useMemo(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const consultantNameFromUrl = urlParams.get('consultor') || urlParams.get('consultant');
+        
+        return {
+            consultantName: consultantNameFromUrl || 'Consultor Sidinei Lara',
+            assistantName: 'Yannis',
+            consultantPhoto: 'https://lh3.googleusercontent.com/pw/AP1GczNjDUpGj9SrkxSb0twW-X4VpKtzDwhNTEirCxk1fyEGfo6NTNIOW7qM2kifnymFOrJ0v6LuSn6sThGMj3_E_Vxgf2ld3-IHsDdewbd7aqtuCP6xqELBx3IC0_10oKCQyiEKXTyl6aBCi5crsAyGEHda7A=w801-h801-s-no-gm',
+            webhookId: 'your-webhook-id-here'
+        };
+    }, []);
+
+    const chatService = React.useMemo(() => {
+        const fallbackRule = new RegraFallbackImpl();
+        return new ServicoChatImpl(fallbackRule);
+    }, []);
+
     const {
         messages,
         isTyping,
