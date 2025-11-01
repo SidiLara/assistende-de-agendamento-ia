@@ -130,23 +130,37 @@ export class RegraFallbackImpl implements RegraFallback {
         keyToCollect: LeadKey | null,
         config: ConfiguracaoChat
     ): RespostaAi {
-        // NOVO: 1. Verifica se a mensagem do usuário é uma objeção/pergunta conhecida
+        // 1. Verifica se a mensagem do usuário é uma objeção/pergunta conhecida
         const lowerCaseMessage = lastUserMessage.toLowerCase();
         for (const objecao of baseDeConhecimento) {
             for (const palavra of objecao.palavrasChave) {
                 if (lowerCaseMessage.includes(palavra)) {
-                    // Responde à objeção e mantém o fluxo onde estava
+                    const fallbackQuestions = getFallbackQuestions(config);
+                    
+                    // Se a conversa já começou (keyToCollect não é nulo), repete a última pergunta.
+                    // Se a conversa não começou (keyToCollect é nulo), busca a primeira pergunta do fluxo.
+                    const nextKeyToAsk = keyToCollect || fallbackFlow.find(key => !currentData.hasOwnProperty(key)) || 'clientName';
+                    
+                    let nextQuestion = fallbackQuestions[nextKeyToAsk];
+
+                    if (nextQuestion.includes('{clientName}') && currentData.clientName) {
+                        const firstName = currentData.clientName.split(' ')[0];
+                        nextQuestion = nextQuestion.replace('{clientName}', firstName);
+                    }
+
+                    // Monta a resposta final
+                    const responseText = `${objecao.resposta} Para continuarmos, ${nextQuestion.charAt(0).toLowerCase() + nextQuestion.slice(1)}`;
+
                     return {
                         updatedLeadData: {}, // Nenhum dado novo foi coletado
-                        responseText: objecao.resposta,
-                        action: null,
-                        nextKey: keyToCollect, // Pergunta a mesma coisa novamente após a resposta
+                        responseText: responseText,
+                        action: nextKeyToAsk === 'startDatetime' ? 'SHOW_DAY_OPTIONS' : null,
+                        nextKey: nextKeyToAsk, // Retorna ao fluxo correto
                     };
                 }
             }
         }
 
-        // Lógica original continua se não for uma objeção
         let updatedLeadData = { ...currentData };
 
         // 2. Tenta extrair qualquer dado da última mensagem do usuário de forma inteligente

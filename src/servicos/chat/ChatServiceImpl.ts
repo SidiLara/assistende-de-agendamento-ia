@@ -149,9 +149,15 @@ export class ServicoChatImpl implements ServicoChat {
             const formattedText = (responseText || "Desculpe, não entendi. Pode repetir?")
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
+            // Sanitize the output to remove any potential markdown links `[text](url)` and HTML `<a>` tags.
+            const sanitizedText = formattedText
+                .replace(/\[(.*?)\]\((.*?)\)/g, '$1') // Remove markdown links, keeping only the text
+                .replace(/<a\b[^>]*>(.*?)<\/a>/gi, '$1'); // Remove HTML links, keeping only the text
+
+
             return {
                 updatedLeadData,
-                responseText: formattedText,
+                responseText: sanitizedText,
                 action: action || null,
                 nextKey: nextKey || null
             };
