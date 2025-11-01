@@ -12,45 +12,46 @@ const MoonIcon = () => (
     </svg>
 );
 
-
 export const CabecalhoDoChat = ({ consultantName, assistantName, consultantPhoto, theme, toggleTheme, isChatStarted }: CabecalhoDoChatProps) => {
+    
+    // Layout de boas-vindas (estilo Gemini)
+    if (!isChatStarted) {
+        return (
+            <div className="flex flex-col items-center justify-center text-center p-5 transition-all duration-700 ease-in-out">
+                <img
+                    className="w-24 h-24 rounded-full border-4 border-white object-cover shadow-lg mb-4 dark:border-dark-tertiary"
+                    src={consultantPhoto}
+                    alt={consultantName}
+                />
+                <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-brand-green-light dark:from-brand-blue dark:to-brand-green-light">
+                    Olá, sou o {assistantName}
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 mt-2">Como posso ajudar a planejar seu projeto hoje?</p>
+            </div>
+        );
+    }
+
+    // Layout de cabeçalho do chat ativo (estilo Gemini moderno)
     return (
-        <div className={`flex w-full items-center transition-all duration-700 ease-in-out ${
-            !isChatStarted ? 'flex-col justify-center text-center p-5 flex-1' : 'flex-row justify-between p-5'
-        }`}>
-            {/* Lado Esquerdo: Avatar + Texto */}
-            <div className={`flex items-center transition-all duration-700 ease-in-out ${!isChatStarted ? 'flex-col w-full' : 'flex-row space-x-4'}`}>
+        <div className="p-5 flex items-center justify-between w-full">
+            <div className="flex items-center space-x-4">
                 <div className="relative">
                     <img
-                        className={`rounded-full object-cover border-4 border-white dark:border-dark-tertiary shadow-lg transition-all duration-700 ease-in-out ${
-                            !isChatStarted ? 'w-24 h-24 mb-4' : 'w-10 h-10'
-                        }`}
+                        className="w-10 h-10 rounded-full object-cover"
                         src={consultantPhoto}
                         alt={consultantName}
                     />
-                    <span className={`absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-brand-green ring-2 ring-dark-primary transition-opacity duration-500 ${isChatStarted ? 'opacity-100' : 'opacity-0'}`}></span>
+                    <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-brand-green ring-2 ring-dark-primary"></span>
                 </div>
-                {/* Container de altura fixa para evitar "pulos" de layout durante a transição do texto */}
-                <div className={`relative flex items-center ${!isChatStarted ? 'w-full h-24' : 'flex-1 h-10'}`}>
-                    {/* Texto de Boas-vindas */}
-                    <div className={`absolute inset-0 flex flex-col justify-center items-center text-center transition-opacity duration-500 ${!isChatStarted ? 'opacity-100' : 'opacity-0'}`}>
-                        <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-brand-green-light dark:from-brand-blue dark:to-brand-green-light">
-                            Olá, sou o {assistantName}
-                        </h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-2 max-w-sm">Como posso ajudar a planejar seu projeto hoje?</p>
-                    </div>
-                    {/* Texto do Cabeçalho Ativo */}
-                    <div className={`absolute inset-0 flex flex-col justify-center text-left transition-opacity duration-500 ${isChatStarted ? 'opacity-100' : 'opacity-0'}`}>
-                        <h1 className="text-md font-bold text-gray-800 dark:text-gray-100">Assistente de Pré-Consultoria</h1>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{consultantName}, Consultor</p>
-                    </div>
+                <div>
+                    <h1 className="text-md font-bold text-gray-800 dark:text-gray-100">Assistente de Pré-Consultoria</h1>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{consultantName}, Consultor</p>
                 </div>
             </div>
-            {/* Lado Direito: Ícones (aparecem quando o chat começa) */}
-            <div className={`flex items-center space-x-4 transition-opacity duration-700 ${isChatStarted ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <div className="flex items-center space-x-4">
                 <button
                     onClick={toggleTheme}
-                    className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-tertiary focus:outline-none"
+                    className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-tertiary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     aria-label="Alternar tema"
                 >
                     {theme === 'dark' ? <SunIcon /> : <MoonIcon />}

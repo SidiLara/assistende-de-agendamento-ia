@@ -6,21 +6,8 @@ import { parseHumanNumber } from "../../utils/formatters/Number";
 import { generateTimeSlots } from "../../utils/formatters/DateAndTime";
 import { baseDeConhecimento } from "./conhecimento";
 
-// Lista de saudações comuns e uma expressão regular para identificá-las no início de uma frase.
-const GREETINGS_ONLY = [
-    'olá', 'ola', 'oi', 'oie', 
-    'bom dia', 'boa tarde', 'boa noite', 
-    'opa', 'e aí', 'e ai', 'beleza', 
-    'tudo bem?', 'tudo bem'
-];
-const GREETINGS_REGEX = /^(olá|ola|oi|oie|bom dia|boa tarde|boa noite|opa|e aí|e ai|beleza|tudo bem\??)\s*[,.!?]?\s*/i;
-
-
 const extractName = (message: string): string => {
-    // Remove saudações comuns do início da mensagem para extrair apenas o nome.
-    const messageWithoutGreeting = message.trim().replace(GREETINGS_REGEX, '');
-    const cleanedMessage = messageWithoutGreeting.trim();
-    
+    const cleanedMessage = message.trim();
     const patterns = [
         /^meu nome é\s*(.+)/i,
         /^me chamo\s*(.+)/i,
@@ -35,7 +22,6 @@ const extractName = (message: string): string => {
         const match = cleanedMessage.match(pattern);
         if (match && match[1]) {
             const extractedName = match[1].trim();
-            // Capitaliza o nome corretamente
             return extractedName
                 .split(' ')
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -43,7 +29,7 @@ const extractName = (message: string): string => {
         }
     }
     
-    // Se nenhum padrão corresponder, assume que a mensagem inteira (sem a saudação) é o nome.
+    // If no pattern matches, assume the whole message is the name
     return cleanedMessage
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -130,7 +116,7 @@ const extractAllData = (message: string): Partial<Lead> => {
     else if (/(presencial|pessoalmente|escritório)/i.test(remainingMessage)) extracted.meetingType = 'Presencial';
 
     // Se ainda sobrar texto e não houver nome, assume que é o nome
-    if (remainingMessage.trim().length > 0 && !extracted.clientName) {
+    if (remainingMessage.trim().length > 2 && !extracted.clientName) {
         extracted.clientName = extractName(remainingMessage);
     }
 
@@ -144,19 +130,7 @@ export class RegraFallbackImpl implements RegraFallback {
         keyToCollect: LeadKey | null,
         config: ConfiguracaoChat
     ): RespostaAi {
-        // 1. Se for a primeira mensagem e for apenas uma saudação, pede o nome.
-        const cleanedUserMessage = lastUserMessage.toLowerCase().trim().replace(/[?!.]/g, '');
-        if (!keyToCollect && !currentData.clientName && GREETINGS_ONLY.includes(cleanedUserMessage)) {
-            const fallbackQuestions = getFallbackQuestions(config);
-            return {
-                updatedLeadData: currentData,
-                responseText: fallbackQuestions.clientName, // Pergunta o nome
-                action: null,
-                nextKey: 'clientName',
-            };
-        }
-
-        // 2. Verifica se a mensagem do usuário é uma objeção/pergunta conhecida
+        // NOVO: 1. Verifica se a mensagem do usuário é uma objeção/pergunta conhecida
         const lowerCaseMessage = lastUserMessage.toLowerCase();
         for (const objecao of baseDeConhecimento) {
             for (const palavra of objecao.palavrasChave) {
@@ -175,11 +149,11 @@ export class RegraFallbackImpl implements RegraFallback {
         // Lógica original continua se não for uma objeção
         let updatedLeadData = { ...currentData };
 
-        // 3. Tenta extrair qualquer dado da última mensagem do usuário de forma inteligente
+        // 2. Tenta extrair qualquer dado da última mensagem do usuário de forma inteligente
         const extractedData = extractAllData(lastUserMessage);
         updatedLeadData = { ...updatedLeadData, ...extractedData };
         
-        // 4. Processa a resposta direta para a pergunta anterior (keyToCollect), se não foi extraída na etapa 3
+        // 3. Processa a resposta direta para a pergunta anterior (keyToCollect), se não foi extraída na etapa 2
         if (keyToCollect && lastUserMessage) {
             if (keyToCollect === 'clientName' && !updatedLeadData.clientName) {
                 updatedLeadData.clientName = extractName(lastUserMessage);

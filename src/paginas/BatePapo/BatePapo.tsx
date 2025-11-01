@@ -15,12 +15,11 @@ export const BatePapo: React.FC = () => {
     const chatConfig = React.useMemo(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const consultantNameFromUrl = urlParams.get('consultor') || urlParams.get('consultant');
-        const assistantNameFromUrl = urlParams.get('assistente') || urlParams.get('assistant');
         
         return {
             consultantName: consultantNameFromUrl || 'Consultor Sidinei Lara',
-            assistantName: assistantNameFromUrl || 'Yannis',
-            consultantPhoto: 'https://avatar.iran.liara.run/public/4',
+            assistantName: 'Yannis',
+            consultantPhoto: 'https://lh3.googleusercontent.com/pw/AP1GczNjDUpGj9SrkxSb0twW-X4VpKtzDwhNTEirCxk1fyEGfo6NTNIOW7qM2kifnymFOrJ0v6LuSn6sThGMj3_E_Vxgf2ld3-IHsDdewbd7aqtuCP6xqELBx3IC0_10oKCQyiEKXTyl6aBCi5crsAyGEHda7A=w801-h801-s-no-gm',
             webhookId: 'your-webhook-id-here'
         };
     }, []);
@@ -52,61 +51,67 @@ export const BatePapo: React.FC = () => {
         }
     }, [isActionPending, isSending, isDone, messages]);
 
+    const footerClasses = "bg-transparent";
+
     return (
         <div className="bg-gray-100 dark:bg-black min-h-dvh w-full flex items-center justify-center p-0 md:p-4">
-            <div className="w-full h-dvh md:h-[85vh] md:max-h-[900px] md:max-w-4xl lg:max-w-5xl md:rounded-2xl md:shadow-xl flex flex-col bg-transparent text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 overflow-hidden">
-                
-                {/* O cabeçalho agora está sempre presente e anima sua posição e conteúdo */}
-                <header className={`
-                    z-10 transition-all duration-700 ease-in-out
-                    ${!isChatStarted 
-                        ? 'flex-1 flex flex-col' // Ocupa o espaço principal para centralizar
-                        : 'flex-none' // Encolhe para o tamanho do conteúdo
-                    }
-                `}>
-                    <CabecalhoDoChat
-                        consultantName={chatConfig.consultantName}
-                        assistantName={chatConfig.assistantName}
-                        consultantPhoto={chatConfig.consultantPhoto}
-                        theme={theme}
-                        toggleTheme={toggleTheme}
-                        isChatStarted={isChatStarted}
-                    />
-                </header>
+            <div className="w-full h-dvh md:h-[85vh] md:max-h-[900px] md:max-w-4xl lg:max-w-5xl md:rounded-2xl md:shadow-xl flex flex-col bg-transparent text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 overflow-hidden relative">
+                {isChatStarted && (
+                    <header className="flex-shrink-0 z-10 bg-transparent">
+                        <CabecalhoDoChat
+                            consultantName={chatConfig.consultantName}
+                            assistantName={chatConfig.assistantName}
+                            consultantPhoto={chatConfig.consultantPhoto}
+                            theme={theme}
+                            toggleTheme={toggleTheme}
+                            isChatStarted={isChatStarted}
+                        />
+                    </header>
+                )}
 
-                {/* O corpo principal do chat, que aparece suavemente */}
-                <main className={`
-                    flex flex-col overflow-hidden transition-all duration-500
-                    ${isChatStarted 
-                        ? 'flex-1 opacity-100' // Ocupa o espaço restante e aparece
-                        : 'h-0 opacity-0 pointer-events-none' // Fica oculto e sem espaço
-                    }
-                `}>
-                    <CorpoDoChat
-                        messages={messages}
-                        isTyping={isTyping}
-                        consultantPhoto={chatConfig.consultantPhoto}
-                        onPlayAudio={playAudio}
-                        isPlaying={isPlaying}
-                        isLoading={isLoading}
-                    />
+                <main className="flex-1 flex flex-col overflow-hidden">
+                    {/* Área de rolagem para o conteúdo do chat */}
+                    <div className={`flex-1 overflow-y-auto p-4 md:p-6 flex flex-col ${!isChatStarted ? 'justify-center' : ''}`}>
+                        {!isChatStarted && (
+                            <div className="mb-auto mt-auto">
+                                <CabecalhoDoChat
+                                    consultantName={chatConfig.consultantName}
+                                    assistantName={chatConfig.assistantName}
+                                    consultantPhoto={chatConfig.consultantPhoto}
+                                    theme={theme}
+                                    toggleTheme={toggleTheme}
+                                    isChatStarted={isChatStarted}
+                                />
+                            </div>
+                        )}
+                        {isChatStarted && (
+                            <CorpoDoChat
+                                messages={messages}
+                                isTyping={isTyping}
+                                consultantPhoto={chatConfig.consultantPhoto}
+                                onPlayAudio={playAudio}
+                                isPlaying={isPlaying}
+                                isLoading={isLoading}
+                            />
+                        )}
+                    </div>
+
+                    {/* Rodapé fixo para a entrada de texto */}
+                    <div className={`flex-shrink-0 p-4 md:px-6 md:pb-6 transition-colors duration-300 ${footerClasses}`}>
+                        {isActionPending && actionOptions.length > 0 && (
+                            <PillsDeAcao options={actionOptions} onSelect={handlePillSelect} />
+                        )}
+                        <EntradaDeChat
+                            ref={inputRef}
+                            onSendMessage={handleSendMessage}
+                            isSending={isSending}
+                            isDone={isDone}
+                            isActionPending={isActionPending}
+                            nextKey={nextKey}
+                            assistantName={chatConfig.assistantName}
+                        />
+                    </div>
                 </main>
-
-                {/* Rodapé fixo para a entrada de texto */}
-                <footer className="flex-shrink-0 p-4 md:px-6 md:pb-6">
-                    {isActionPending && actionOptions.length > 0 && (
-                        <PillsDeAcao options={actionOptions} onSelect={handlePillSelect} />
-                    )}
-                    <EntradaDeChat
-                        ref={inputRef}
-                        onSendMessage={handleSendMessage}
-                        isSending={isSending}
-                        isDone={isDone}
-                        isActionPending={isActionPending}
-                        nextKey={nextKey}
-                        assistantName={chatConfig.assistantName}
-                    />
-                </footer>
             </div>
         </div>
     );
