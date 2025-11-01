@@ -1,10 +1,15 @@
+// Handlers Principais
 export * from './ManipuladorAcao';
 export * from './ManipuladorMensagemUsuario';
-export * from './ManipuladorConfirmacao';
-export * from './ManipuladorCorrecao';
-export * from './ManipuladorSelecaoDataHora';
 export * from './ManipuladorResumo';
-export * from './ManipuladorDadosFallback';
-export * from './ManipuladorDataHoraFallback';
-export * from './ManipuladorObjecaoFallback';
-export * from './ManipuladorResumoFallback';
+
+// Handlers de Ações da UI
+export * from './acoes/ManipuladorConfirmacao';
+export * from './acoes/ManipuladorCorrecao';
+export * from './acoes/ManipuladorSelecaoDataHora';
+
+// Handlers de Fallback
+export * from './fallback/ManipuladorDadosFallback';
+export * from './fallback/ManipuladorDataHoraFallback';
+export * from './fallback/ManipuladorObjecaoFallback';
+export * from './fallback/ManipuladorResumoFallback';

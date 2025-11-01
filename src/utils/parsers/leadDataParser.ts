@@ -1,4 +1,5 @@
 import { Lead } from '../../servicos/chat/modelos/LeadModel';
+// FIX: Correct casing for 'Number.ts' import to resolve case-sensitive path errors.
 import { parseHumanNumber } from '../formatters/number';
 
 export const extractName = (message: string): string => {

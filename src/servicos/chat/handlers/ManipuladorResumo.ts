@@ -2,7 +2,7 @@ import { RemetenteMensagem } from '../modelos/MensagemModel';
 import { ServicoChat } from '../ServicoChat';
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';
-// FIX: Correct casing for 'dateAndTime.ts' import.
+// FIX: Corrected import casing.
 import { calculateFullDate } from '../../../utils/formatters/dateAndTime';
 import { Lead } from '../modelos/LeadModel';
 

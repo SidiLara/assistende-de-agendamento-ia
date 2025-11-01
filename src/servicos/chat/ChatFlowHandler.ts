@@ -2,7 +2,8 @@ import { RemetenteMensagem } from './modelos/MensagemModel';
 import { ServicoChat } from './ChatService';
 import { ConfiguracaoChat } from './modelos/ConfiguracaoChatModel';
 import { IChatFlowHandler, MessageHandlerParams, PillSelectionHandlerParams } from './ChatInterfaces';
-import { FlowResult } from './handlers/AcaoHandler';
+// FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao and aliased type.
+import { ResultadoFluxo } from './handlers/ManipuladorAcao';
 // FIX: Use correct class names exported from the handlers barrel file.
 import { ManipuladorMensagemUsuario, ManipuladorConfirmacao, ManipuladorCorrecao, ManipuladorSelecaoDataHora } from './handlers';
 
@@ -19,11 +20,11 @@ export class ChatFlowHandler implements IChatFlowHandler {
         this.dateTimeSelectionHandler = new ManipuladorSelecaoDataHora(chatService, config);
     }
 
-    public async processUserMessage(params: MessageHandlerParams): Promise<FlowResult> {
+    public async processUserMessage(params: MessageHandlerParams): Promise<ResultadoFluxo> {
         return this.userMessageHandler.handle(params);
     }
 
-    public async processPillSelection(params: PillSelectionHandlerParams): Promise<FlowResult> {
+    public async processPillSelection(params: PillSelectionHandlerParams): Promise<ResultadoFluxo> {
         const { value, isCorrecting, leadData } = params;
 
         if (value === 'confirm') {

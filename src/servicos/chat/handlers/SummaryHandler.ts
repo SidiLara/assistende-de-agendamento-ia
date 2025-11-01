@@ -1,8 +1,10 @@
 import { RemetenteMensagem } from '../modelos/MensagemModel';
 import { ServicoChat } from '../ChatService';
-import { AcaoHandler, FlowResult } from './AcaoHandler';
+// FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao
+import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';
-import { calculateFullDate } from '../../../utils/formatters/DateAndTime';
+// FIX: Corrected import casing.
+import { calculateFullDate } from '../../../utils/formatters/dateAndTime';
 import { Lead } from '../modelos/LeadModel';
 
 interface SummaryHandlerParams {
@@ -10,7 +12,7 @@ interface SummaryHandlerParams {
     isFallbackMode: boolean;
 }
 
-export class SummaryHandler implements AcaoHandler<SummaryHandlerParams> {
+export class SummaryHandler implements ManipuladorAcao<SummaryHandlerParams> {
     private chatService: ServicoChat;
     private config: ConfiguracaoChat;
 
@@ -19,7 +21,7 @@ export class SummaryHandler implements AcaoHandler<SummaryHandlerParams> {
         this.config = config;
     }
 
-    public async handle(params: SummaryHandlerParams): Promise<FlowResult> {
+    public async handle(params: SummaryHandlerParams): Promise<ResultadoFluxo> {
         const { leadData, isFallbackMode } = params;
 
         const dateTimeString = leadData.startDatetime || '';

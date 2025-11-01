@@ -1,12 +1,13 @@
 import { RemetenteMensagem } from '../modelos/MensagemModel';
 import { ServicoChat } from '../ChatService';
 import { validateEmail, validateWhatsapp } from '../../../utils/validators';
-import { AcaoHandler, FlowResult } from './AcaoHandler';
+// FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao
+import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { UserMessageHandlerParams } from '../ChatInterfaces';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';
 import { SummaryHandler } from './SummaryHandler';
 
-export class UserMessageHandler implements AcaoHandler<UserMessageHandlerParams> {
+export class UserMessageHandler implements ManipuladorAcao<UserMessageHandlerParams> {
     private chatService: ServicoChat;
     private config: ConfiguracaoChat;
     private summaryHandler: SummaryHandler;
@@ -17,7 +18,7 @@ export class UserMessageHandler implements AcaoHandler<UserMessageHandlerParams>
         this.summaryHandler = new SummaryHandler(chatService, config);
     }
 
-    public async handle(params: UserMessageHandlerParams): Promise<FlowResult> {
+    public async handle(params: UserMessageHandlerParams): Promise<ResultadoFluxo> {
         const { text, leadData, nextKey, currentHistory, isFallbackMode, isErrorRecovery } = params;
         
         if (nextKey === 'clientWhatsapp' && !validateWhatsapp(text)) {
@@ -40,7 +41,7 @@ export class UserMessageHandler implements AcaoHandler<UserMessageHandlerParams>
         }
         
         let response;
-        let finalResult: FlowResult = {};
+        let finalResult: ResultadoFluxo = {};
 
         if (isErrorRecovery) {
              finalResult.newMessages = [{ 

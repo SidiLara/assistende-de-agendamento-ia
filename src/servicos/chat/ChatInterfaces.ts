@@ -1,6 +1,7 @@
 import { Mensagem } from './modelos/MensagemModel';
 import { Lead, LeadKey } from './modelos/LeadModel';
-import { FlowResult } from './handlers/AcaoHandler';
+// FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao
+import { ResultadoFluxo } from './handlers/ManipuladorAcao';
 
 export interface SendCrmOptions {
     isFallback: boolean;
@@ -26,8 +27,8 @@ export interface PillSelectionHandlerParams {
 }
 
 export interface IChatFlowHandler {
-    processUserMessage(params: MessageHandlerParams): Promise<FlowResult>;
-    processPillSelection(params: PillSelectionHandlerParams): Promise<FlowResult>;
+    processUserMessage(params: MessageHandlerParams): Promise<ResultadoFluxo>;
+    processPillSelection(params: PillSelectionHandlerParams): Promise<ResultadoFluxo>;
 }
 
 export interface ConfirmationHandlerParams extends PillSelectionHandlerParams {}
