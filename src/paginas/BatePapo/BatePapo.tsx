@@ -14,7 +14,7 @@ import { RegraFallbackImpl } from '../../servicos/chat/FallbackRuleImpl';
 const chatConfig: ConfiguracaoChat = {
     consultantName: 'Glauber',
     assistantName: 'Yannis',
-    consultantPhoto: 'https://i.imgur.com/Q9q2C4N.png', // Avatar do Yannis
+    consultantPhoto: 'https://lh3.googleusercontent.com/pw/AP1GczMFmQvMReOaz2lJo2gClnuE2ywLnTNEpzYFgU4exkgHjUoGlraLC9fNGyHXhTUoTXWBtCmp2gPU-1fqrgAaGZigcd_Mol-ETCPc4RikTFngl_jNJuuKTyMbKSE4SEB7-r1BVUltLx-A7xvTQ38UXuscuQ=w458-h801-s-no-gm?authuser=0', // Avatar do Yannis
     webhookId: 'your-webhook-id-here' // This should be configured.
 };
 
@@ -45,6 +45,10 @@ export const BatePapo: React.FC = () => {
         }
     }, [isActionPending, isSending, isDone, messages]);
 
+    const footerClasses = isChatStarted
+        ? "bg-white dark:bg-dark-secondary border-t border-gray-200 dark:border-slate-700"
+        : "bg-transparent";
+
     return (
         <div className="flex flex-col h-screen bg-gray-50 dark:bg-dark-primary text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
             {isChatStarted && (
@@ -61,6 +65,7 @@ export const BatePapo: React.FC = () => {
             )}
 
             <main className="flex-1 flex flex-col overflow-hidden">
+                {/* Área de rolagem para o conteúdo do chat */}
                 <div className={`flex-1 overflow-y-auto p-4 md:p-6 flex flex-col ${!isChatStarted ? 'justify-center' : ''}`}>
                     {!isChatStarted && (
                         <div className="mb-auto mt-auto">
@@ -86,7 +91,8 @@ export const BatePapo: React.FC = () => {
                     )}
                 </div>
                 
-                <div className="p-4 md:px-6 md:pb-6 bg-transparent">
+                {/* Rodapé fixo para a entrada de texto */}
+                <div className={`flex-shrink-0 p-4 md:px-6 md:pb-6 transition-colors duration-300 ${footerClasses}`}>
                     {isActionPending && actionOptions.length > 0 && (
                         <PillsDeAcao options={actionOptions} onSelect={handlePillSelect} />
                     )}
