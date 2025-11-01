@@ -19,7 +19,7 @@ const CORRECTION_FIELD_LABELS: Record<string, string> = {
 export const useChatManager = (config: ConfiguracaoChat | null, chatService: ServicoChat | null) => {
     const [messages, setMessages] = React.useState<Mensagem[]>([]);
     const [leadData, setLeadData] = React.useState<Partial<Lead>>({});
-    const [isTyping, setIsTyping] = React.useState<boolean>(true);
+    const [isTyping, setIsTyping] = React.useState<boolean>(false);
     const [isSending, setIsSending] = React.useState<boolean>(false);
     const [isDone, setIsDone] = React.useState<boolean>(false);
     const [actionOptions, setActionOptions] = React.useState<{ label: string; value: string; }[]>([]);
@@ -30,39 +30,16 @@ export const useChatManager = (config: ConfiguracaoChat | null, chatService: Ser
     const [hasShownSummary, setHasShownSummary] = React.useState<boolean>(false);
 
     React.useEffect(() => {
-        if (!config || !chatService) return;
+        if (!config) return;
 
+        // Apenas configura os dados iniciais, sem iniciar a conversa.
+        // A conversa agora é iniciada pelo usuário.
         const urlParams = new URLSearchParams(window.location.search);
         const sourceParam = urlParams.get('origem') || urlParams.get('source') || urlParams.get('utm_source');
         const initialData: Partial<Lead> = { source: sourceParam || 'Direto' };
         setLeadData(initialData);
 
-        const fetchWelcomeMessage = async () => {
-            setIsTyping(true);
-
-            const initialHistory: Mensagem[] = [];
-            try {
-                const { responseText, nextKey: newNextKeyFromAI } = await chatService.getAiResponse(initialHistory, initialData, config);
-                setMessages([{ id: Date.now(), sender: RemetenteMensagem.Bot, text: responseText }]);
-                setNextKey(newNextKeyFromAI);
-            } catch (error) {
-                console.error("Initial API call failed, switching to fallback mode.", error);
-                setIsFallbackMode(true);
-                const fallbackNotice: Mensagem = { 
-                    id: Date.now(), 
-                    sender: RemetenteMensagem.Bot, 
-                    text: "A Chave de API parece inválida ou houve um erro de conexão. Para garantir seu atendimento, vamos continuar em um modo mais direto.",
-                    isNotice: true,
-                };
-                const { responseText, nextKey } = chatService.getFallbackResponse("", initialData, null, config);
-                const firstQuestion: Mensagem = { id: Date.now() + 1, sender: RemetenteMensagem.Bot, text: responseText };
-                setMessages([fallbackNotice, firstQuestion]);
-                setNextKey(nextKey);
-            }
-            setIsTyping(false);
-        };
-        fetchWelcomeMessage();
-    }, [config, chatService]);
+    }, [config]);
 
 
     const showSummaryAndActions = React.useCallback(async (data: Partial<Lead>) => {
@@ -182,7 +159,7 @@ export const useChatManager = (config: ConfiguracaoChat | null, chatService: Ser
             const fallbackNotice: Mensagem = { 
                 id: Date.now() + 1, 
                 sender: RemetenteMensagem.Bot, 
-                text: "Tivemos um problema com a conexão. Para não te deixar esperando, vamos continuar de forma mais direta.",
+                text: "Tivemos um problema de comunicação com a inteligência artificial. Para não te deixar esperando, vamos continuar de forma mais direta.",
                 isNotice: true,
             };
             const fallbackResponse = chatService.getFallbackResponse(text, leadData, nextKey, config);
