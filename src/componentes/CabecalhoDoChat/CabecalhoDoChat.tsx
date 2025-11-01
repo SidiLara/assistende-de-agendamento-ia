@@ -12,8 +12,26 @@ const MoonIcon = () => (
     </svg>
 );
 
+export const CabecalhoDoChat = ({ consultantName, consultantPhoto, theme, toggleTheme, isChatStarted }: CabecalhoDoChatProps) => {
+    
+    // Layout de boas-vindas (estilo Gemini)
+    if (!isChatStarted) {
+        return (
+            <div className="flex flex-col items-center justify-center text-center p-5 transition-all duration-700 ease-in-out">
+                <img
+                    className="w-24 h-24 rounded-full border-4 border-white object-cover shadow-lg mb-4 dark:border-dark-tertiary"
+                    src={consultantPhoto}
+                    alt={consultantName}
+                />
+                <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-brand-green-light dark:from-brand-blue dark:to-brand-green-light">
+                    Olá, {consultantName.split(' ')[0]}
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 mt-2">Como posso ajudar a planejar seu projeto hoje?</p>
+            </div>
+        );
+    }
 
-export const CabecalhoDoChat = ({ consultantName, consultantPhoto, theme, toggleTheme }: CabecalhoDoChatProps) => {
+    // Layout de cabeçalho do chat ativo
     return (
         <div className="p-5 border-b border-gray-200 dark:border-dark-tertiary flex items-center justify-between bg-white dark:bg-dark-secondary rounded-t-2xl">
             <div className="flex items-center space-x-4">

@@ -16,6 +16,7 @@ export default {
         'brand-green': '#22C55E',
         'brand-green-dark': '#16A34A',
         'brand-green-light': '#4ADE80',
+        'brand-blue': '#8AB4F8',
         'dark-primary': '#0F172A',
         'dark-secondary': '#1E293B',
         'dark-tertiary': '#334155',

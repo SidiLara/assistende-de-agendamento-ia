@@ -3,4 +3,5 @@ export interface CabecalhoDoChatProps {
     consultantPhoto: string;
     theme: 'light' | 'dark';
     toggleTheme: () => void;
+    isChatStarted: boolean;
 }
