@@ -58,10 +58,10 @@ export const BatePapo: React.FC = () => {
                 
                 {/* O cabeçalho agora está sempre presente e anima sua posição e conteúdo */}
                 <header className={`
-                    flex-shrink-0 z-10 transition-all duration-700 ease-in-out
+                    z-10 transition-all duration-700 ease-in-out
                     ${!isChatStarted 
-                        ? 'flex-grow flex flex-col' // Ocupa espaço para centralizar o conteúdo
-                        : ''
+                        ? 'flex-1 flex flex-col' // Ocupa o espaço principal para centralizar
+                        : 'flex-none' // Encolhe para o tamanho do conteúdo
                     }
                 `}>
                     <CabecalhoDoChat
@@ -76,10 +76,10 @@ export const BatePapo: React.FC = () => {
 
                 {/* O corpo principal do chat, que aparece suavemente */}
                 <main className={`
-                    flex-1 flex flex-col overflow-hidden transition-opacity duration-500
+                    flex flex-col overflow-hidden transition-all duration-500
                     ${isChatStarted 
-                        ? 'opacity-100' // Aparece quando o chat começa
-                        : 'opacity-0 pointer-events-none' // Fica oculto antes
+                        ? 'flex-1 opacity-100' // Ocupa o espaço restante e aparece
+                        : 'h-0 opacity-0 pointer-events-none' // Fica oculto e sem espaço
                     }
                 `}>
                     <CorpoDoChat

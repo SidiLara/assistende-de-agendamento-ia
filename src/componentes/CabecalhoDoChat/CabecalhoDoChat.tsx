@@ -31,7 +31,7 @@ export const CabecalhoDoChat = ({ consultantName, assistantName, consultantPhoto
                     <span className={`absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-brand-green ring-2 ring-dark-primary transition-opacity duration-500 ${isChatStarted ? 'opacity-100' : 'opacity-0'}`}></span>
                 </div>
                 {/* Container de altura fixa para evitar "pulos" de layout durante a transição do texto */}
-                <div className={`relative flex items-center w-full ${!isChatStarted ? 'h-24' : 'h-10'}`}>
+                <div className={`relative flex items-center ${!isChatStarted ? 'w-full h-24' : 'flex-1 h-10'}`}>
                     {/* Texto de Boas-vindas */}
                     <div className={`absolute inset-0 flex flex-col justify-center items-center text-center transition-opacity duration-500 ${!isChatStarted ? 'opacity-100' : 'opacity-0'}`}>
                         <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-brand-green-light dark:from-brand-blue dark:to-brand-green-light">
