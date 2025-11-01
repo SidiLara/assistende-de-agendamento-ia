@@ -29,7 +29,7 @@ export const EntradaDeChat = React.forwardRef<HTMLInputElement, EntradaDeChatPro
     };
 
     const isDisabled = isSending || isDone || isActionPending;
-    let placeholderText = "Digite sua mensagem...";
+    let placeholderText = "Peça ao Gemini...";
     if (isDone) {
         placeholderText = "Agendamento concluído!";
     } else if (isActionPending) {
@@ -50,13 +50,13 @@ export const EntradaDeChat = React.forwardRef<HTMLInputElement, EntradaDeChatPro
                 value={inputValue}
                 onChange={handleChange}
                 placeholder={placeholderText}
-                className="flex-1 w-full px-5 py-3 border-2 bg-transparent border-brand-green-light rounded-full focus:outline-none focus:ring-2 focus:ring-brand-green-light focus:border-transparent transition-colors duration-200 disabled:bg-gray-100 disabled:border-gray-300 dark:text-gray-100 dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:border-gray-600"
+                className="flex-1 w-full px-5 py-3 border-2 bg-transparent border-dark-tertiary rounded-full focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent transition-colors duration-200 disabled:bg-gray-100 disabled:border-gray-300 dark:text-gray-100 dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:border-gray-600"
                 autoComplete="off"
                 disabled={isDisabled}
             />
             <button
                 type="submit"
-                className="bg-brand-green text-white rounded-full p-3 hover:bg-brand-green-dark transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
+                className="bg-dark-tertiary text-white rounded-full p-3 hover:bg-slate-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2 disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
                 disabled={isDisabled}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

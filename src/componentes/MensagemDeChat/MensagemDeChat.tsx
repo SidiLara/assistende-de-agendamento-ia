@@ -21,8 +21,8 @@ export const MensagemDeChat = ({ message }: MensagemDeChatProps) => {
     const wrapperClasses = `flex items-end ${isUser ? 'justify-end' : 'justify-start'}`;
     const bubbleClasses = `max-w-md shadow-md py-3 px-5 text-base ${
         isUser
-            ? 'bg-brand-green text-white rounded-2xl rounded-br-lg'
-            : 'bg-white text-gray-800 border border-gray-200 rounded-2xl rounded-bl-lg dark:bg-dark-tertiary dark:text-gray-200 dark:border-slate-600'
+            ? 'bg-blue-600 text-white rounded-2xl rounded-br-lg'
+            : 'bg-white text-gray-800 border border-gray-200 rounded-2xl rounded-bl-lg dark:bg-dark-secondary dark:text-gray-200 dark:border-slate-700'
     }`;
 
     return (

@@ -75,33 +75,30 @@ export const BatePapo: React.FC = () => {
     if (!config) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-200 dark:bg-dark-primary">
-                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-brand-green"></div>
+                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col h-screen font-sans bg-gray-200 dark:bg-dark-primary transition-all duration-500 ease-in-out">
-            <header className="absolute top-0 left-0 p-4">
-                <h1 className="text-xl font-semibold text-gray-400 dark:text-gray-500">Gemini</h1>
-            </header>
-
-            <main className={`flex-1 min-h-0 flex transition-all duration-700 ease-in-out ${isChatStarted ? 'justify-center items-start md:items-center' : 'justify-center items-center'}`}>
-                <div className={`w-full flex flex-col transition-all duration-700 ease-in-out ${isChatStarted ? 'h-full md:max-w-2xl md:max-h-[90vh] md:rounded-2xl bg-white dark:bg-dark-secondary shadow-2xl' : 'h-auto max-w-2xl'}`}>
+        <div className="flex flex-col h-screen font-sans bg-gray-200 dark:bg-dark-primary transition-colors duration-500 ease-in-out">
+            <main className={`flex-1 min-h-0 flex flex-col transition-all duration-700 ease-in-out ${isChatStarted ? 'justify-start items-center' : 'justify-center items-center'}`}>
+                <div className={`w-full flex flex-col transition-all duration-700 ease-in-out h-full max-w-2xl ${isChatStarted ? 'justify-between' : 'justify-center h-auto'}`}>
                     
                     <CabecalhoDoChat 
                         consultantName={config.consultantName}
+                        assistantName={config.assistantName}
                         consultantPhoto={config.consultantPhoto}
                         theme={theme}
                         toggleTheme={toggleTheme}
                         isChatStarted={isChatStarted}
                     />
-
-                    <div className={`flex-1 min-h-0 transition-opacity duration-500 ease-in-out ${isChatStarted ? 'opacity-100' : 'opacity-0 h-0'}`}>
+                    
+                    <div className={`flex-1 min-h-0 w-full transition-opacity duration-500 ease-in-out ${isChatStarted ? 'opacity-100' : 'opacity-0 h-0'}`}>
                         {isChatStarted && <CorpoDoChat messages={messages} isTyping={isTyping} />}
                     </div>
                     
-                    <div className={`p-5 transition-all duration-700 ease-in-out ${isChatStarted ? 'border-t border-gray-200 dark:border-dark-tertiary rounded-b-2xl' : ''}`}>
+                    <div className={`p-5 w-full transition-all duration-700 ease-in-out`}>
                         {isChatStarted && isActionPending && <PillsDeAcao options={actionOptions} onSelect={handlePillSelect} />}
                         <div className={`${isChatStarted ? '' : 'mt-8'}`}>
                             <EntradaDeChat ref={inputRef} onSendMessage={handleSendMessage} isSending={isSending} isDone={isDone} isActionPending={isActionPending} nextKey={nextKey} />

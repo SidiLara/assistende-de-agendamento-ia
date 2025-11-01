@@ -9,8 +9,8 @@ export const PillsDeAcao = ({ options, onSelect }: PillsDeAcaoProps) => {
                     onClick={() => onSelect(option.value, option.label)}
                     className={`text-sm font-semibold px-4 py-2 rounded-full cursor-pointer transition-all duration-200 border transform active:scale-95 ${
                         option.value === 'confirm'
-                            ? 'bg-brand-green text-white border-brand-green hover:bg-brand-green-dark'
-                            : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100 hover:border-gray-400 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600'
+                            ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
+                            : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100 hover:border-gray-400 dark:bg-dark-tertiary dark:text-gray-200 dark:border-slate-600 dark:hover:bg-slate-600'
                     }`}
                 >
                     {option.label}
