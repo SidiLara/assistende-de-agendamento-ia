@@ -15,8 +15,8 @@ const MoonIcon = () => (
 
 export const CabecalhoDoChat = ({ consultantName, assistantName, consultantPhoto, theme, toggleTheme, isChatStarted }: CabecalhoDoChatProps) => {
     return (
-        <div className={`flex w-full h-full items-center transition-all duration-700 ease-in-out ${
-            !isChatStarted ? 'flex-col justify-center text-center p-5' : 'flex-row justify-between p-5'
+        <div className={`flex w-full items-center transition-all duration-700 ease-in-out ${
+            !isChatStarted ? 'flex-col justify-center text-center p-5 h-full' : 'flex-row justify-between p-5'
         }`}>
             {/* Lado Esquerdo: Avatar + Texto */}
             <div className={`flex items-center transition-all duration-700 ease-in-out ${!isChatStarted ? 'flex-col w-full' : 'flex-row space-x-4'}`}>
