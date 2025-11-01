@@ -4,6 +4,7 @@ import { Lead, LeadKey } from "./modelos/LeadModel";
 import { RegraFallback } from "./FallbackRule";
 import { parseHumanNumber } from "../../utils/formatters/Number";
 import { generateTimeSlots } from "../../utils/formatters/DateAndTime";
+import { baseDeConhecimento } from "./conhecimento";
 
 const extractName = (message: string): string => {
     const cleanedMessage = message.trim();
@@ -129,13 +130,30 @@ export class RegraFallbackImpl implements RegraFallback {
         keyToCollect: LeadKey | null,
         config: ConfiguracaoChat
     ): RespostaAi {
+        // NOVO: 1. Verifica se a mensagem do usuário é uma objeção/pergunta conhecida
+        const lowerCaseMessage = lastUserMessage.toLowerCase();
+        for (const objecao of baseDeConhecimento) {
+            for (const palavra of objecao.palavrasChave) {
+                if (lowerCaseMessage.includes(palavra)) {
+                    // Responde à objeção e mantém o fluxo onde estava
+                    return {
+                        updatedLeadData: currentData, // Nenhum dado novo foi coletado
+                        responseText: objecao.resposta,
+                        action: null,
+                        nextKey: keyToCollect, // Pergunta a mesma coisa novamente após a resposta
+                    };
+                }
+            }
+        }
+
+        // Lógica original continua se não for uma objeção
         let updatedLeadData = { ...currentData };
 
-        // 1. Tenta extrair qualquer dado da última mensagem do usuário de forma inteligente
+        // 2. Tenta extrair qualquer dado da última mensagem do usuário de forma inteligente
         const extractedData = extractAllData(lastUserMessage);
         updatedLeadData = { ...updatedLeadData, ...extractedData };
         
-        // 2. Processa a resposta direta para a pergunta anterior (keyToCollect), se não foi extraída na etapa 1
+        // 3. Processa a resposta direta para a pergunta anterior (keyToCollect), se não foi extraída na etapa 2
         if (keyToCollect && lastUserMessage) {
             if (keyToCollect === 'clientName' && !updatedLeadData.clientName) {
                 updatedLeadData.clientName = extractName(lastUserMessage);
