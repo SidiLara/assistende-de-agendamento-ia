@@ -35,13 +35,10 @@ export const BatePapo: React.FC = () => {
         };
         setConfig(appConfig);
 
-        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-        if (!apiKey) {
-            console.warn("Chave de API do Gemini não encontrada. O aplicativo será executado em modo de fallback. Certifique-se de configurar a variável de ambiente VITE_GEMINI_API_KEY em seu ambiente de hospedagem (ex: Vercel).");
-        }
-
+        // FIX: Per Gemini API guidelines, API key handling is moved into the ChatServiceImpl
+        // to use process.env.API_KEY directly.
         const fallbackRule = new RegraFallbackImpl();
-        const service = new ServicoChatImpl(fallbackRule, apiKey);
+        const service = new ServicoChatImpl(fallbackRule);
         setChatService(service);
 
         const pixelId = urlParams.get('pixelId');
@@ -91,8 +88,8 @@ export const BatePapo: React.FC = () => {
 
     return (
         <div className="flex flex-col h-screen font-sans bg-gray-200 dark:bg-dark-primary">
-            <div className="flex-1 min-h-0 flex justify-center items-center p-4">
-                <div className="w-full max-w-xl h-full max-h-[90vh] bg-white dark:bg-dark-secondary rounded-2xl shadow-2xl flex flex-col">
+            <div className="flex-1 min-h-0 flex justify-center items-center md:p-4">
+                <div className="w-full h-full bg-white dark:bg-dark-secondary flex flex-col md:max-w-xl md:max-h-[90vh] md:rounded-2xl md:shadow-2xl">
                     <CabecalhoDoChat 
                         consultantName={config.consultantName}
                         consultantPhoto={config.consultantPhoto}

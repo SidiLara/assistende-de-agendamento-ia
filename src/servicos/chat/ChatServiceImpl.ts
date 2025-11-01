@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { Mensagem } from "./modelos/MensagemModel";
+import { Mensagem, RemetenteMensagem } from "./modelos/MensagemModel";
 import { Lead, LeadKey } from "./modelos/LeadModel";
 import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
 import { ServicoChat } from "./ChatService";
@@ -15,10 +15,14 @@ export class ServicoChatImpl implements ServicoChat {
     private fallbackRule: RegraFallback;
     private ai?: GoogleGenAI;
 
-    constructor(fallbackRule: RegraFallback, apiKey?: string) {
+    constructor(fallbackRule: RegraFallback) {
         this.fallbackRule = fallbackRule;
+        // FIX: Per Gemini API guidelines, initialize with process.env.API_KEY directly.
+        const apiKey = process.env.API_KEY;
         if (apiKey) {
             this.ai = new GoogleGenAI({ apiKey });
+        } else {
+            console.warn("Chave de API do Gemini não encontrada. O aplicativo será executado em modo de fallback. Certifique-se de que a variável de ambiente API_KEY está configurada.");
         }
     }
 
@@ -46,7 +50,8 @@ export class ServicoChatImpl implements ServicoChat {
 
     private async callGenerativeApi(apiFn: () => Promise<any>) {
         if (!this.ai) {
-            throw new Error("O serviço de IA não foi inicializado. Verifique a Chave de API.");
+            // FIX: Updated error message to reflect new API key handling.
+            throw new Error("O serviço de IA não foi inicializado. Verifique se a Chave de API (API_KEY) está configurada no ambiente.");
         }
         try {
             return await this.callApiWithRetry(apiFn);
@@ -85,7 +90,7 @@ export class ServicoChatImpl implements ServicoChat {
 
         for (const msg of history) {
             contents.push({
-                role: msg.sender === 'user' ? 'user' : 'model',
+                role: msg.sender === RemetenteMensagem.User ? 'user' : 'model',
                 parts: [{ text: msg.text }]
             });
         }
