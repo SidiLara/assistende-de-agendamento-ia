@@ -37,7 +37,7 @@ export const useChatManager = (config: ConfiguracaoChat | null, chatService: Ser
     }, [config]);
 
     const updateStateFromFlowResult = (result: FlowResult) => {
-        if (result.newMessages) setMessages(prev => [...prev, ...result.newMessages]);
+        if (result.newMessages) setMessages(prev => [...prev, ...result.newMessages!]);
         if (result.updatedLeadData) setLeadData(result.updatedLeadData);
         if (result.newActionOptions !== undefined) setActionOptions(result.newActionOptions);
         if (result.newIsActionPending !== undefined) setIsActionPending(result.newIsActionPending);

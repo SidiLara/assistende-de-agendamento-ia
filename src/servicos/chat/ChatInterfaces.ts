@@ -1,7 +1,6 @@
 import { Mensagem } from './modelos/MensagemModel';
 import { Lead, LeadKey } from './modelos/LeadModel';
 import { FlowResult } from './handlers/AcaoHandler';
-import { ConfiguracaoChat } from './modelos/ConfiguracaoChatModel';
 
 export interface SendCrmOptions {
     isFallback: boolean;

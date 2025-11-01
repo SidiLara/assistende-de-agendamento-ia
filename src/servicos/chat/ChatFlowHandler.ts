@@ -1,5 +1,4 @@
-import { Mensagem, RemetenteMensagem } from './modelos/MensagemModel';
-import { LeadKey } from './modelos/LeadModel';
+import { RemetenteMensagem } from './modelos/MensagemModel';
 import { ServicoChat } from './ChatService';
 import { ConfiguracaoChat } from './modelos/ConfiguracaoChatModel';
 import { IChatFlowHandler, MessageHandlerParams, PillSelectionHandlerParams } from './ChatInterfaces';
