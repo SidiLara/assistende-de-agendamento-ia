@@ -28,6 +28,8 @@ export const useChatManager = (config: ConfiguracaoChat | null, chatService: Ser
     const [isCorrecting, setIsCorrecting] = React.useState<boolean>(false);
     const [isFallbackMode, setIsFallbackMode] = React.useState<boolean>(false);
     const [hasShownSummary, setHasShownSummary] = React.useState<boolean>(false);
+    const [triggeredObjections, setTriggeredObjections] = React.useState<string[]>([]);
+
 
     React.useEffect(() => {
         if (!config) return;
@@ -122,6 +124,9 @@ export const useChatManager = (config: ConfiguracaoChat | null, chatService: Ser
         try {
             if (isFallbackMode) {
                 response = chatService.getFallbackResponse(text, leadData, nextKey, config);
+                if (response.triggeredObjectionText) {
+                    setTriggeredObjections(prev => [...prev, response.triggeredObjectionText!]);
+                }
             } else {
                 response = await chatService.getAiResponse(currentHistory, leadData, config);
             }
@@ -163,6 +168,10 @@ export const useChatManager = (config: ConfiguracaoChat | null, chatService: Ser
                 isNotice: true,
             };
             const fallbackResponse = chatService.getFallbackResponse(text, leadData, nextKey, config);
+            if (fallbackResponse.triggeredObjectionText) {
+                setTriggeredObjections(prev => [...prev, fallbackResponse.triggeredObjectionText!]);
+            }
+
             const newLeadData = { ...leadData, ...fallbackResponse.updatedLeadData };
             setLeadData(newLeadData);
             
@@ -188,7 +197,7 @@ export const useChatManager = (config: ConfiguracaoChat | null, chatService: Ser
                 if ((window as any).fbq) {
                     (window as any).fbq('track', 'Schedule');
                 }
-                await chatService.sendLeadToCRM(leadData, messages, config);
+                await chatService.sendLeadToCRM(leadData, messages, config, { isFallback: isFallbackMode, objections: triggeredObjections });
                 const confirmationMessage: Mensagem = { id: Date.now(), sender: RemetenteMensagem.Bot, text: "Tudo certo! Seu agendamento foi confirmado. Em breve, um de nossos consultores entrará em contato com você. Obrigado!" };
                 setMessages(prev => [...prev, confirmationMessage]);
                 setIsDone(true);
@@ -281,7 +290,7 @@ export const useChatManager = (config: ConfiguracaoChat | null, chatService: Ser
             }
             setIsTyping(false);
         }
-    }, [config, chatService, leadData, messages, isCorrecting, showSummaryAndActions]);
+    }, [config, chatService, leadData, messages, isCorrecting, showSummaryAndActions, isFallbackMode, triggeredObjections]);
 
     return {
         messages,

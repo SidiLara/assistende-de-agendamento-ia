@@ -5,123 +5,8 @@ import { RegraFallback } from "./FallbackRule";
 import { parseHumanNumber } from "../../utils/formatters/Number";
 import { generateTimeSlots } from "../../utils/formatters/DateAndTime";
 import { baseDeConhecimento } from "./conhecimento";
-
-const extractName = (message: string): string => {
-    const cleanedMessage = message.trim();
-    const patterns = [
-        /^meu nome é\s*(.+)/i,
-        /^me chamo\s*(.+)/i,
-        /^chamo-me\s*(.+)/i,
-        /^sou o\s*(.+)/i,
-        /^sou a\s*(.+)/i,
-        /^é\s*(.+)/i,
-        /^o meu é\s*(.+)/i,
-    ];
-
-    for (const pattern of patterns) {
-        const match = cleanedMessage.match(pattern);
-        if (match && match[1]) {
-            const extractedName = match[1].trim();
-            return extractedName
-                .split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                .join(' ');
-        }
-    }
-    
-    // If no pattern matches, assume the whole message is the name
-    return cleanedMessage
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
-};
-
-const fallbackFlow: LeadKey[] = [
-    'clientName', 'topic', 'creditAmount', 'monthlyInvestment',
-    'clientWhatsapp', 'clientEmail', 'meetingType', 'startDatetime'
-];
-
-const getFallbackQuestions = (config: ConfiguracaoChat): Record<LeadKey, string> => ({
-    clientName: `Que ótimo ter você aqui! Para começarmos, qual o seu <strong>nome completo</strong>, por favor?`,
-    topic: "Obrigado, {clientName}! Qual o seu <strong>objetivo principal</strong> com este planejamento? (Ex: <strong>Carro</strong>, <strong>Imóvel</strong>, <strong>Viagem</strong>, <strong>Investir/Planejar</strong> ou outro projeto)",
-    creditAmount: "Entendi. Para este projeto, qual o <strong>valor de crédito</strong> aproximado que você está buscando?",
-    monthlyInvestment: "Ótimo! E qual seria o valor da sua <strong>reserva mensal</strong>? Ou seja, o valor que você pode investir todo mês sem apertar seu orçamento.",
-    clientWhatsapp: `Perfeito. Para que ${config.consultantName} possa entrar em contato, qual o seu melhor <strong>WhatsApp com DDD</strong>?`,
-    clientEmail: "E qual o seu <strong>melhor e-mail</strong> para mantermos contato?",
-    meetingType: "Estamos quase lá! Você prefere uma reunião por <strong>Videochamada</strong> ou <strong>Presencial</strong>?",
-    startDatetime: "Qual o melhor <strong>dia da semana</strong> para a nossa conversa?",
-    finalSummary: "",
-    source: ""
-});
-
-/**
- * Extrai múltiplos dados de uma única mensagem do usuário usando regex aprimorados.
- * @param message A mensagem do usuário.
- * @returns Um objeto com os novos dados extraídos.
- */
-const extractAllData = (message: string): Partial<Lead> => {
-    const extracted: Partial<Lead> = {};
-    let remainingMessage = message;
-
-    // Extrair Tópico
-    const topicPatterns = {
-        'Imóvel': /(imóvel|casa|apto|apartamento|terreno)/i,
-        'Automóvel': /(carro|automóvel|veículo|moto)/i,
-        'Viagem': /(viagem|viajar)/i,
-        'Investimento': /(investimento|investir|planejar|planejamento|outro)/i
-    };
-    for (const [topic, pattern] of Object.entries(topicPatterns)) {
-        if (pattern.test(remainingMessage)) {
-            extracted.topic = topic as Lead['topic'];
-            break;
-        }
-    }
-
-    // Extrair Valor do Crédito (com maior flexibilidade)
-    const creditMatch = remainingMessage.match(/(?:crédito|valor|preciso de|busco|de|na faixa de|em torno de)\s*(?:de\s+)?(?:R\$\s*)?([\d.,\s]+(?:mil|k)?)/i);
-    if (creditMatch && creditMatch[1]) {
-        const amount = parseHumanNumber(creditMatch[1], true);
-        if (!isNaN(amount)) {
-            extracted.creditAmount = amount;
-            remainingMessage = remainingMessage.replace(creditMatch[0], '');
-        }
-    }
-
-    // Extrair Investimento Mensal (com maior flexibilidade)
-    const investmentMatch = remainingMessage.match(/(?:mensal|por mês|parcela|reserva|investir)\s*(?:de\s+)?(?:R\$\s*)?([\d.,\s]+(?:mil|k)?)/i);
-    if (investmentMatch && investmentMatch[1]) {
-        const amount = parseHumanNumber(investmentMatch[1], false);
-        if (!isNaN(amount)) {
-            extracted.monthlyInvestment = amount;
-            remainingMessage = remainingMessage.replace(investmentMatch[0], '');
-        }
-    }
-
-    // Extrair Email
-    const emailMatch = remainingMessage.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-    if (emailMatch) {
-        extracted.clientEmail = emailMatch[0];
-        remainingMessage = remainingMessage.replace(emailMatch[0], '');
-    }
-    
-    // Extrair WhatsApp
-    const whatsappMatch = remainingMessage.match(/\(?\s*(\d{2})\s*\)?\s*(9?\d{4})[-.\s]?(\d{4})/);
-    if (whatsappMatch) {
-        extracted.clientWhatsapp = `(${whatsappMatch[1]}) ${whatsappMatch[2]}${whatsappMatch[3]}`;
-        remainingMessage = remainingMessage.replace(whatsappMatch[0], '');
-    }
-
-    // Extrair Tipo de Reunião
-    if (/(video|online|chamada|virtual)/i.test(remainingMessage)) extracted.meetingType = 'Videochamada';
-    else if (/(presencial|pessoalmente|escritório)/i.test(remainingMessage)) extracted.meetingType = 'Presencial';
-
-    // Se ainda sobrar texto e não houver nome, assume que é o nome
-    if (remainingMessage.trim().length > 2 && !extracted.clientName) {
-        extracted.clientName = extractName(remainingMessage);
-    }
-
-    return extracted;
-};
+import { extractAllData, extractName } from "../../utils/parsers";
+import { fallbackFlow, getFallbackQuestions } from "./FallbackConfig";
 
 export class RegraFallbackImpl implements RegraFallback {
     public getFallbackResponse(
@@ -137,8 +22,6 @@ export class RegraFallbackImpl implements RegraFallback {
                 if (lowerCaseMessage.includes(palavra)) {
                     const fallbackQuestions = getFallbackQuestions(config);
                     
-                    // Se a conversa já começou (keyToCollect não é nulo), repete a última pergunta.
-                    // Se a conversa não começou (keyToCollect é nulo), busca a primeira pergunta do fluxo.
                     const nextKeyToAsk = keyToCollect || fallbackFlow.find(key => !currentData.hasOwnProperty(key)) || 'clientName';
                     
                     let nextQuestion = fallbackQuestions[nextKeyToAsk];
@@ -148,14 +31,14 @@ export class RegraFallbackImpl implements RegraFallback {
                         nextQuestion = nextQuestion.replace('{clientName}', firstName);
                     }
 
-                    // Monta a resposta final
                     const responseText = `${objecao.resposta} Para continuarmos, ${nextQuestion.charAt(0).toLowerCase() + nextQuestion.slice(1)}`;
 
                     return {
-                        updatedLeadData: {}, // Nenhum dado novo foi coletado
+                        updatedLeadData: {},
                         responseText: responseText,
                         action: nextKeyToAsk === 'startDatetime' ? 'SHOW_DAY_OPTIONS' : null,
-                        nextKey: nextKeyToAsk, // Retorna ao fluxo correto
+                        nextKey: nextKeyToAsk,
+                        triggeredObjectionText: objecao.pergunta,
                     };
                 }
             }
@@ -163,11 +46,11 @@ export class RegraFallbackImpl implements RegraFallback {
 
         let updatedLeadData = { ...currentData };
 
-        // 2. Tenta extrair qualquer dado da última mensagem do usuário de forma inteligente
+        // 2. Extrai dados da mensagem
         const extractedData = extractAllData(lastUserMessage);
         updatedLeadData = { ...updatedLeadData, ...extractedData };
         
-        // 3. Processa a resposta direta para a pergunta anterior (keyToCollect), se não foi extraída na etapa 2
+        // 3. Processa o dado específico que estava sendo coletado
         if (keyToCollect && lastUserMessage) {
             if (keyToCollect === 'clientName' && !updatedLeadData.clientName) {
                 updatedLeadData.clientName = extractName(lastUserMessage);
@@ -186,7 +69,7 @@ export class RegraFallbackImpl implements RegraFallback {
             }
         }
 
-        // Lógica específica para agendamento (dia e depois hora)
+        // 4. Lida com o fluxo de data/hora
         if (keyToCollect === 'startDatetime' && updatedLeadData.startDatetime && !updatedLeadData.startDatetime.includes('às')) {
              const timeSlots = generateTimeSlots();
              const timeOptions = timeSlots.map(time => ({ label: time, value: time }));
@@ -200,7 +83,7 @@ export class RegraFallbackImpl implements RegraFallback {
             };
         }
 
-        // Encontra a próxima informação que falta no fluxo
+        // 5. Determina a próxima pergunta
         const nextKey = fallbackFlow.find(key => {
              if (key === 'startDatetime') {
                 return !(updatedLeadData.startDatetime && updatedLeadData.startDatetime.includes('às'));
@@ -212,7 +95,7 @@ export class RegraFallbackImpl implements RegraFallback {
             return { updatedLeadData, responseText: "", action: null, nextKey: null };
         }
 
-        // Monta a próxima pergunta
+        // 6. Monta a resposta final
         const fallbackQuestions = getFallbackQuestions(config);
         let responseText = fallbackQuestions[nextKey];
         if (nextKey === 'topic' && updatedLeadData.clientName) {
@@ -220,10 +103,7 @@ export class RegraFallbackImpl implements RegraFallback {
             responseText = responseText.replace('{clientName}', firstName);
         }
 
-        let action = null;
-        if (nextKey === 'startDatetime') {
-            action = 'SHOW_DAY_OPTIONS';
-        }
+        const action = nextKey === 'startDatetime' ? 'SHOW_DAY_OPTIONS' : null;
 
         return { updatedLeadData, responseText, action, nextKey };
     }

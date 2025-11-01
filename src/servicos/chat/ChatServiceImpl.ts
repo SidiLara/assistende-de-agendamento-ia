@@ -1,111 +1,29 @@
-import { GoogleGenAI, Modality } from "@google/genai";
-import { Mensagem, RemetenteMensagem } from "./modelos/MensagemModel";
-import { Lead, LeadKey } from "./modelos/LeadModel";
+import { Mensagem } from "./modelos/MensagemModel";
+import { Lead } from "./modelos/LeadModel";
 import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
-import { ServicoChat } from "./ChatService";
+import { ServicoChat, SendCrmOptions } from "./ChatService";
 import { RespostaAi } from "./modelos/AiResponse";
 import { RegraFallback } from "./FallbackRule";
-import { createSystemPrompt, leadDataSchema, createFinalSummaryPrompt, createInternalSummaryPrompt } from "./ChatPrompts";
-
-const BASE_MAKE_URL = "https://hook.us2.make.com/";
-
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+import { baseDeConhecimento } from "./conhecimento";
+import { getFallbackQuestions, fallbackFlow } from "./FallbackConfig";
+import { ICrmApiService, IGeminiApiService } from "../api/ApiInterfaces";
 
 export class ServicoChatImpl implements ServicoChat {
     private fallbackRule: RegraFallback;
-    private ai?: GoogleGenAI;
+    private geminiApi: IGeminiApiService;
+    private crmApi: ICrmApiService;
 
-    constructor(fallbackRule: RegraFallback) {
+    constructor(fallbackRule: RegraFallback, geminiApi: IGeminiApiService, crmApi: ICrmApiService) {
         this.fallbackRule = fallbackRule;
-        // FIX: Per Gemini API guidelines, initialize with process.env.API_KEY directly.
-        const apiKey = process.env.API_KEY;
-        if (apiKey) {
-            this.ai = new GoogleGenAI({ apiKey });
-        } else {
-            console.warn("Chave de API do Gemini não encontrada. O aplicativo será executado em modo de fallback. Certifique-se de que a variável de ambiente API_KEY está configurada.");
-        }
-    }
-
-    private async callApiWithRetry<T>(apiFn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
-        let lastError: any;
-        for (let i = 0; i < retries; i++) {
-            try {
-                return await apiFn();
-            } catch (error: any) {
-                lastError = error;
-                const errorMessage = error.toString().toLowerCase();
-                if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('unavailable') || errorMessage.includes('rate limit')) {
-                     if (i < retries - 1) {
-                        const waitTime = delay * Math.pow(2, i);
-                        console.warn(`API call failed due to transient error, retrying in ${waitTime}ms...`);
-                        await sleep(waitTime);
-                    }
-                } else {
-                    throw lastError;
-                }
-            }
-        }
-        throw lastError;
-    }
-
-    private async callGenerativeApi(apiFn: () => Promise<any>) {
-        if (!this.ai) {
-            // FIX: Updated error message to reflect new API key handling.
-            throw new Error("O serviço de IA não foi inicializado. Verifique se a Chave de API (API_KEY) está configurada no ambiente.");
-        }
-        try {
-            return await this.callApiWithRetry(apiFn);
-        } catch (error) {
-            console.error("API call failed after retries.", error);
-            throw new Error("API call failed, switching to local script.");
-        }
+        this.geminiApi = geminiApi;
+        this.crmApi = crmApi;
     }
     
-    private async getInternalSummaryForCRM(leadData: Partial<Lead>, history: Mensagem[], formattedCreditAmount: string, formattedMonthlyInvestment: string, consultantName: string): Promise<string> {
-        const internalSummaryPrompt = createInternalSummaryPrompt(leadData, history, formattedCreditAmount, formattedMonthlyInvestment, consultantName);
-        
-        try {
-            const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
-                model: "gemini-2.5-flash",
-                contents: internalSummaryPrompt,
-            }));
-            return response.text.trim();
-        } catch (error) {
-            console.error("Failed to generate internal CRM summary:", error);
-            return "Não foi possível gerar o relatório narrativo da conversa.";
-        }
-    }
-
     public async generateSpeech(text: string): Promise<string | null> {
-        if (!this.ai) {
-            console.warn("AI service not initialized. Cannot generate speech.");
-            return null;
-        }
-    
-        const plainText = text.replace(/<[^>]*>/g, '');
-    
         try {
-            const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
-                model: "gemini-2.5-flash-preview-tts",
-                contents: [{ parts: [{ text: plainText }] }],
-                config: {
-                    responseModalities: [Modality.AUDIO],
-                    speechConfig: {
-                        voiceConfig: {
-                          prebuiltVoiceConfig: { voiceName: 'Kore' },
-                        },
-                    },
-                },
-            }));
-    
-            const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-            if (base64Audio) {
-                return base64Audio;
-            }
-            return null;
-    
+            return await this.geminiApi.generateSpeech(text);
         } catch (error) {
-            console.error("Falha ao gerar áudio:", error);
+            console.error("Falha ao gerar áudio no serviço de chat:", error);
             return null;
         }
     }
@@ -115,165 +33,70 @@ export class ServicoChatImpl implements ServicoChat {
         currentData: Partial<Lead>,
         config: ConfiguracaoChat
     ): Promise<RespostaAi> {
-        const contextMessage = `[CONTEXTO] Dados já coletados: ${JSON.stringify(currentData)}. Analise o histórico e o contexto para determinar a próxima pergunta.`;
-        
-        const contents: {role: 'user' | 'model', parts: {text: string}[]}[] = [{
-            role: 'user',
-            parts: [{ text: contextMessage }]
-        }];
-
-        for (const msg of history) {
-            contents.push({
-                role: msg.sender === RemetenteMensagem.User ? 'user' : 'model',
-                parts: [{ text: msg.text }]
-            });
-        }
-        
-        const systemInstruction = createSystemPrompt(config.assistantName, config.consultantName);
-
-        const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents,
-            config: {
-                systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: leadDataSchema
+        const lastUserMessage = history[history.length - 1]?.text.toLowerCase() || '';
+        if (lastUserMessage) {
+            for (const objecao of baseDeConhecimento) {
+                for (const palavra of objecao.palavrasChave) {
+                    if (lastUserMessage.includes(palavra)) {
+                        const fallbackQuestions = getFallbackQuestions(config);
+                        const nextKeyToAsk = fallbackFlow.find(key => !currentData.hasOwnProperty(key)) || 'clientName';
+                        let nextQuestion = fallbackQuestions[nextKeyToAsk];
+                        
+                        if (nextQuestion.includes('{clientName}') && currentData.clientName) {
+                            nextQuestion = nextQuestion.replace('{clientName}', currentData.clientName.split(' ')[0]);
+                        }
+                        
+                        const responseText = `${objecao.resposta} Para continuarmos, ${nextQuestion.charAt(0).toLowerCase() + nextQuestion.slice(1)}`;
+                        
+                        return {
+                            updatedLeadData: {},
+                            responseText,
+                            action: nextKeyToAsk === 'startDatetime' ? 'SHOW_DAY_OPTIONS' : null,
+                            nextKey: nextKeyToAsk,
+                            triggeredObjectionText: objecao.pergunta,
+                        };
+                    }
+                }
             }
-        }));
-
-        const jsonText = response.text;
-        try {
-            const parsedJson = JSON.parse(jsonText);
-            const { responseText, action, nextKey, ...updatedLeadData } = parsedJson;
-            
-            const formattedText = (responseText || "Desculpe, não entendi. Pode repetir?")
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-            // Sanitize the output to remove any potential markdown links `[text](url)` and HTML `<a>` tags.
-            const sanitizedText = formattedText
-                .replace(/\[(.*?)\]\((.*?)\)/g, '$1') // Remove markdown links, keeping only the text
-                .replace(/<a\b[^>]*>(.*?)<\/a>/gi, '$1'); // Remove HTML links, keeping only the text
-
-
-            return {
-                updatedLeadData,
-                responseText: sanitizedText,
-                action: action || null,
-                nextKey: nextKey || null
-            };
-        } catch (e) {
-            console.error("Failed to parse Gemini JSON response:", jsonText, e);
-            throw new Error("JSON parsing failed");
         }
+        
+        return await this.geminiApi.generateAiResponse(history, currentData, config);
     }
 
     public async getFinalSummary(leadData: Partial<Lead>, config: ConfiguracaoChat): Promise<string> {
-        const summaryPrompt = createFinalSummaryPrompt(leadData, config);
-
-        const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: summaryPrompt,
-        }));
-
-        return response.text.trim();
+        return await this.geminiApi.generateFinalSummary(leadData, config);
     }
 
-    public getFallbackResponse(
-        lastUserMessage: string,
-        currentData: Partial<Lead>,
-        keyToCollect: LeadKey | null,
-        config: ConfiguracaoChat
-    ): RespostaAi {
-        return this.fallbackRule.getFallbackResponse(lastUserMessage, currentData, keyToCollect, config);
+    public getFallbackResponse(...args: Parameters<RegraFallback['getFallbackResponse']>): RespostaAi {
+        return this.fallbackRule.getFallbackResponse(...args);
     }
 
     public getFallbackSummary(leadData: Partial<Lead>): string {
         return this.fallbackRule.getFallbackSummary(leadData);
     }
 
-    public async sendLeadToCRM(leadData: Partial<Lead>, history: Mensagem[], config: ConfiguracaoChat) {
-        const { webhookId, consultantName } = config;
-        const MAKE_URL = `${BASE_MAKE_URL}${webhookId}`;
-        
-        let leadCounter = 1;
-        try {
-            const storedCounter = localStorage.getItem('leadCounter');
-            if (storedCounter) {
-                leadCounter = parseInt(storedCounter, 10);
-            }
-        } catch (e) {
-            console.error("Could not access localStorage for lead counter", e);
-        }
-        const currentLeadNumber = leadCounter;
-        try {
-            localStorage.setItem('leadCounter', (leadCounter + 1).toString());
-        } catch (e) {
-            console.error("Could not update localStorage for lead counter", e);
-        }
-
-        const { clientName, clientWhatsapp, clientEmail, topic, creditAmount = 0, monthlyInvestment = 0, startDatetime, source, finalSummary, meetingType } = leadData;
+    public async sendLeadToCRM(leadData: Partial<Lead>, history: Mensagem[], config: ConfiguracaoChat, options: SendCrmOptions) {
+        // FIX: The property 'topic' does not exist on type 'ConfiguracaoChat'.
+        const { consultantName } = config;
+        const { creditAmount = 0, monthlyInvestment = 0 } = leadData;
 
         const formattedCreditAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(creditAmount);
         const formattedMonthlyInvestment = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(monthlyInvestment);
-
-        const narrativeReport = await this.getInternalSummaryForCRM(leadData, history, formattedCreditAmount, formattedMonthlyInvestment, consultantName);
-
-        let notesContent = `Lead: ${currentLeadNumber}\n\n`;
-        notesContent += "RELATÓRIO DA CONVERSA (IA):\n";
-        notesContent += `${narrativeReport}\n\n`;
-        notesContent += "--------------------------------------\n\n";
-        notesContent += "DADOS CAPTURADOS:\n";
-        notesContent += `Origem: ${source || 'Direto'}\n`;
-        notesContent += `Nome do Cliente: ${clientName}\n`;
-        notesContent += `WhatsApp: ${clientWhatsapp || 'Não informado'}\n`;
-        notesContent += `E-mail: ${clientEmail || 'Não informado'}\n`;
-        notesContent += `Objetivo do Projeto: ${topic}\n`;
-        notesContent += `Valor do Crédito: ${formattedCreditAmount}\n`;
-        notesContent += `Reserva Mensal: ${formattedMonthlyInvestment}\n`;
-        notesContent += `Agendamento Preferencial: ${startDatetime || 'Não informado'}\n\n`;
         
-        if (startDatetime) {
-            const timeMatch = startDatetime.match(/\b(\d{1,2}):(\d{2})\b/);
-            if (timeMatch) {
-                const hour = parseInt(timeMatch[1], 10);
-                if (hour < 6 || hour >= 22) {
-                    notesContent += "ATENÇÃO: Horário de agendamento fora do padrão comercial. Recomenda-se ligar para confirmar.\n";
-                }
+        let narrativeReport: string;
+
+        if (options.isFallback) {
+            const project = leadData.topic || '(não informado)';
+            narrativeReport = `Cliente quer fazer ${project}, precisa de ${formattedCreditAmount} e consegue pagar até ${formattedMonthlyInvestment} por mês.`;
+            
+            const uniqueObjections = [...new Set(options.objections)];
+            if (uniqueObjections.length > 0) {
+                narrativeReport += ` Teve algumas objeções: ${uniqueObjections.join(', ')}.`;
             }
+        } else {
+            narrativeReport = await this.geminiApi.generateInternalSummary(leadData, history, formattedCreditAmount, formattedMonthlyInvestment, consultantName);
         }
 
-        const requestBody = {
-            nome: clientName,
-            email: clientEmail || 'nao-informado@lead.com',
-            celular: (clientWhatsapp || '').replace(/\D/g, ''),
-            cpf_ou_cnpj: "000.000.000-00",
-            classificacao1: `Projeto: ${topic}`,
-            classificacao2: `${formattedCreditAmount}`,
-            classificacao3: `Reserva Mensal: ${formattedMonthlyInvestment}`,
-            obs: notesContent,
-            platform: "GEMSID",
-            consultantName,
-            final_summary: finalSummary,
-            start_datetime: startDatetime,
-            meeting_type: meetingType,
-        };
-
-        try {
-            const response = await fetch(MAKE_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
-            });
-            console.log("Lead enviado para o CRM:", requestBody);
-            if (!response.ok) {
-                console.error("Erro na resposta do CRM:", response.status, response.statusText);
-                const responseBody = await response.text();
-                console.error("Corpo da resposta do CRM:", responseBody);
-                throw new Error(`CRM submission failed with status: ${response.status}`);
-            }
-        } catch (error) {
-            console.error("Erro ao enviar para o CRM:", error);
-            throw error;
-        }
+        await this.crmApi.sendLead(leadData, narrativeReport, config);
     }
 }
