@@ -52,67 +52,61 @@ export const BatePapo: React.FC = () => {
         }
     }, [isActionPending, isSending, isDone, messages]);
 
-    const footerClasses = "bg-transparent";
-
     return (
         <div className="bg-gray-100 dark:bg-black min-h-dvh w-full flex items-center justify-center p-0 md:p-4">
-            <div className="w-full h-dvh md:h-[85vh] md:max-h-[900px] md:max-w-4xl lg:max-w-5xl md:rounded-2xl md:shadow-xl flex flex-col bg-transparent text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 overflow-hidden relative">
-                {isChatStarted && (
-                    <header className="flex-shrink-0 z-10 bg-transparent">
-                        <CabecalhoDoChat
-                            consultantName={chatConfig.consultantName}
-                            assistantName={chatConfig.assistantName}
-                            consultantPhoto={chatConfig.consultantPhoto}
-                            theme={theme}
-                            toggleTheme={toggleTheme}
-                            isChatStarted={isChatStarted}
-                        />
-                    </header>
-                )}
+            <div className="w-full h-dvh md:h-[85vh] md:max-h-[900px] md:max-w-4xl lg:max-w-5xl md:rounded-2xl md:shadow-xl flex flex-col bg-transparent text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 overflow-hidden">
+                
+                {/* O cabeçalho agora está sempre presente e anima sua posição e conteúdo */}
+                <header className={`
+                    flex-shrink-0 z-10 transition-all duration-700 ease-in-out
+                    ${!isChatStarted 
+                        ? 'flex-grow flex flex-col' // Ocupa espaço para centralizar o conteúdo
+                        : ''
+                    }
+                `}>
+                    <CabecalhoDoChat
+                        consultantName={chatConfig.consultantName}
+                        assistantName={chatConfig.assistantName}
+                        consultantPhoto={chatConfig.consultantPhoto}
+                        theme={theme}
+                        toggleTheme={toggleTheme}
+                        isChatStarted={isChatStarted}
+                    />
+                </header>
 
-                <main className="flex-1 flex flex-col overflow-hidden">
-                    {/* Área de rolagem para o conteúdo do chat */}
-                    <div className={`flex-1 overflow-y-auto p-4 md:p-6 flex flex-col ${!isChatStarted ? 'justify-center' : ''}`}>
-                        {!isChatStarted && (
-                            <div className="mb-auto mt-auto">
-                                <CabecalhoDoChat
-                                    consultantName={chatConfig.consultantName}
-                                    assistantName={chatConfig.assistantName}
-                                    consultantPhoto={chatConfig.consultantPhoto}
-                                    theme={theme}
-                                    toggleTheme={toggleTheme}
-                                    isChatStarted={isChatStarted}
-                                />
-                            </div>
-                        )}
-                        {isChatStarted && (
-                            <CorpoDoChat
-                                messages={messages}
-                                isTyping={isTyping}
-                                consultantPhoto={chatConfig.consultantPhoto}
-                                onPlayAudio={playAudio}
-                                isPlaying={isPlaying}
-                                isLoading={isLoading}
-                            />
-                        )}
-                    </div>
-
-                    {/* Rodapé fixo para a entrada de texto */}
-                    <div className={`flex-shrink-0 p-4 md:px-6 md:pb-6 transition-colors duration-300 ${footerClasses}`}>
-                        {isActionPending && actionOptions.length > 0 && (
-                            <PillsDeAcao options={actionOptions} onSelect={handlePillSelect} />
-                        )}
-                        <EntradaDeChat
-                            ref={inputRef}
-                            onSendMessage={handleSendMessage}
-                            isSending={isSending}
-                            isDone={isDone}
-                            isActionPending={isActionPending}
-                            nextKey={nextKey}
-                            assistantName={chatConfig.assistantName}
-                        />
-                    </div>
+                {/* O corpo principal do chat, que aparece suavemente */}
+                <main className={`
+                    flex-1 flex flex-col overflow-hidden transition-opacity duration-500
+                    ${isChatStarted 
+                        ? 'opacity-100' // Aparece quando o chat começa
+                        : 'opacity-0 pointer-events-none' // Fica oculto antes
+                    }
+                `}>
+                    <CorpoDoChat
+                        messages={messages}
+                        isTyping={isTyping}
+                        consultantPhoto={chatConfig.consultantPhoto}
+                        onPlayAudio={playAudio}
+                        isPlaying={isPlaying}
+                        isLoading={isLoading}
+                    />
                 </main>
+
+                {/* Rodapé fixo para a entrada de texto */}
+                <footer className="flex-shrink-0 p-4 md:px-6 md:pb-6">
+                    {isActionPending && actionOptions.length > 0 && (
+                        <PillsDeAcao options={actionOptions} onSelect={handlePillSelect} />
+                    )}
+                    <EntradaDeChat
+                        ref={inputRef}
+                        onSendMessage={handleSendMessage}
+                        isSending={isSending}
+                        isDone={isDone}
+                        isActionPending={isActionPending}
+                        nextKey={nextKey}
+                        assistantName={chatConfig.assistantName}
+                    />
+                </footer>
             </div>
         </div>
     );
