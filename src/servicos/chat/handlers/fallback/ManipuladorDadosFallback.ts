@@ -1,7 +1,7 @@
 import { Lead, LeadKey } from "../../modelos/LeadModel";
 import { extractAllData, extractName } from "../../../../utils/parsers";
-// FIX: Correct casing for 'Number.ts' import to resolve case-sensitive path errors.
-import { parseHumanNumber } from "../../../../utils/formatters/number";
+// FIX: Corrected import casing to match file name 'Number.ts'.
+import { parseHumanNumber } from "../../../../utils/formatters/Number";
 
 export class ManipuladorDadosFallback {
     public handle(

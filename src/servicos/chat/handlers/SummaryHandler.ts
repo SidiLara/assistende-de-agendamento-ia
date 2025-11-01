@@ -1,10 +1,10 @@
 import { RemetenteMensagem } from '../modelos/MensagemModel';
-import { ServicoChat } from '../ChatService';
+import { ServicoChat } from '../ServicoChat';
 // FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';
 // FIX: Corrected import casing.
-import { calculateFullDate } from '../../../utils/formatters/dateAndTime';
+import { calculateFullDate } from '../../../utils/formatters/DateAndTime';
 import { Lead } from '../modelos/LeadModel';
 
 interface SummaryHandlerParams {

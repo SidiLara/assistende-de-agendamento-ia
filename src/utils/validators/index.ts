@@ -1,2 +1,2 @@
 // FIX: Correct casing for 'InputValidator' export.
-export * from './inputValidator';
+export * from './InputValidator';

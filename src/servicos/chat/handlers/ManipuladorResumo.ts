@@ -2,8 +2,8 @@ import { RemetenteMensagem } from '../modelos/MensagemModel';
 import { ServicoChat } from '../ServicoChat';
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';
-// FIX: Corrected import casing.
-import { calculateFullDate } from '../../../utils/formatters/dateAndTime';
+// FIX: Corrected import casing to match file name 'DateAndTime.ts'.
+import { calculateFullDate } from '../../../utils/formatters/DateAndTime';
 import { Lead } from '../modelos/LeadModel';
 
 interface SummaryHandlerParams {

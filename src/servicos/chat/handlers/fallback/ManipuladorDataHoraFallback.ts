@@ -1,7 +1,7 @@
 import { RespostaAi } from "../../modelos/RespostaAi";
 import { Lead } from "../../modelos/LeadModel";
-// FIX: Correct casing for 'DateAndTime.ts' import to resolve case-sensitive path errors.
-import { generateTimeSlots } from "../../../../utils/formatters/dateAndTime";
+// FIX: Corrected import casing to match file name 'DateAndTime.ts'.
+import { generateTimeSlots } from "../../../../utils/formatters/DateAndTime";
 
 export class ManipuladorDataHoraFallback {
     public handle(
