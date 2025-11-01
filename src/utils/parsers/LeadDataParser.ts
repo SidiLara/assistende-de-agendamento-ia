@@ -1,6 +1,6 @@
 import { Lead } from '../../servicos/chat/modelos/LeadModel';
-// FIX: Corrected import casing to use PascalCase 'Number.ts' for consistency.
-import { parseHumanNumber } from '../formatters/Number';
+// FIX: Corrected import casing to use the lowercase re-export file for consistency.
+import { parseHumanNumber } from '../formatters/number';
 
 /**
  * Tenta extrair um nome de uma frase de saudação.
