@@ -1,6 +1,6 @@
 import { Lead, LeadKey } from "../../modelos/LeadModel";
 import { extractAllData, extractName } from "../../../../utils/parsers";
-// FIX: Corrected import casing to use the lowercase re-export file for consistency.
+// FIX: Standardizing import to use lowercase file to avoid casing conflicts.
 import { parseHumanNumber } from "../../../../utils/formatters/number";
 
 export class ManipuladorDadosFallback {

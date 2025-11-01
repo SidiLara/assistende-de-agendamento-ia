@@ -1,5 +1,5 @@
 import { Lead } from '../../servicos/chat/modelos/LeadModel';
-// FIX: Corrected import casing to use the lowercase re-export file for consistency.
+// FIX: Standardizing import to use lowercase file to avoid casing conflicts.
 import { parseHumanNumber } from '../formatters/number';
 
 /**
