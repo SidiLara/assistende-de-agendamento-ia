@@ -15,11 +15,14 @@ export const CorpoDoChat: React.FC<CorpoDoChatProps> = ({ messages, isTyping, co
     return (
         <div ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-4 chat-container bg-transparent">
             {messages.map((msg) => (
-                <MensagemDeChat 
-                    key={msg.id} 
-                    message={msg} 
-                    consultantPhoto={consultantPhoto}
-                />
+                // FIX: Wrapped MensagemDeChat in React.Fragment and moved the key prop to it.
+                // This resolves the TypeScript error where 'key' was being incorrectly validated against MensagemDeChatProps.
+                <React.Fragment key={msg.id}>
+                    <MensagemDeChat
+                        message={msg}
+                        consultantPhoto={consultantPhoto}
+                    />
+                </React.Fragment>
             ))}
             {isTyping && <IndicadorDeDigitacao />}
         </div>
