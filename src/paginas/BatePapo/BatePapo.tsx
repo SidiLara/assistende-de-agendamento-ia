@@ -51,9 +51,7 @@ export const BatePapo: React.FC = () => {
         }
     }, [isActionPending, isSending, isDone, messages]);
 
-    const footerClasses = isChatStarted
-        ? "bg-white dark:bg-dark-secondary border-t border-gray-200 dark:border-slate-700"
-        : "bg-transparent";
+    const footerClasses = "bg-transparent";
 
     return (
         <div className="bg-gray-100 dark:bg-black min-h-dvh w-full flex items-center justify-center p-0 md:p-4">
