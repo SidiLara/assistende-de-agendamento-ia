@@ -1,7 +1,7 @@
 import { RemetenteMensagem } from '../modelos/MensagemModel';
 import { ServicoChat } from '../ChatService';
-// FIX: Corrected import casing to use PascalCase 'InputValidator.ts'.
-import { validateEmail, validateWhatsapp } from '../../../utils/validators/InputValidator';
+// FIX: Corrected import path to use the barrel file and resolve casing issues.
+import { validateEmail, validateWhatsapp } from '../../../utils/validators';
 // FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { UserMessageHandlerParams } from '../ChatInterfaces';

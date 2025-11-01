@@ -1,6 +1,7 @@
 import { RemetenteMensagem } from '../modelos/MensagemModel';
 import { ServicoChat } from '../ServicoChat';
-import { validateEmail, validateWhatsapp } from '../../../utils/validators/inputValidator';
+// FIX: Corrected import path to use the barrel file and resolve casing issues.
+import { validateEmail, validateWhatsapp } from '../../../utils/validators';
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { UserMessageHandlerParams } from '../InterfacesChat';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';

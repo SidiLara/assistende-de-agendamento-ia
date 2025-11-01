@@ -1,5 +1,7 @@
 import { Lead, LeadKey } from "../../modelos/LeadModel";
-import { extractAllData, extractName } from "../../../../utils/parsers/leadDataParser";
+// FIX: Corrected import path to use the barrel file and resolve casing issues.
+import { extractAllData, extractName } from "../../../../utils/parsers";
+// FIX: Corrected import casing to use camelCase 'number.ts'.
 import { parseHumanNumber } from "../../../../utils/formatters/number";
 
 export class ManipuladorDadosFallback {

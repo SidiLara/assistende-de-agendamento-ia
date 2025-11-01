@@ -1,4 +1,5 @@
 import { Lead } from '../../servicos/chat/modelos/LeadModel';
+// FIX: Corrected import casing to use camelCase 'number.ts'.
 import { parseHumanNumber } from '../formatters/number';
 
 /**
