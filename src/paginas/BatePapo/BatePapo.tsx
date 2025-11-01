@@ -5,7 +5,6 @@ import { EntradaDeChat } from '../../componentes/EntradaDeChat';
 import { PillsDeAcao } from '../../componentes/PillsDeAcao';
 import { useChatManager } from '../../hooks/useChatManager';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 import { ServicoChatImpl } from '../../servicos/chat/ChatServiceImpl';
 import { RegraFallbackImpl } from '../../servicos/chat/FallbackRuleImpl';
 import { CrmApiService, GeminiApiService } from '../../servicos/api';
@@ -43,7 +42,6 @@ export const BatePapo: React.FC = () => {
         handleSendMessage,
         handlePillSelect,
     } = useChatManager(chatConfig, chatService);
-    const { playAudio, isPlaying, isLoading } = useAudioPlayer(chatService);
 
     const inputRef = React.useRef<HTMLInputElement>(null);
     const isChatStarted = messages.length > 0;
@@ -92,9 +90,6 @@ export const BatePapo: React.FC = () => {
                                 messages={messages}
                                 isTyping={isTyping}
                                 consultantPhoto={chatConfig.consultantPhoto}
-                                onPlayAudio={playAudio}
-                                isPlaying={isPlaying}
-                                isLoading={isLoading}
                             />
                         )}
                     </div>

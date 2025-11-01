@@ -53,7 +53,10 @@ export class RegraFallbackImpl implements RegraFallback {
         // 3. Processa o dado específico que estava sendo coletado
         if (keyToCollect && lastUserMessage) {
             if (keyToCollect === 'clientName' && !updatedLeadData.clientName) {
-                updatedLeadData.clientName = extractName(lastUserMessage);
+                const extractedName = extractName(lastUserMessage);
+                if (extractedName) { // Apenas define o nome se um foi de fato extraído
+                    updatedLeadData.clientName = extractedName;
+                }
             } else if (keyToCollect === 'startDatetime' && updatedLeadData.startDatetime && !updatedLeadData.startDatetime.includes('às')) {
                 if (lastUserMessage !== updatedLeadData.startDatetime) {
                     updatedLeadData.startDatetime = `${updatedLeadData.startDatetime} às ${lastUserMessage}`;

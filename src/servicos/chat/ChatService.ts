@@ -10,5 +10,4 @@ export interface ServicoChat {
     getFallbackResponse(lastUserMessage: string, currentData: Partial<Lead>, keyToCollect: LeadKey | null, config: ConfiguracaoChat): RespostaAi;
     getFallbackSummary(leadData: Partial<Lead>): string;
     sendLeadToCRM(leadData: Partial<Lead>, history: Mensagem[], config: ConfiguracaoChat, options: SendCrmOptions): Promise<void>;
-    generateSpeech(text: string): Promise<string | null>;
 }

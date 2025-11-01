@@ -1,4 +1,4 @@
-import { GoogleGenAI, Modality } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { Mensagem, RemetenteMensagem } from "../chat/modelos/MensagemModel";
 import { Lead } from "../chat/modelos/LeadModel";
 import { ConfiguracaoChat } from "../chat/modelos/ConfiguracaoChatModel";
@@ -129,25 +129,5 @@ export class GeminiApiService implements IGeminiApiService {
             console.error("Falha ao gerar o resumo interno do CRM:", error);
             return "Não foi possível gerar o relatório narrativo da conversa.";
         }
-    }
-
-    public async generateSpeech(text: string): Promise<string | null> {
-        const plainText = text.replace(/<[^>]*>/g, '');
-    
-        const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
-            model: "gemini-2.5-flash-preview-tts",
-            contents: [{ parts: [{ text: plainText }] }],
-            config: {
-                responseModalities: [Modality.AUDIO],
-                speechConfig: {
-                    voiceConfig: {
-                      prebuiltVoiceConfig: { voiceName: 'Kore' },
-                    },
-                },
-            },
-        }));
-
-        const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-        return base64Audio || null;
     }
 }

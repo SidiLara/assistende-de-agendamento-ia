@@ -7,7 +7,6 @@ export interface IGeminiApiService {
     generateAiResponse(history: Mensagem[], currentData: Partial<Lead>, config: ConfiguracaoChat): Promise<RespostaAi>;
     generateFinalSummary(leadData: Partial<Lead>, config: ConfiguracaoChat): Promise<string>;
     generateInternalSummary(leadData: Partial<Lead>, history: Mensagem[], formattedCreditAmount: string, formattedMonthlyInvestment: string, consultantName: string): Promise<string>;
-    generateSpeech(text: string): Promise<string | null>;
 }
 
 export interface ICrmApiService {

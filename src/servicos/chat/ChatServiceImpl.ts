@@ -21,15 +21,6 @@ export class ServicoChatImpl implements ServicoChat {
         this.crmApi = crmApi;
     }
     
-    public async generateSpeech(text: string): Promise<string | null> {
-        try {
-            return await this.geminiApi.generateSpeech(text);
-        } catch (error) {
-            console.error("Falha ao gerar áudio no serviço de chat:", error);
-            return null;
-        }
-    }
-
     public async getAiResponse(
         history: Mensagem[],
         currentData: Partial<Lead>,
