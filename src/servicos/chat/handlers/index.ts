@@ -4,3 +4,7 @@ export * from './ConfirmationHandler';
 export * from './CorrectionHandler';
 export * from './DateTimeSelectionHandler';
 export * from './SummaryHandler';
+export * from './FallbackDataHandler';
+export * from './FallbackDateTimeHandler';
+export * from './FallbackObjectionHandler';
+export * from './FallbackSummaryHandler';

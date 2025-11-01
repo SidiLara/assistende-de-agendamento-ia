@@ -115,7 +115,10 @@ export const extractAllData = (message: string): Partial<Lead> => {
 
     // Se ainda sobrar texto e não houver nome, assume que é o nome
     if (remainingMessage.trim().length > 2 && !extracted.clientName) {
-        extracted.clientName = extractName(remainingMessage);
+        const name = extractName(remainingMessage);
+        if (name) { // Only set the name if something was actually extracted
+            extracted.clientName = name;
+        }
     }
 
     return extracted;
