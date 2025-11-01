@@ -2,8 +2,7 @@ import { RemetenteMensagem } from '../modelos/MensagemModel';
 import { ServicoChat } from '../ServicoChat';
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';
-// FIX: Corrected import casing to use PascalCase 'DateAndTime.ts'.
-import { calculateFullDate } from '../../../utils/formatters/DateAndTime';
+import { calculateFullDate } from '../../../utils/formatters/dateAndTime';
 import { Lead } from '../modelos/LeadModel';
 
 interface SummaryHandlerParams {

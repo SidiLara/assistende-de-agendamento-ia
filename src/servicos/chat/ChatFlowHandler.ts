@@ -1,13 +1,13 @@
 import { RemetenteMensagem } from './modelos/MensagemModel';
-import { ServicoChat } from './ChatService';
+// FIX: Corrected import to use the refactored 'ServicoChat' interface file.
+import { ServicoChat } from './ServicoChat';
 import { ConfiguracaoChat } from './modelos/ConfiguracaoChatModel';
-import { IChatFlowHandler, MessageHandlerParams, PillSelectionHandlerParams } from './ChatInterfaces';
-// FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao and aliased type.
+// FIX: Corrected import to use the refactored 'InterfacesChat' file and resolve missing export error.
+import { IManipuladorFluxoChat, MessageHandlerParams, PillSelectionHandlerParams } from './InterfacesChat';
 import { ResultadoFluxo } from './handlers/ManipuladorAcao';
-// FIX: Use correct class names exported from the handlers barrel file.
 import { ManipuladorMensagemUsuario, ManipuladorConfirmacao, ManipuladorCorrecao, ManipuladorSelecaoDataHora } from './handlers';
 
-export class ChatFlowHandler implements IChatFlowHandler {
+export class ManipuladorFluxoChat implements IManipuladorFluxoChat {
     private userMessageHandler: ManipuladorMensagemUsuario;
     private confirmationHandler: ManipuladorConfirmacao;
     private correctionHandler: ManipuladorCorrecao;

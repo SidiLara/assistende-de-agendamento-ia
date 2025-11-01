@@ -3,8 +3,9 @@ import { Mensagem, RemetenteMensagem } from '../servicos/chat/modelos/MensagemMo
 import { Lead, LeadKey } from '../servicos/chat/modelos/LeadModel';
 import { ConfiguracaoChat } from '../servicos/chat/modelos/ConfiguracaoChatModel';
 import { ServicoChat } from '../servicos/chat/ServicoChat';
-import { ManipuladorFluxoChat } from '../servicos/chat/ManipuladorFluxoChat';
+import { ManipuladorFluxoChat } from '../servicos/chat/ChatFlowHandler';
 import { ResultadoFluxo } from '../servicos/chat/handlers/ManipuladorAcao';
+// FIX: Corrected import path to use the refactored InterfacesChat file and resolve missing export error.
 import { IManipuladorFluxoChat } from '../servicos/chat/InterfacesChat';
 
 export const useGerenciadorDeChat = (config: ConfiguracaoChat | null, chatService: ServicoChat | null) => {

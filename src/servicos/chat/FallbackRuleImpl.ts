@@ -2,9 +2,7 @@ import { RespostaAi } from "./modelos/AiResponse";
 import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
 import { Lead, LeadKey } from "./modelos/LeadModel";
 import { RegraFallback } from "./FallbackRule";
-// FIX: Correct import from ConfiguracaoFallback.ts instead of non-existent FallbackConfig.ts
 import { fallbackFlow, getFallbackQuestions } from "./ConfiguracaoFallback";
-// FIX: Use correct class names exported from the handlers barrel file.
 import { ManipuladorObjecaoFallback, ManipuladorDadosFallback, ManipuladorDataHoraFallback, ManipuladorResumoFallback } from './handlers';
 
 export class RegraFallbackImpl implements RegraFallback {

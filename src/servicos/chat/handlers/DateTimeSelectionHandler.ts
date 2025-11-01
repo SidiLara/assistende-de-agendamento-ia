@@ -1,20 +1,25 @@
 import { RemetenteMensagem } from '../modelos/MensagemModel';
-import { ServicoChat } from '../ChatService';
+// FIX: Corrected import to use the refactored ServicoChat interface file.
+import { ServicoChat } from '../ServicoChat';
 // FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
-import { DateTimeSelectionHandlerParams } from '../ChatInterfaces';
+// FIX: Corrected import to use the refactored InterfacesChat file.
+import { DateTimeSelectionHandlerParams } from '../InterfacesChat';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';
-import { SummaryHandler } from './SummaryHandler';
+// FIX: Corrected import to use the refactored ManipuladorResumo handler.
+import { ManipuladorResumo } from './ManipuladorResumo';
 
 export class DateTimeSelectionHandler implements ManipuladorAcao<DateTimeSelectionHandlerParams> {
     private chatService: ServicoChat;
     private config: ConfiguracaoChat;
-    private summaryHandler: SummaryHandler;
+    // FIX: Updated type to use the refactored ManipuladorResumo handler.
+    private summaryHandler: ManipuladorResumo;
 
     constructor(chatService: ServicoChat, config: ConfiguracaoChat) {
         this.chatService = chatService;
         this.config = config;
-        this.summaryHandler = new SummaryHandler(chatService, config);
+        // FIX: Instantiated the refactored ManipuladorResumo handler.
+        this.summaryHandler = new ManipuladorResumo(chatService, config);
     }
 
     public async handle(params: DateTimeSelectionHandlerParams): Promise<ResultadoFluxo> {

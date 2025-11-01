@@ -2,7 +2,8 @@ import { Mensagem } from "./modelos/MensagemModel";
 import { Lead, LeadKey } from "./modelos/LeadModel";
 import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
 import { RespostaAi } from "./modelos/AiResponse";
-import { SendCrmOptions } from "./ChatInterfaces";
+// FIX: Corrected import path to use the refactored InterfacesChat file.
+import { SendCrmOptions } from "./InterfacesChat";
 
 export interface ServicoChat {
     getAiResponse(history: Mensagem[], currentData: Partial<Lead>, config: ConfiguracaoChat): Promise<RespostaAi>;
