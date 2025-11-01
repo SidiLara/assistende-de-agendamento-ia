@@ -1,6 +1,6 @@
 import { RespostaAi } from "../../modelos/RespostaAi";
 import { Lead } from "../../modelos/LeadModel";
-// FIX: Corrected import casing to match file name 'DateAndTime.ts'.
+// FIX: Corrected import casing to use PascalCase 'DateAndTime.ts'.
 import { generateTimeSlots } from "../../../../utils/formatters/DateAndTime";
 
 export class ManipuladorDataHoraFallback {
@@ -11,7 +11,7 @@ export class ManipuladorDataHoraFallback {
         
         if (isCollectingTime) {
              const timeSlots = generateTimeSlots();
-             const timeOptions = timeSlots.map(time => ({ label: time, value: time }));
+             const timeOptions = timeSlots.map((time: string) => ({ label: time, value: time }));
 
             return {
                 updatedLeadData,

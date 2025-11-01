@@ -1,6 +1,7 @@
 import { RemetenteMensagem } from '../modelos/MensagemModel';
 import { ServicoChat } from '../ServicoChat';
-import { validateEmail, validateWhatsapp } from '../../../utils/validators';
+// FIX: Corrected import casing to use PascalCase 'InputValidator.ts'.
+import { validateEmail, validateWhatsapp } from '../../../utils/validators/InputValidator';
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { UserMessageHandlerParams } from '../InterfacesChat';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';

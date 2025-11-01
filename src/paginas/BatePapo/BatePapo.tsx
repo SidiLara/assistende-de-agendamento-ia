@@ -19,7 +19,7 @@ export const BatePapo: React.FC = () => {
         return {
             consultantName: consultantNameFromUrl || 'Consultor Sidinei Lara',
             assistantName: 'Yannis',
-            consultantPhoto: 'https://lh3.googleusercontent.com/pw/AP1GczNjDUpGj9Srkxsb0twW-X4VpKtzDwhNTEirCxk1fyEGfo6NTNIOW7qM2kifnymFOrJ0v6LuSn6sThGMj3_E_Vxgf2ld3-IHsDdewbd7aqtuCP6xqELBx3IC0_10oKCQyiEKXTyl6aBCi5crsAyGEHda7A=w801-h801-s-no-gm',
+            consultantPhoto: 'https://lh3.googleusercontent.com/pw/AP1GczOxgZ0lrck55UZFbbWy6VGdzVypbfV4mlqEAwytyyDe_MCrMLs3FgfTCOiOe3sHpKsF_QMw7hweBRi8oU2WGYD1SoWBlUCwU1IFOmJUCgqfFSsX4020goytb0Pkef-nvQSg4f5NRt9gDa4Fnx5WsFDSOQ=w801-h801-s-no-gm',
             webhookId: 'your-webhook-id-here'
         };
     }, []);

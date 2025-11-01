@@ -1,2 +1,2 @@
-// FIX: Correct casing for 'LeadDataParser' export.
+// FIX: Correct casing for 'leadDataParser' export.
 export * from './LeadDataParser';

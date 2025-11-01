@@ -2,7 +2,7 @@ import { RemetenteMensagem } from '../modelos/MensagemModel';
 import { ServicoChat } from '../ServicoChat';
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';
-// FIX: Corrected import casing to match file name 'DateAndTime.ts'.
+// FIX: Corrected import casing to use PascalCase 'DateAndTime.ts'.
 import { calculateFullDate } from '../../../utils/formatters/DateAndTime';
 import { Lead } from '../modelos/LeadModel';
 
@@ -34,7 +34,7 @@ export class ManipuladorResumo implements ManipuladorAcao<SummaryHandlerParams> 
         
         const summaryText = isFallbackMode
             ? this.chatService.getFallbackSummary(finalLeadData)
-            : await this.chatService.getFinalSummary(finalLeadData, this.config);
+            ? await this.chatService.getFinalSummary(finalLeadData, this.config);
             
         const finalDataWithSummary = { ...finalLeadData, finalSummary: summaryText };
 
