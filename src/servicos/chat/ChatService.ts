@@ -2,11 +2,7 @@ import { Mensagem } from "./modelos/MensagemModel";
 import { Lead, LeadKey } from "./modelos/LeadModel";
 import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
 import { RespostaAi } from "./modelos/AiResponse";
-
-export interface SendCrmOptions {
-    isFallback: boolean;
-    objections: string[];
-}
+import { SendCrmOptions } from "./ChatInterfaces";
 
 export interface ServicoChat {
     getAiResponse(history: Mensagem[], currentData: Partial<Lead>, config: ConfiguracaoChat): Promise<RespostaAi>;

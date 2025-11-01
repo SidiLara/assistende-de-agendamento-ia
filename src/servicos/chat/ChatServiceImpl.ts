@@ -1,7 +1,9 @@
 import { Mensagem } from "./modelos/MensagemModel";
 import { Lead } from "./modelos/LeadModel";
 import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
-import { ServicoChat, SendCrmOptions } from "./ChatService";
+// FIX: Import SendCrmOptions from its original definition file.
+import { ServicoChat } from "./ChatService";
+import { SendCrmOptions } from "./ChatInterfaces";
 import { RespostaAi } from "./modelos/AiResponse";
 import { RegraFallback } from "./FallbackRule";
 import { baseDeConhecimento } from "./conhecimento";
