@@ -1,6 +1,7 @@
 declare namespace NodeJS {
   interface ProcessEnv {
-    GEMINI_API_KEY: string;
+    // FIX: Use API_KEY to align with coding guidelines.
+    API_KEY: string;
   }
 }
 

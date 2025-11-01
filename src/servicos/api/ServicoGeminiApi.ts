@@ -16,6 +16,7 @@ export class ServicoGeminiApi implements IGeminiApiService {
         if (apiKey) {
             this.ai = new GoogleGenAI({ apiKey });
         } else {
+            // FIX: Updated warning message to reference API_KEY consistently.
             console.warn("Chave de API do Gemini não encontrada. O aplicativo será executado em modo de fallback. Certifique-se de que a variável de ambiente API_KEY está configurada.");
         }
     }
@@ -44,6 +45,7 @@ export class ServicoGeminiApi implements IGeminiApiService {
 
     private async callGenerativeApi(apiFn: () => Promise<any>) {
         if (!this.ai) {
+            // FIX: Updated error message to reference API_KEY.
             throw new Error("O serviço de IA não foi inicializado. Verifique se a Chave de API (API_KEY) está configurada no ambiente.");
         }
         try {
