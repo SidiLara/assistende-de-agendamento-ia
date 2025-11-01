@@ -3,11 +3,11 @@ import { CabecalhoDoChat } from '../../componentes/CabecalhoDoChat';
 import { CorpoDoChat } from '../../componentes/CorpoDoChat';
 import { EntradaDeChat } from '../../componentes/EntradaDeChat';
 import { PillsDeAcao } from '../../componentes/PillsDeAcao';
-import { useChatManager } from '../../hooks/useChatManager';
+import { useGerenciadorDeChat } from '../../hooks/useGerenciadorDeChat';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { ServicoChatImpl } from '../../servicos/chat/ChatServiceImpl';
-import { RegraFallbackImpl } from '../../servicos/chat/FallbackRuleImpl';
-import { CrmApiService, GeminiApiService } from '../../servicos/api';
+import { ServicoChatImpl } from '../../servicos/chat/ServicoChatImpl';
+import { RegraFallbackImpl } from '../../servicos/chat/RegraFallbackImpl';
+import { ServicoCrmApi, ServicoGeminiApi } from '../../servicos/api';
 
 export const BatePapo: React.FC = () => {
     const { theme, toggleTheme } = useDarkMode();
@@ -26,8 +26,8 @@ export const BatePapo: React.FC = () => {
 
     const chatService = React.useMemo(() => {
         const fallbackRule = new RegraFallbackImpl();
-        const geminiApi = new GeminiApiService();
-        const crmApi = new CrmApiService();
+        const geminiApi = new ServicoGeminiApi();
+        const crmApi = new ServicoCrmApi();
         return new ServicoChatImpl(fallbackRule, geminiApi, crmApi);
     }, []);
 
@@ -41,7 +41,7 @@ export const BatePapo: React.FC = () => {
         nextKey,
         handleSendMessage,
         handlePillSelect,
-    } = useChatManager(chatConfig, chatService);
+    } = useGerenciadorDeChat(chatConfig, chatService);
 
     const inputRef = React.useRef<HTMLInputElement>(null);
     const isChatStarted = messages.length > 0;
@@ -71,7 +71,6 @@ export const BatePapo: React.FC = () => {
                 )}
 
                 <main className="flex-1 flex flex-col overflow-hidden">
-                    {/* Área de rolagem para o conteúdo do chat */}
                     <div className={`flex-1 overflow-y-auto p-4 md:p-6 flex flex-col ${!isChatStarted ? 'justify-center' : ''}`}>
                         {!isChatStarted && (
                             <div className="mb-auto mt-auto">
@@ -94,7 +93,6 @@ export const BatePapo: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Rodapé fixo para a entrada de texto */}
                     <div className={`flex-shrink-0 p-4 md:px-6 md:pb-6 transition-colors duration-300 ${footerClasses}`}>
                         {isActionPending && actionOptions.length > 0 && (
                             <PillsDeAcao options={actionOptions} onSelect={handlePillSelect} />

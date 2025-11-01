@@ -1,11 +1,10 @@
-import { RespostaAi } from "../modelos/AiResponse";
+import { RespostaAi } from "../modelos/RespostaAi";
 import { ConfiguracaoChat } from "../modelos/ConfiguracaoChatModel";
 import { Lead, LeadKey } from "../modelos/LeadModel";
 import { baseDeConhecimento } from "../conhecimento";
-// FIX: Correct import from ConfiguracaoFallback.ts instead of non-existent FallbackConfig.ts
 import { fallbackFlow, getFallbackQuestions } from "../ConfiguracaoFallback";
 
-export class FallbackObjectionHandler {
+export class ManipuladorObjecaoFallback {
     public handle(
         lastUserMessage: string,
         currentData: Partial<Lead>,
@@ -39,6 +38,6 @@ export class FallbackObjectionHandler {
                 }
             }
         }
-        return null; // Nenhuma objeção encontrada
+        return null;
     }
 }

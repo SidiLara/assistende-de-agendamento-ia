@@ -1,9 +1,9 @@
-import { RespostaAi } from "../modelos/AiResponse";
+import { RespostaAi } from "../modelos/RespostaAi";
 import { Lead } from "../modelos/LeadModel";
 // FIX: Correct casing for 'dateAndTime.ts' import.
 import { generateTimeSlots } from "../../../utils/formatters/dateAndTime";
 
-export class FallbackDateTimeHandler {
+export class ManipuladorDataHoraFallback {
     public handle(
         updatedLeadData: Partial<Lead>
     ): RespostaAi | null {

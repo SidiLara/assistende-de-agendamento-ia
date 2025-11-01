@@ -1,10 +1,8 @@
-import { RespostaAi } from "./modelos/AiResponse";
+import { RespostaAi } from "./modelos/RespostaAi";
 import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
 import { Lead, LeadKey } from "./modelos/LeadModel";
-import { RegraFallback } from "./FallbackRule";
-// FIX: Correct import from ConfiguracaoFallback.ts instead of non-existent FallbackConfig.ts
+import { RegraFallback } from "./RegraFallback";
 import { fallbackFlow, getFallbackQuestions } from "./ConfiguracaoFallback";
-// FIX: Use correct class names exported from the handlers barrel file.
 import { ManipuladorObjecaoFallback, ManipuladorDadosFallback, ManipuladorDataHoraFallback, ManipuladorResumoFallback } from './handlers';
 
 export class RegraFallbackImpl implements RegraFallback {
@@ -26,22 +24,18 @@ export class RegraFallbackImpl implements RegraFallback {
         keyToCollect: LeadKey | null,
         config: ConfiguracaoChat
     ): RespostaAi {
-        // 1. Tenta lidar com a mensagem como uma objeção
         const objectionResponse = this.objectionHandler.handle(lastUserMessage, currentData, keyToCollect, config);
         if (objectionResponse) {
             return objectionResponse;
         }
 
-        // 2. Coleta os dados da mensagem do usuário
         const updatedLeadData = this.dataHandler.handle(lastUserMessage, currentData, keyToCollect);
 
-        // 3. Tenta lidar com o fluxo de data/hora
         const dateTimeResponse = this.dateTimeHandler.handle(updatedLeadData);
         if (dateTimeResponse) {
             return dateTimeResponse;
         }
 
-        // 4. Determina a próxima pergunta do fluxo principal
         const nextKey = fallbackFlow.find(key => {
              if (key === 'startDatetime') {
                 return !(updatedLeadData.startDatetime && updatedLeadData.startDatetime.includes('às'));
@@ -49,12 +43,10 @@ export class RegraFallbackImpl implements RegraFallback {
             return !updatedLeadData.hasOwnProperty(key);
         }) || null;
 
-        // Se o fluxo terminou, retorna um objeto vazio para o SummaryHandler assumir
         if (!nextKey) {
             return { updatedLeadData, responseText: "", action: null, nextKey: null };
         }
 
-        // 5. Monta a resposta final
         const fallbackQuestions = getFallbackQuestions(config);
         let responseText = fallbackQuestions[nextKey];
         

@@ -1,12 +1,11 @@
 import { RemetenteMensagem } from './modelos/MensagemModel';
-import { ServicoChat } from './ChatService';
+import { ServicoChat } from './ServicoChat';
 import { ConfiguracaoChat } from './modelos/ConfiguracaoChatModel';
-import { IChatFlowHandler, MessageHandlerParams, PillSelectionHandlerParams } from './ChatInterfaces';
-import { FlowResult } from './handlers/AcaoHandler';
-// FIX: Use correct class names exported from the handlers barrel file.
+import { IManipuladorFluxoChat, MessageHandlerParams, PillSelectionHandlerParams } from './InterfacesChat';
+import { ResultadoFluxo } from './handlers/ManipuladorAcao';
 import { ManipuladorMensagemUsuario, ManipuladorConfirmacao, ManipuladorCorrecao, ManipuladorSelecaoDataHora } from './handlers';
 
-export class ChatFlowHandler implements IChatFlowHandler {
+export class ManipuladorFluxoChat implements IManipuladorFluxoChat {
     private userMessageHandler: ManipuladorMensagemUsuario;
     private confirmationHandler: ManipuladorConfirmacao;
     private correctionHandler: ManipuladorCorrecao;
@@ -19,11 +18,11 @@ export class ChatFlowHandler implements IChatFlowHandler {
         this.dateTimeSelectionHandler = new ManipuladorSelecaoDataHora(chatService, config);
     }
 
-    public async processUserMessage(params: MessageHandlerParams): Promise<FlowResult> {
+    public async processUserMessage(params: MessageHandlerParams): Promise<ResultadoFluxo> {
         return this.userMessageHandler.handle(params);
     }
 
-    public async processPillSelection(params: PillSelectionHandlerParams): Promise<FlowResult> {
+    public async processPillSelection(params: PillSelectionHandlerParams): Promise<ResultadoFluxo> {
         const { value, isCorrecting, leadData } = params;
 
         if (value === 'confirm') {
@@ -34,13 +33,11 @@ export class ChatFlowHandler implements IChatFlowHandler {
             return this.correctionHandler.handle(params);
         }
         
-        // Se não for confirmação ou correção, é seleção de data/hora
         const isDateTimeSelection = (leadData.startDatetime && !leadData.startDatetime.includes('às')) || params.currentHistory.some(m => m.text.includes("dia da semana"));
         if(isDateTimeSelection) {
             return this.dateTimeSelectionHandler.handle(params);
         }
 
-        // Fallback para uma mensagem de erro genérica se nenhuma condição for atendida
         console.error("Ação de pill não reconhecida:", value);
         return {
             newMessages: [{

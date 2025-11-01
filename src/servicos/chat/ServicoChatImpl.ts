@@ -1,15 +1,13 @@
 import { Mensagem } from "./modelos/MensagemModel";
 import { Lead } from "./modelos/LeadModel";
 import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
-// FIX: Import SendCrmOptions from its original definition file.
-import { ServicoChat } from "./ChatService";
-import { SendCrmOptions } from "./ChatInterfaces";
-import { RespostaAi } from "./modelos/AiResponse";
-import { RegraFallback } from "./FallbackRule";
+import { ServicoChat } from "./ServicoChat";
+import { SendCrmOptions } from "./InterfacesChat";
+import { RespostaAi } from "./modelos/RespostaAi";
+import { RegraFallback } from "./RegraFallback";
 import { baseDeConhecimento } from "./conhecimento";
-// FIX: Correct import from ConfiguracaoFallback.ts instead of non-existent FallbackConfig.ts
 import { getFallbackQuestions, fallbackFlow } from "./ConfiguracaoFallback";
-import { ICrmApiService, IGeminiApiService } from "../api/ApiInterfaces";
+import { ICrmApiService, IGeminiApiService } from "../api/InterfacesApi";
 
 export class ServicoChatImpl implements ServicoChat {
     private fallbackRule: RegraFallback;
@@ -70,7 +68,6 @@ export class ServicoChatImpl implements ServicoChat {
     }
 
     public async sendLeadToCRM(leadData: Partial<Lead>, history: Mensagem[], config: ConfiguracaoChat, options: SendCrmOptions) {
-        // FIX: The property 'topic' does not exist on type 'ConfiguracaoChat'.
         const { consultantName } = config;
         const { creditAmount = 0, monthlyInvestment = 0 } = leadData;
 

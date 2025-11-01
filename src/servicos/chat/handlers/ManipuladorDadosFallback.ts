@@ -3,7 +3,7 @@ import { extractAllData, extractName } from "../../../utils/parsers";
 // FIX: Correct casing for 'number.ts' import.
 import { parseHumanNumber } from "../../../utils/formatters/number";
 
-export class FallbackDataHandler {
+export class ManipuladorDadosFallback {
     public handle(
         lastUserMessage: string,
         currentData: Partial<Lead>,
@@ -11,11 +11,9 @@ export class FallbackDataHandler {
     ): Partial<Lead> {
         let updatedLeadData = { ...currentData };
 
-        // 1. Extrai dados genéricos da mensagem
         const extractedData = extractAllData(lastUserMessage);
         updatedLeadData = { ...updatedLeadData, ...extractedData };
         
-        // 2. Processa o dado específico que estava sendo coletado
         if (keyToCollect && lastUserMessage) {
             if (keyToCollect === 'clientName' && !updatedLeadData.clientName) {
                 const extractedName = extractName(lastUserMessage);
