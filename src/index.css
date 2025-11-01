@@ -17,16 +17,12 @@
   animation: slide-in-fade-in 0.4s ease-out forwards;
 }
 
-.chat-container::-webkit-scrollbar {
-  width: 6px;
-}
-.chat-container::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800;
-}
-.chat-container::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-600;
-  border-radius: 3px;
-}
-.chat-container::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-500;
+@layer utilities {
+  .chat-container {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .chat-container::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
 }
