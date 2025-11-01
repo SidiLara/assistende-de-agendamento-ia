@@ -1,4 +1,6 @@
 import { CabecalhoDoChatProps } from './CabecalhoDoChat.props';
+import { Avatar } from '../Avatar';
+import { LogoEmpresa } from '../LogoEmpresa';
 
 const SunIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -18,11 +20,9 @@ export const CabecalhoDoChat = ({ consultantName, assistantName, consultantPhoto
     if (!isChatStarted) {
         return (
             <div className="flex flex-col items-center justify-center text-center p-5 transition-all duration-700 ease-in-out">
-                <img
-                    className="w-24 h-24 rounded-full border-4 border-white object-cover shadow-lg mb-4 dark:border-dark-tertiary"
-                    src={consultantPhoto}
-                    alt={consultantName}
-                />
+                <div className="mb-4">
+                    <Avatar src={consultantPhoto} alt={consultantName} size="large" />
+                </div>
                 <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-brand-green-light dark:from-brand-blue dark:to-brand-green-light">
                     Olá, sou o {assistantName}
                 </h1>
@@ -35,14 +35,7 @@ export const CabecalhoDoChat = ({ consultantName, assistantName, consultantPhoto
     return (
         <div className="p-5 flex items-center justify-between w-full">
             <div className="flex items-center space-x-4">
-                <div className="relative">
-                    <img
-                        className="w-10 h-10 rounded-full object-cover"
-                        src={consultantPhoto}
-                        alt={consultantName}
-                    />
-                    <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-brand-green ring-2 ring-dark-primary"></span>
-                </div>
+                <Avatar src={consultantPhoto} alt={consultantName} size="small" showStatus={true} />
                 <div>
                     <h1 className="text-md font-bold text-gray-800 dark:text-gray-100">Assistente de Pré-Consultoria</h1>
                     <p className="text-xs text-gray-500 dark:text-gray-400">{consultantName}, Consultor</p>
@@ -56,11 +49,7 @@ export const CabecalhoDoChat = ({ consultantName, assistantName, consultantPhoto
                 >
                     {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
                 </button>
-                <img
-                    src="https://lh3.googleusercontent.com/pw/AP1GczMLLmTFX3k4nI61XGKYxWDQxtvpRlW1pj6emtnu7C43TsWql3583NdeDKjg4sTNz6qGGhPR-TDbnFX0X-NCQxGeQdU7rFj92z0hHzHrYwKa4HDg4tEZTGRYpjk7dTUlDfodrt8IQsMGePi24SS5ThxR2g=w900-h900-s-no-gm"
-                    alt="Logo"
-                    className="h-8 w-8"
-                />
+                <LogoEmpresa />
             </div>
         </div>
     );

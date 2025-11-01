@@ -34,7 +34,7 @@ export class ManipuladorResumo implements ManipuladorAcao<SummaryHandlerParams> 
         
         const summaryText = isFallbackMode
             ? this.chatService.getFallbackSummary(finalLeadData)
-            ? await this.chatService.getFinalSummary(finalLeadData, this.config);
+            : await this.chatService.getFinalSummary(finalLeadData, this.config);
             
         const finalDataWithSummary = { ...finalLeadData, finalSummary: summaryText };
 
