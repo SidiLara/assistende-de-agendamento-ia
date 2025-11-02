@@ -28,8 +28,10 @@ export const getSheetsClient = async () => {
             scopes: ['https://www.googleapis.com/auth/spreadsheets'],
         });
 
-        const authClient = await auth.getClient();
-        sheets = google.sheets({ version: 'v4', auth: authClient });
+        // Correção: Em vez de obter um cliente genérico com `auth.getClient()`,
+        // passamos a instância de `GoogleAuth` diretamente. A biblioteca `googleapis`
+        // gerencia a obtenção do cliente internamente, resolvendo o conflito de tipos.
+        sheets = google.sheets({ version: 'v4', auth });
         
         console.log("Cliente do Google Sheets inicializado com sucesso.");
         return sheets;
