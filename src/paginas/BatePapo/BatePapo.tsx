@@ -7,7 +7,9 @@ import { useGerenciadorDeChat } from '../../hooks/useGerenciadorDeChat';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ServicoChatImpl } from '../../servicos/chat/ServicoChatImpl';
 import { RegraFallbackImpl } from '../../servicos/chat/RegraFallbackImpl';
-import { ServicoCrmApi, ServicoGeminiApi } from '../../servicos/api';
+// FIX: `ServicoCrmApi` is not exported from `ServicoGeminiApi.ts`. Changed to import from its own file.
+import { ServicoGeminiApi } from '../../servicos/api/ServicoGeminiApi';
+import { ServicoCrmApi } from '../../servicos/api/ServicoCrmApi';
 
 export const BatePapo: React.FC = () => {
     const { theme, toggleTheme } = useDarkMode();
@@ -15,11 +17,12 @@ export const BatePapo: React.FC = () => {
     const chatConfig = React.useMemo(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const consultantNameFromUrl = urlParams.get('consultor') || urlParams.get('consultant');
+        const assistantNameFromUrl = urlParams.get('assistente') || urlParams.get('assistant');
         const webhookIdFromUrl = urlParams.get('make') || urlParams.get('webhook') || urlParams.get('webhookId');
         
         return {
             consultantName: consultantNameFromUrl || 'Consultor Sidinei Lara',
-            assistantName: 'Yannis',
+            assistantName: assistantNameFromUrl || 'Yannis',
             consultantPhoto: 'https://lh3.googleusercontent.com/pw/AP1GczOxgZ0lrck55UZFbbWy6VGdzVypbfV4mlqEAwytyyDe_MCrMLs3FgfTCOiOe3sHpKsF_QMw7hweBRi8oU2WGYD1SoWBlUCwU1IFOmJUCgqfFSsX4020goytb0Pkef-nvQSg4f5NRt9gDa4Fnx5WsFDSOQ=w801-h801-s-no-gm',
             webhookId: webhookIdFromUrl || 'ud4aq9lrms2mfpce40ur6ac1papv68fi'
         };
