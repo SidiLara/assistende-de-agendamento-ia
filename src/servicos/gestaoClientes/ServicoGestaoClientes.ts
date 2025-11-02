@@ -1,18 +1,19 @@
-import { Cliente } from "./modelos/ClienteModel";
+import { Cliente, StatusCliente } from "./modelos/ClienteModel";
 import { IServicoGestaoClientes } from "./InterfacesGestaoClientes";
 
+// Mock data
 const mockClientes: Cliente[] = [
-    { id: '1', nome: 'Sidinei Lara', plano: 'Premium', telefone: '(11) 98765-4321', status: 'Ativo' },
-    { id: '2', nome: 'Maria Silva', plano: 'Básico', telefone: '(21) 91234-5678', status: 'Ativo' },
-    { id: '3', nome: 'Acme Corporation', plano: 'Empresarial', telefone: '(31) 95555-8888', status: 'Ativo' },
-    { id: '4', nome: 'Ana Pereira', plano: 'Básico', telefone: '(41) 99999-0000', status: 'Inativo' },
+    { id: 'c1', nome: 'Empresa Alpha', plano: 'Empresarial', telefone: '(11) 91111-1111', status: 'Ativo' },
+    { id: 'c2', nome: 'Comércio Beta', plano: 'Premium', telefone: '(21) 92222-2222', status: 'Ativo' },
+    { id: 'c3', nome: 'Serviços Gama', plano: 'Básico', telefone: '(31) 93333-3333', status: 'Inativo' },
+    { id: 'c4', nome: 'Indústria Delta', plano: 'Premium', telefone: '(41) 94444-4444', status: 'Ativo' },
 ];
 
 export class ServicoGestaoClientes implements IServicoGestaoClientes {
     public async getClientes(): Promise<Cliente[]> {
         return new Promise(resolve => {
             setTimeout(() => {
-                resolve([...mockClientes]); 
+                resolve([...mockClientes]);
             }, 500);
         });
     }
@@ -21,9 +22,9 @@ export class ServicoGestaoClientes implements IServicoGestaoClientes {
         return new Promise(resolve => {
             setTimeout(() => {
                 const novoCliente: Cliente = {
-                    id: Date.now().toString(),
-                    ...clienteData,
-                    status: 'Ativo'
+                    id: `c${Date.now()}`,
+                    status: 'Ativo',
+                    ...clienteData
                 };
                 mockClientes.push(novoCliente);
                 resolve(novoCliente);
@@ -39,7 +40,7 @@ export class ServicoGestaoClientes implements IServicoGestaoClientes {
                     mockClientes[index] = clienteAtualizado;
                     resolve(clienteAtualizado);
                 } else {
-                    reject(new Error("Cliente não encontrado"));
+                    reject(new Error("Cliente não encontrado."));
                 }
             }, 300);
         });

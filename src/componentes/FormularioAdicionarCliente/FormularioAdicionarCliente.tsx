@@ -3,24 +3,23 @@ import { FormularioAdicionarClienteProps } from './FormularioAdicionarCliente.pr
 import { TipoPlano } from '../../servicos/gestaoClientes/modelos/ClienteModel';
 import { applyWhatsappMask } from '../../utils/formatters/Phone';
 
-export const FormularioAdicionarCliente = ({ clienteExistente, onSalvar, onCancelar }: FormularioAdicionarClienteProps) => {
+export const FormularioAdicionarCliente = ({ clienteParaEditar, onSalvar, onCancelar }: FormularioAdicionarClienteProps) => {
     const [nome, setNome] = React.useState('');
     const [plano, setPlano] = React.useState<TipoPlano>('Básico');
     const [telefone, setTelefone] = React.useState('');
     const [erro, setErro] = React.useState('');
 
     React.useEffect(() => {
-        if (clienteExistente) {
-            setNome(clienteExistente.nome);
-            setPlano(clienteExistente.plano);
-            setTelefone(clienteExistente.telefone);
+        if (clienteParaEditar) {
+            setNome(clienteParaEditar.nome);
+            setPlano(clienteParaEditar.plano);
+            setTelefone(clienteParaEditar.telefone);
         } else {
-            // Reseta o formulário se não houver cliente para editar (modo de adição)
             setNome('');
             setPlano('Básico');
             setTelefone('');
         }
-    }, [clienteExistente]);
+    }, [clienteParaEditar]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,12 +28,7 @@ export const FormularioAdicionarCliente = ({ clienteExistente, onSalvar, onCance
             return;
         }
         setErro('');
-        
-        if (clienteExistente) {
-            onSalvar({ ...clienteExistente, nome, plano, telefone });
-        } else {
-            onSalvar({ nome, plano, telefone });
-        }
+        onSalvar({ nome, plano, telefone });
     };
 
     return (
@@ -47,7 +41,7 @@ export const FormularioAdicionarCliente = ({ clienteExistente, onSalvar, onCance
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm bg-white dark:bg-dark-tertiary"
-                    placeholder="Ex: João da Silva ou Acme Inc."
+                    placeholder="Ex: Empresa Exemplo"
                 />
             </div>
             <div>
