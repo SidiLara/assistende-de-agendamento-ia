@@ -3,6 +3,7 @@ import { ListaDeConsultores } from '../../componentes/ListaDeConsultores';
 import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarConsultor } from '../../componentes/FormularioAdicionarConsultor';
 import { ServicoGestaoCrm, Consultor } from '../../servicos/gestaoCrm';
+import { getFriendlyApiError } from '../../utils/apiErrorHandler';
 
 export const Consultores: React.FC = () => {
     const [consultores, setConsultores] = React.useState<Consultor[]>([]);
@@ -19,9 +20,9 @@ export const Consultores: React.FC = () => {
             .then(data => {
                 setConsultores(data);
             })
-            .catch(error => {
-                console.error("Erro ao buscar consultores:", error);
-                setError("Não foi possível carregar os consultores. Verifique a configuração da API do Google Sheets e se a planilha está acessível.");
+            .catch(err => {
+                console.error("Erro ao buscar consultores:", err);
+                setError(getFriendlyApiError(err, 'os consultores'));
             })
             .finally(() => {
                 setIsLoading(false);

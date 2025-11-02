@@ -4,6 +4,7 @@ import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarCliente } from '../../componentes/FormularioAdicionarCliente';
 import { ServicoGestaoClientes, Cliente, StatusCliente } from '../../servicos/gestaoClientes';
 import { ServicoGestaoPlanos, Plano } from '../../servicos/gestaoPlanos';
+import { getFriendlyApiError } from '../../utils/apiErrorHandler';
 
 export const Clientes: React.FC = () => {
     const [clientes, setClientes] = React.useState<Cliente[]>([]);
@@ -28,9 +29,9 @@ export const Clientes: React.FC = () => {
                 ]);
                 setClientes(clientesData);
                 setPlanos(planosData);
-            } catch (error) {
-                console.error("Erro ao buscar dados:", error);
-                setError("Não foi possível carregar os dados. Verifique a configuração da API do Google Sheets e se a planilha está acessível.");
+            } catch (err) {
+                console.error("Erro ao buscar dados:", err);
+                setError(getFriendlyApiError(err, 'os clientes e planos'));
             } finally {
                 setIsLoading(false);
             }

@@ -3,6 +3,7 @@ import { ListaDePlanos } from '../../componentes/ListaDePlanos';
 import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarPlano } from '../../componentes/FormularioAdicionarPlano';
 import { ServicoGestaoPlanos, Plano } from '../../servicos/gestaoPlanos';
+import { getFriendlyApiError } from '../../utils/apiErrorHandler';
 
 export const Planos: React.FC = () => {
     const [planos, setPlanos] = React.useState<Plano[]>([]);
@@ -19,9 +20,9 @@ export const Planos: React.FC = () => {
             .then(data => {
                 setPlanos(data);
             })
-            .catch(error => {
-                console.error("Erro ao buscar planos:", error);
-                setError("Não foi possível carregar os planos. Verifique a configuração da API do Google Sheets e se a planilha está acessível.");
+            .catch(err => {
+                console.error("Erro ao buscar planos:", err);
+                setError(getFriendlyApiError(err, 'os planos'));
             })
             .finally(() => {
                 setIsLoading(false);
