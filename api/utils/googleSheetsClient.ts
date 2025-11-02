@@ -1,26 +1,9 @@
 // api/utils/googleSheetsClient.ts
 import { google } from 'googleapis';
 
-// As variáveis de ambiente são injetadas pela Vercel de forma segura.
+// A aplicação agora usará estas duas variáveis de ambiente.
 export const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
-const SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-
-// Lógica de sanitização robusta para a chave privada.
-// Isso corrige erros comuns de cópia/cola, como aspas extras ou problemas de formatação de nova linha.
-const getSanitizedPrivateKey = () => {
-    let rawKey = process.env.GOOGLE_PRIVATE_KEY || '';
-
-    // Remove aspas extras do início e do fim, se houver.
-    if (rawKey.startsWith('"') && rawKey.endsWith('"')) {
-        rawKey = rawKey.substring(1, rawKey.length - 1);
-    }
-    
-    // Substitui os literais '\\n' por caracteres de nova linha reais.
-    // Esta é a principal correção para o erro 'ERR_OSSL_UNSUPPORTED'.
-    return rawKey.replace(/\\n/g, '\n');
-};
-
-const PRIVATE_KEY = getSanitizedPrivateKey();
+const GOOGLE_CREDENTIALS_JSON = process.env.GOOGLE_CREDENTIALS_JSON;
 
 let sheets: any;
 
@@ -29,16 +12,23 @@ export const getSheetsClient = async () => {
         return sheets;
     }
 
-    if (!SPREADSHEET_ID || !SERVICE_ACCOUNT_EMAIL || !PRIVATE_KEY) {
-        console.error("Variáveis de ambiente do Google Sheets não configuradas!");
-        throw new Error("Credenciais do Google Sheets não encontradas.");
+    if (!SPREADSHEET_ID || !GOOGLE_CREDENTIALS_JSON) {
+        console.error("Variáveis de ambiente GOOGLE_SHEET_ID ou GOOGLE_CREDENTIALS_JSON não configuradas!");
+        throw new Error("Credenciais do Google Sheets não encontradas. Por favor, configure a variável GOOGLE_CREDENTIALS_JSON com o conteúdo completo do seu arquivo JSON de credenciais.");
     }
 
     try {
+        // Analisa o JSON de credenciais diretamente da variável de ambiente.
+        const credentials = JSON.parse(GOOGLE_CREDENTIALS_JSON);
+
+        // Sanitiza a chave privada do JSON analisado.
+        // Esta é a correção definitiva para problemas de formatação de nova linha ('\\n').
+        const sanitizedPrivateKey = credentials.private_key.replace(/\\n/g, '\n');
+
         const auth = new google.auth.GoogleAuth({
             credentials: {
-                client_email: SERVICE_ACCOUNT_EMAIL,
-                private_key: PRIVATE_KEY,
+                client_email: credentials.client_email,
+                private_key: sanitizedPrivateKey, // Usa a chave sanitizada
             },
             scopes: ['https://www.googleapis.com/auth/spreadsheets'],
         });
@@ -48,7 +38,7 @@ export const getSheetsClient = async () => {
         console.log("Cliente do Google Sheets inicializado com sucesso.");
         return sheets;
     } catch (error) {
-        console.error("Erro ao autenticar com a API do Google Sheets:", error);
+        console.error("Erro ao autenticar com a API do Google Sheets. Verifique se o conteúdo da variável GOOGLE_CREDENTIALS_JSON é um JSON válido.", error);
         throw new Error("Falha na autenticação do Google Sheets.");
     }
 };
