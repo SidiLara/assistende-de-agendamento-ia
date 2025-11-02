@@ -1,13 +1,31 @@
 import { Plano } from "./modelos/PlanoModel";
 import { IServicoGestaoPlanos } from "./InterfacesGestaoPlanos";
-import { getPlanos, addPlano } from "../../../api/planos";
+
+const API_BASE_URL = '/api/planos';
+
+// Helper to handle fetch responses
+const handleResponse = async (response: Response) => {
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.details || `HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+};
 
 export class ServicoGestaoPlanos implements IServicoGestaoPlanos {
     public async getPlanos(): Promise<Plano[]> {
-        return getPlanos();
+        const response = await fetch(API_BASE_URL);
+        return handleResponse(response);
     }
 
     public async addPlano(planoData: Omit<Plano, 'id'>): Promise<Plano> {
-        return addPlano(planoData);
+        const response = await fetch(API_BASE_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(planoData),
+        });
+        return handleResponse(response);
     }
 }

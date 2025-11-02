@@ -1,3 +1,5 @@
+// api/planos.ts
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSheetsClient, SPREADSHEET_ID } from './utils/googleSheetsClient';
 import { Plano } from '../src/servicos/gestaoPlanos';
 
@@ -20,7 +22,7 @@ const rowsToPlanos = (rows: any[][]): Plano[] => {
     }));
 };
 
-export const getPlanos = async (): Promise<Plano[]> => {
+const getPlanos = async (): Promise<Plano[]> => {
     const sheets = await getSheetsClient();
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
@@ -29,7 +31,7 @@ export const getPlanos = async (): Promise<Plano[]> => {
     return rowsToPlanos(response.data.values || []);
 };
 
-export const addPlano = async (planoData: Omit<Plano, 'id'>): Promise<Plano> => {
+const addPlano = async (planoData: Omit<Plano, 'id'>): Promise<Plano> => {
     const sheets = await getSheetsClient();
     const novoPlano: Plano = {
         id: Date.now().toString(),
@@ -47,3 +49,24 @@ export const addPlano = async (planoData: Omit<Plano, 'id'>): Promise<Plano> => 
 
     return novoPlano;
 };
+
+
+// Vercel Serverless Function Handler
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+    try {
+        if (req.method === 'GET') {
+            const planos = await getPlanos();
+            res.status(200).json(planos);
+        } else if (req.method === 'POST') {
+            const novoPlano = await addPlano(req.body);
+            res.status(201).json(novoPlano);
+        } else {
+            res.setHeader('Allow', ['GET', 'POST']);
+            res.status(405).end(`Method ${req.method} Not Allowed`);
+        }
+    } catch (error) {
+        console.error("Erro na API de Planos:", error);
+        const message = error instanceof Error ? error.message : 'Um erro interno ocorreu.';
+        res.status(500).json({ error: 'Falha ao processar a requisição.', details: message });
+    }
+}
