@@ -68,6 +68,10 @@ export class ServicoGeminiApi implements IGeminiApiService {
         }));
 
         const jsonText = response.text;
+        if (!jsonText) {
+            console.error("A resposta do Gemini veio vazia e não pode ser analisada.");
+            throw new Error("A resposta da IA veio vazia.");
+        }
         try {
             const parsedJson = JSON.parse(jsonText);
             const { responseText, action, nextKey, ...updatedLeadData } = parsedJson;
@@ -99,7 +103,7 @@ export class ServicoGeminiApi implements IGeminiApiService {
             contents: summaryPrompt,
         }));
 
-        return response.text.trim();
+        return response.text?.trim() ?? "Não foi possível gerar o resumo. Por favor, confirme os dados.";
     }
     
     public async generateInternalSummary(leadData: Partial<Lead>, history: Mensagem[], formattedCreditAmount: string, formattedMonthlyInvestment: string, consultantName: string): Promise<string> {
@@ -110,7 +114,13 @@ export class ServicoGeminiApi implements IGeminiApiService {
                 model: "gemini-2.5-pro",
                 contents: internalSummaryPrompt,
             }));
-            return response.text.trim();
+
+            const summary = response.text?.trim();
+            if (!summary) {
+                throw new Error("O resumo interno retornado pela IA estava vazio.");
+            }
+            return summary;
+
         } catch (error) {
             console.error("Falha ao gerar o resumo interno do CRM:", error);
             return "Não foi possível gerar o relatório narrativo da conversa.";
