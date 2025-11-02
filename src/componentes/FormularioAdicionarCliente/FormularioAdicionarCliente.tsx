@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { FormularioClienteProps } from './FormularioCliente.props';
+import { FormularioAdicionarClienteProps } from './FormularioAdicionarCliente.props';
 import { TipoPlano } from '../../servicos/gestaoClientes/modelos/ClienteModel';
 import { applyWhatsappMask } from '../../utils/formatters/Phone';
 
-export const FormularioCliente = ({ clienteExistente, onSalvar, onCancelar }: FormularioClienteProps) => {
+export const FormularioAdicionarCliente = ({ clienteExistente, onSalvar, onCancelar }: FormularioAdicionarClienteProps) => {
     const [nome, setNome] = React.useState('');
     const [plano, setPlano] = React.useState<TipoPlano>('Básico');
     const [telefone, setTelefone] = React.useState('');

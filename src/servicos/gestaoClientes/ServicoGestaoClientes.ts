@@ -1,4 +1,4 @@
-import { Cliente, StatusCliente } from "./modelos/ClienteModel";
+import { Cliente } from "./modelos/ClienteModel";
 import { IServicoGestaoClientes } from "./InterfacesGestaoClientes";
 
 const mockClientes: Cliente[] = [

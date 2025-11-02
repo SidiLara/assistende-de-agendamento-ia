@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ListaDeClientes } from '../../componentes/ListaDeClientes';
 import { Modal } from '../../componentes/Modal';
-import { FormularioCliente } from '../../componentes/FormularioCliente';
+import { FormularioAdicionarCliente } from '../../componentes/FormularioAdicionarCliente';
 import { ServicoGestaoClientes, Cliente } from '../../servicos/gestaoClientes';
 
 export const Clientes: React.FC = () => {
@@ -108,7 +108,7 @@ export const Clientes: React.FC = () => {
                 onClose={() => setIsModalOpen(false)}
                 titulo={clienteParaEditar ? "Editar Cliente" : "Adicionar Novo Cliente"}
             >
-                <FormularioCliente
+                <FormularioAdicionarCliente
                     clienteExistente={clienteParaEditar}
                     onSalvar={handleSalvarCliente}
                     onCancelar={() => setIsModalOpen(false)}
