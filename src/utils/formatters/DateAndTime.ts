@@ -56,20 +56,32 @@ export const calculateFullDate = (dayOfWeekString: string, timeString: string): 
 };
 
 /**
- * Gera uma lista de horários disponíveis em intervalos de 30 minutos, das 09:00 às 18:00.
- * @returns Um array de strings com os horários (ex: ["09:00", "09:30", ...]).
+ * Gera 3 horários aleatórios: um de manhã, um à tarde e um à noite.
+ * @returns Um array com 3 strings de horários (ex: ["10:30", "14:00", "19:30"]).
  */
 export const generateTimeSlots = (): string[] => {
-    const slots: string[] = [];
-    const startTime = 9 * 60; // 9:00 em minutos
-    const endTime = 18 * 60; // 18:00 em minutos
-    const interval = 30; // 30 minutos
+    // Helper para gerar um horário aleatório em um intervalo de tempo, com incrementos de 30 minutos.
+    const getRandomTimeSlot = (startHour: number, startMinute: number, endHour: number, endMinute: number): string => {
+        const startTime = startHour * 60 + startMinute;
+        const endTime = endHour * 60 + endMinute;
+        const interval = 30;
 
-    for (let time = startTime; time <= endTime; time += interval) {
-        const hours = Math.floor(time / 60);
-        const minutes = time % 60;
-        slots.push(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`);
-    }
-    
-    return slots;
+        const slots = [];
+        for (let time = startTime; time <= endTime; time += interval) {
+            slots.push(time);
+        }
+
+        const randomTime = slots[Math.floor(Math.random() * slots.length)];
+
+        const hours = Math.floor(randomTime / 60);
+        const minutes = randomTime % 60;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    };
+
+    const morningSlot = getRandomTimeSlot(9, 0, 11, 30);   // Manhã: 09:00 - 11:30
+    const afternoonSlot = getRandomTimeSlot(13, 0, 17, 30); // Tarde: 13:00 - 17:30
+    const eveningSlot = getRandomTimeSlot(18, 0, 20, 30);  // Noite: 18:00 - 20:30
+
+    // Retorna os horários em ordem.
+    return [morningSlot, afternoonSlot, eveningSlot].sort();
 };
