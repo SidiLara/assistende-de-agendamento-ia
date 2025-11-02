@@ -3,4 +3,6 @@ export interface NavegacaoCrmProps {
     toggleTheme: () => void;
     isCollapsed: boolean;
     toggleSidebar: () => void;
+    isMobileMenuOpen: boolean;
+    setIsMobileMenuOpen: (isOpen: boolean) => void;
 }
