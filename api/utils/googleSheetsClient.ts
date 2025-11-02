@@ -4,8 +4,23 @@ import { google } from 'googleapis';
 // As variáveis de ambiente são injetadas pela Vercel de forma segura.
 export const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
 const SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-// A chave privada precisa de um tratamento para substituir `\n` por newlines reais.
-const PRIVATE_KEY = (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
+
+// Lógica de sanitização robusta para a chave privada.
+// Isso corrige erros comuns de cópia/cola, como aspas extras ou problemas de formatação de nova linha.
+const getSanitizedPrivateKey = () => {
+    let rawKey = process.env.GOOGLE_PRIVATE_KEY || '';
+
+    // Remove aspas extras do início e do fim, se houver.
+    if (rawKey.startsWith('"') && rawKey.endsWith('"')) {
+        rawKey = rawKey.substring(1, rawKey.length - 1);
+    }
+    
+    // Substitui os literais '\\n' por caracteres de nova linha reais.
+    // Esta é a principal correção para o erro 'ERR_OSSL_UNSUPPORTED'.
+    return rawKey.replace(/\\n/g, '\n');
+};
+
+const PRIVATE_KEY = getSanitizedPrivateKey();
 
 let sheets: any;
 
@@ -28,9 +43,6 @@ export const getSheetsClient = async () => {
             scopes: ['https://www.googleapis.com/auth/spreadsheets'],
         });
 
-        // Correção: Em vez de obter um cliente genérico com `auth.getClient()`,
-        // passamos a instância de `GoogleAuth` diretamente. A biblioteca `googleapis`
-        // gerencia a obtenção do cliente internamente, resolvendo o conflito de tipos.
         sheets = google.sheets({ version: 'v4', auth });
         
         console.log("Cliente do Google Sheets inicializado com sucesso.");
