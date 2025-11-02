@@ -1,39 +1,41 @@
 import { getSheetsClient, SPREADSHEET_ID } from './utils/googleSheetsClient';
-import { Plano } from '../src/servicos/gestaoPlanos';
+import { Consultor } from '../src/servicos/gestaoCrm';
 
-const RANGE = 'Planos!A:C';
+const RANGE = 'Consultores!A:D';
 
-// Helper to convert sheet rows to Plano objects
-const rowsToPlanos = (rows: any[][]): Plano[] => {
+// Helper to convert sheet rows to Consultor objects
+const rowsToConsultores = (rows: any[][]): Consultor[] => {
     if (!rows || rows.length < 2) return [];
     const header = rows[0];
     const data = rows.slice(1);
-
+    
     const idIndex = header.indexOf('id');
     const nomeIndex = header.indexOf('nome');
-    const valorIndex = header.indexOf('valor');
+    const planoIndex = header.indexOf('plano');
+    const telefoneIndex = header.indexOf('telefone');
 
     return data.map(row => ({
         id: row[idIndex],
         nome: row[nomeIndex],
-        valor: parseFloat(row[valorIndex]),
+        plano: row[planoIndex],
+        telefone: row[telefoneIndex],
     }));
 };
 
-export const getPlanos = async (): Promise<Plano[]> => {
+export const getConsultores = async (): Promise<Consultor[]> => {
     const sheets = await getSheetsClient();
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: RANGE,
     });
-    return rowsToPlanos(response.data.values || []);
+    return rowsToConsultores(response.data.values || []);
 };
 
-export const addPlano = async (planoData: Omit<Plano, 'id'>): Promise<Plano> => {
+export const addConsultor = async (consultorData: Omit<Consultor, 'id'>): Promise<Consultor> => {
     const sheets = await getSheetsClient();
-    const novoPlano: Plano = {
+    const novoConsultor: Consultor = {
         id: Date.now().toString(),
-        ...planoData
+        ...consultorData
     };
 
     await sheets.spreadsheets.values.append({
@@ -41,9 +43,9 @@ export const addPlano = async (planoData: Omit<Plano, 'id'>): Promise<Plano> => 
         range: RANGE,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
-            values: [[novoPlano.id, novoPlano.nome, novoPlano.valor]]
+            values: [[novoConsultor.id, novoConsultor.nome, novoConsultor.plano, novoConsultor.telefone]]
         }
     });
 
-    return novoPlano;
+    return novoConsultor;
 };

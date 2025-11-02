@@ -6,6 +6,7 @@ import { Clientes } from '../paginas/Clientes';
 import { Planos } from '../paginas/Planos';
 import { Estatisticas } from '../paginas/Estatisticas';
 import { Auditoria } from '../paginas/Auditoria';
+import { Consultores } from '../paginas/Consultores';
 
 const AppRoutes = () => {
     return (
@@ -13,6 +14,7 @@ const AppRoutes = () => {
             <Route path="/" element={<BatePapo />} />
             <Route path="/crm" element={<LayoutCrm />}>
                 <Route index element={<MenuCrm />} />
+                <Route path="consultores" element={<Consultores />} />
                 <Route path="clientes" element={<Clientes />} />
                 <Route path="planos" element={<Planos />} />
                 <Route path="estatisticas" element={<Estatisticas />} />
