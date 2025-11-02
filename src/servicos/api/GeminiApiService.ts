@@ -10,7 +10,7 @@ export class GeminiApiService implements IGeminiApiService {
     private apiKeys: string[];
 
     constructor() {
-        const keysString = process.env.API_KEYS || "";
+        const keysString = import.meta.env.VITE_GEMINI_API_KEYS || "";
         this.apiKeys = keysString.split(',').map(key => key.trim()).filter(Boolean);
 
         if (this.apiKeys.length === 0) {
