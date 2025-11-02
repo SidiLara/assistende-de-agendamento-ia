@@ -1,60 +1,43 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { Mensagem, RemetenteMensagem } from "../chat/modelos/MensagemModel";
 import { Lead } from "../chat/modelos/LeadModel";
 import { ConfiguracaoChat } from "../chat/modelos/ConfiguracaoChatModel";
-import { RespostaAi } from "../chat/modelos/AiResponse";
+import { RespostaAi } from "../chat/modelos/RespostaAi";
 import { createSystemPrompt, leadDataSchema, createFinalSummaryPrompt, createInternalSummaryPrompt } from "../chat/ChatPrompts";
 import { IGeminiApiService } from "./ApiInterfaces";
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 export class GeminiApiService implements IGeminiApiService {
-    private ai?: GoogleGenAI;
+    private apiKeys: string[];
 
     constructor() {
-        // FIX: API key must be read from process.env.API_KEY as per guidelines.
-        const apiKey = process.env.API_KEY;
-        if (apiKey) {
-            this.ai = new GoogleGenAI({ apiKey });
-        } else {
-            // FIX: Updated warning message to reference API_KEY consistently.
-            console.warn("Chave de API do Gemini não encontrada. O aplicativo será executado em modo de fallback. Certifique-se de que a variável de ambiente API_KEY está configurada.");
+        const keysString = process.env.API_KEYS || "";
+        this.apiKeys = keysString.split(',').map(key => key.trim()).filter(Boolean);
+
+        if (this.apiKeys.length === 0) {
+            console.warn("Nenhuma Chave de API do Gemini foi encontrada. O aplicativo será executado em modo de fallback. Certifique-se de que a variável de ambiente VITE_GEMINI_API_KEYS está configurada.");
         }
     }
 
-    private async callApiWithRetry<T>(apiFn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+    private async callGenerativeApi<T>(apiFn: (ai: GoogleGenAI) => Promise<T>): Promise<T> {
+        if (this.apiKeys.length === 0) {
+            throw new Error("O serviço de IA não foi inicializado. Nenhuma Chave de API está configurada no ambiente.");
+        }
+
         let lastError: any;
-        for (let i = 0; i < retries; i++) {
+
+        for (const key of this.apiKeys) {
             try {
-                return await apiFn();
+                const ai = new GoogleGenAI({ apiKey: key });
+                const result = await apiFn(ai);
+                return result;
             } catch (error: any) {
                 lastError = error;
-                const errorMessage = error.toString().toLowerCase();
-                if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('unavailable') || errorMessage.includes('rate limit')) {
-                     if (i < retries - 1) {
-                        const waitTime = delay * Math.pow(2, i);
-                        console.warn(`A chamada da API falhou com um erro transiente, tentando novamente em ${waitTime}ms...`);
-                        await sleep(waitTime);
-                    }
-                } else {
-                    throw lastError;
-                }
+                console.warn(`A chamada da API falhou com a chave finalizada em '...${key.slice(-4)}'. Tentando a próxima chave.`);
             }
         }
-        throw lastError;
-    }
-
-    private async callGenerativeApi(apiFn: () => Promise<any>) {
-        if (!this.ai) {
-            // FIX: Updated error message to reference API_KEY.
-            throw new Error("O serviço de IA não foi inicializado. Verifique se a Chave de API (API_KEY) está configurada no ambiente.");
-        }
-        try {
-            return await this.callApiWithRetry(apiFn);
-        } catch (error) {
-            console.error("A chamada da API falhou após as tentativas.", error);
-            throw new Error("A chamada da API falhou, mudando para o script local.");
-        }
+        
+        console.error("A chamada da API falhou com todas as chaves disponíveis.", lastError);
+        throw new Error("A chamada da API falhou, mudando para o script local.");
     }
     
     public async generateAiResponse(history: Mensagem[], currentData: Partial<Lead>, config: ConfiguracaoChat): Promise<RespostaAi> {
@@ -74,7 +57,8 @@ export class GeminiApiService implements IGeminiApiService {
         
         const systemInstruction = createSystemPrompt(config.assistantName, config.consultantName);
 
-        const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
+        // FIX: Explicitly type the response to resolve the 'unknown' type error.
+        const response: GenerateContentResponse = await this.callGenerativeApi((ai) => ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents,
             config: {
@@ -111,7 +95,8 @@ export class GeminiApiService implements IGeminiApiService {
     public async generateFinalSummary(leadData: Partial<Lead>, config: ConfiguracaoChat): Promise<string> {
         const summaryPrompt = createFinalSummaryPrompt(leadData, config);
 
-        const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
+        // FIX: Explicitly type the response to resolve the 'unknown' type error.
+        const response: GenerateContentResponse = await this.callGenerativeApi((ai) => ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: summaryPrompt,
         }));
@@ -123,8 +108,8 @@ export class GeminiApiService implements IGeminiApiService {
         const internalSummaryPrompt = createInternalSummaryPrompt(leadData, history, formattedCreditAmount, formattedMonthlyInvestment, consultantName);
         
         try {
-            const response = await this.callGenerativeApi(() => this.ai!.models.generateContent({
-                // FIX: Corrected model name from 'gemini-2.unviersal-pro' to 'gemini-2.5-pro' for complex tasks.
+            // FIX: Explicitly type the response to resolve the 'unknown' type error.
+            const response: GenerateContentResponse = await this.callGenerativeApi((ai) => ai.models.generateContent({
                 model: "gemini-2.5-pro",
                 contents: internalSummaryPrompt,
             }));
