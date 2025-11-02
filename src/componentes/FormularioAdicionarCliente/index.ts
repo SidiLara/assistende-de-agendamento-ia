@@ -1,2 +1,2 @@
-export * from './FormularioAdicionarCliente';
-export type { FormularioAdicionarClienteProps } from './FormularioAdicionarCliente.props';
+export * from './FormularioCliente';
+export type { FormularioClienteProps } from './FormularioCliente.props';

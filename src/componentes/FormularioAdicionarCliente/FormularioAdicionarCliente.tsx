@@ -1,13 +1,26 @@
 import * as React from 'react';
-import { FormularioAdicionarClienteProps } from './FormularioAdicionarCliente.props';
+import { FormularioClienteProps } from './FormularioCliente.props';
 import { TipoPlano } from '../../servicos/gestaoClientes/modelos/ClienteModel';
 import { applyWhatsappMask } from '../../utils/formatters/Phone';
 
-export const FormularioAdicionarCliente = ({ onSalvar, onCancelar }: FormularioAdicionarClienteProps) => {
+export const FormularioCliente = ({ clienteExistente, onSalvar, onCancelar }: FormularioClienteProps) => {
     const [nome, setNome] = React.useState('');
     const [plano, setPlano] = React.useState<TipoPlano>('Básico');
     const [telefone, setTelefone] = React.useState('');
     const [erro, setErro] = React.useState('');
+
+    React.useEffect(() => {
+        if (clienteExistente) {
+            setNome(clienteExistente.nome);
+            setPlano(clienteExistente.plano);
+            setTelefone(clienteExistente.telefone);
+        } else {
+            // Reseta o formulário se não houver cliente para editar (modo de adição)
+            setNome('');
+            setPlano('Básico');
+            setTelefone('');
+        }
+    }, [clienteExistente]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -16,7 +29,12 @@ export const FormularioAdicionarCliente = ({ onSalvar, onCancelar }: FormularioA
             return;
         }
         setErro('');
-        onSalvar({ nome, plano, telefone });
+        
+        if (clienteExistente) {
+            onSalvar({ ...clienteExistente, nome, plano, telefone });
+        } else {
+            onSalvar({ nome, plano, telefone });
+        }
     };
 
     return (
