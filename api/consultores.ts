@@ -1,6 +1,6 @@
 // api/consultores.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSheetsClient, SPREADSHEET_ID } from './utils/googleSheetsClient';
+import { getSheetsClient, SPREADSHEET_ID } from './utils/googleSheetsClient.js';
 import { Consultor } from '../src/servicos/gestaoCrm';
 
 const RANGE = 'Consultores!A:D';

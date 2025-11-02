@@ -1,6 +1,6 @@
 // api/planos.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSheetsClient, SPREADSHEET_ID } from './utils/googleSheetsClient';
+import { getSheetsClient, SPREADSHEET_ID } from './utils/googleSheetsClient.js';
 import { Plano } from '../src/servicos/gestaoPlanos';
 
 const RANGE = 'Planos!A:C';

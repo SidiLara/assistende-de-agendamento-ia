@@ -1,6 +1,6 @@
 // api/clientes.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSheetsClient, SPREADSHEET_ID } from './utils/googleSheetsClient';
+import { getSheetsClient, SPREADSHEET_ID } from './utils/googleSheetsClient.js';
 import { Cliente } from '../src/servicos/gestaoClientes';
 
 const RANGE = 'Clientes!A:E';
