@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { ModalProps } from './Modal.props';
 
-export const Modal = ({ isOpen, onClose, titulo, children }: ModalProps) => {
+// FIX: Changed the component's signature to use React.FC to resolve a TypeScript issue where the implicit `children` prop was not being recognized at call sites.
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, titulo, children }) => {
     React.useEffect(() => {
         const handleEsc = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {

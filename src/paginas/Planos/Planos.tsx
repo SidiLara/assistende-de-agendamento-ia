@@ -8,17 +8,22 @@ export const Planos: React.FC = () => {
     const [planos, setPlanos] = React.useState<Plano[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [error, setError] = React.useState<string | null>(null);
     
     const planosService = React.useMemo(() => new ServicoGestaoPlanos(), []);
 
     React.useEffect(() => {
+        setIsLoading(true);
+        setError(null);
         planosService.getPlanos()
             .then(data => {
                 setPlanos(data);
-                setIsLoading(false);
             })
             .catch(error => {
                 console.error("Erro ao buscar planos:", error);
+                setError("Não foi possível carregar os planos. Verifique a configuração da API do Google Sheets e se a planilha está acessível.");
+            })
+            .finally(() => {
                 setIsLoading(false);
             });
     }, [planosService]);
@@ -46,6 +51,11 @@ export const Planos: React.FC = () => {
             </div>
             {isLoading ? (
                 <p>Carregando planos...</p>
+            ) : error ? (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">Erro!</strong>
+                    <span className="block sm:inline ml-2">{error}</span>
+                </div>
             ) : (
                 <ListaDePlanos planos={planos} />
             )}

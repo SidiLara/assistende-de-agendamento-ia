@@ -8,17 +8,22 @@ export const Consultores: React.FC = () => {
     const [consultores, setConsultores] = React.useState<Consultor[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [error, setError] = React.useState<string | null>(null);
     
     const crmService = React.useMemo(() => new ServicoGestaoCrm(), []);
 
     React.useEffect(() => {
+        setIsLoading(true);
+        setError(null);
         crmService.getConsultores()
             .then(data => {
                 setConsultores(data);
-                setIsLoading(false);
             })
             .catch(error => {
                 console.error("Erro ao buscar consultores:", error);
+                setError("Não foi possível carregar os consultores. Verifique a configuração da API do Google Sheets e se a planilha está acessível.");
+            })
+            .finally(() => {
                 setIsLoading(false);
             });
     }, [crmService]);
@@ -46,6 +51,11 @@ export const Consultores: React.FC = () => {
             </div>
             {isLoading ? (
                 <p>Carregando consultores...</p>
+            ) : error ? (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">Erro!</strong>
+                    <span className="block sm:inline ml-2">{error}</span>
+                </div>
             ) : (
                 <ListaDeConsultores consultores={consultores} />
             )}

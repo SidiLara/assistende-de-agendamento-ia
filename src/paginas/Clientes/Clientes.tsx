@@ -12,6 +12,7 @@ export const Clientes: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [clienteParaEditar, setClienteParaEditar] = React.useState<Cliente | null>(null);
     const [filtro, setFiltro] = React.useState('');
+    const [error, setError] = React.useState<string | null>(null);
     
     const crmService = React.useMemo(() => new ServicoGestaoClientes(), []);
     const planosService = React.useMemo(() => new ServicoGestaoPlanos(), []);
@@ -20,6 +21,7 @@ export const Clientes: React.FC = () => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
+                setError(null);
                 const [clientesData, planosData] = await Promise.all([
                     crmService.getClientes(),
                     planosService.getPlanos()
@@ -28,6 +30,7 @@ export const Clientes: React.FC = () => {
                 setPlanos(planosData);
             } catch (error) {
                 console.error("Erro ao buscar dados:", error);
+                setError("Não foi possível carregar os dados. Verifique a configuração da API do Google Sheets e se a planilha está acessível.");
             } finally {
                 setIsLoading(false);
             }
@@ -103,6 +106,11 @@ export const Clientes: React.FC = () => {
             </div>
             {isLoading ? (
                 <p>Carregando clientes...</p>
+            ) : error ? (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">Erro!</strong>
+                    <span className="block sm:inline ml-2">{error}</span>
+                </div>
             ) : (
                 <ListaDeClientes 
                     clientes={clientesFiltrados}
