@@ -1,16 +1,11 @@
-import { Cliente } from "./modelos/ClienteModel";
+import { Cliente, StatusCliente, TipoPlano } from "./modelos/ClienteModel";
 import { IServicoGestaoClientes } from "./InterfacesGestaoClientes";
 
-// Mock data
 const mockClientes: Cliente[] = [
-    // FIX: Corrected `plano` to match the `TipoPlano` enum.
-    { id: 'c1', nome: 'Sidinei Lara', plano: 'Premium', telefone: '(11) 91111-1111', status: 'Ativo' },
-    // FIX: Corrected `plano` to match the `TipoPlano` enum.
-    { id: 'c2', nome: 'Maria Silva', plano: 'Básico', telefone: '(21) 92222-2222', status: 'Ativo' },
-    // FIX: Corrected `plano` to match the `TipoPlano` enum.
-    { id: 'c3', nome: 'Ana Pereira', plano: 'Básico', telefone: '(31) 93333-3333', status: 'Inativo' },
-    // FIX: Corrected `plano` to match the `TipoPlano` enum.
-    { id: 'c4', nome: 'Acme Corporation', plano: 'Empresarial', telefone: '(41) 94444-4444', status: 'Ativo' },
+    { id: '1', nome: 'Empresa Alpha', plano: 'Premium', telefone: '(11) 91111-1111', status: 'Ativo' },
+    { id: '2', nome: 'Comércio Beta', plano: 'Básico', telefone: '(21) 92222-2222', status: 'Ativo' },
+    { id: '3', nome: 'Indústria Gamma', plano: 'Empresarial', telefone: '(31) 93333-3333', status: 'Inativo' },
+    { id: '4', nome: 'Serviços Delta', plano: 'Premium', telefone: '(41) 94444-4444', status: 'Ativo' },
 ];
 
 export class ServicoGestaoClientes implements IServicoGestaoClientes {
@@ -26,7 +21,7 @@ export class ServicoGestaoClientes implements IServicoGestaoClientes {
         return new Promise(resolve => {
             setTimeout(() => {
                 const novoCliente: Cliente = {
-                    id: `c${Date.now()}`,
+                    id: Date.now().toString(),
                     status: 'Ativo',
                     ...clienteData
                 };
@@ -35,7 +30,7 @@ export class ServicoGestaoClientes implements IServicoGestaoClientes {
             }, 300);
         });
     }
-
+    
     public async updateCliente(clienteAtualizado: Cliente): Promise<Cliente> {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
@@ -44,7 +39,7 @@ export class ServicoGestaoClientes implements IServicoGestaoClientes {
                     mockClientes[index] = clienteAtualizado;
                     resolve(clienteAtualizado);
                 } else {
-                    reject(new Error("Cliente não encontrado."));
+                    reject(new Error("Cliente não encontrado"));
                 }
             }, 300);
         });

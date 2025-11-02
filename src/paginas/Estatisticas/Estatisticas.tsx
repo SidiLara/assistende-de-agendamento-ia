@@ -1,42 +1,54 @@
 import * as React from 'react';
 import { CartaoDeEstatistica } from '../../componentes/CartaoDeEstatistica';
+import { GraficoDeBarras } from '../../componentes/GraficoDeBarras';
 
 // Icons
-const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.125-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.125-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>;
-const CashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>;
-const ChartPieIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>;
-const UserGroupIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.125-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.125-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm-2 10v-2a2 2 0 00-2-2h-2a2 2 0 00-2 2v2" /></svg>;
+const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197m0 0A5.965 5.965 0 0112 13a5.965 5.965 0 013 1.803" /></svg>;
+const CurrencyDollarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0-1V4m0 2.01M12 14v4m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 14c-1.657 0-3-.895-3-2s1.343-2 3-2" /></svg>;
+const ClipboardCheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>;
+
+const leadsPorMesData = [
+    { label: 'Jan', value: 65 },
+    { label: 'Fev', value: 59 },
+    { label: 'Mar', value: 80 },
+    { label: 'Abr', value: 81 },
+    { label: 'Mai', value: 56 },
+    { label: 'Jun', value: 55 },
+];
 
 export const Estatisticas: React.FC = () => {
-    // Dados mockados para as estatísticas
-    const stats = [
-        { titulo: 'Total de Clientes', valor: '1,254', icone: <UsersIcon />, mudanca: '+12.5%', corMudanca: 'positivo' as const },
-        { titulo: 'Receita Mensal (MRR)', valor: 'R$ 87.5k', icone: <CashIcon />, mudanca: '+5.2%', corMudanca: 'positivo' as const },
-        { titulo: 'Taxa de Conversão', valor: '4.8%', icone: <ChartPieIcon />, mudanca: '-0.3%', corMudanca: 'negativo' as const },
-        { titulo: 'Novos Consultores', valor: '8', icone: <UserGroupIcon />, mudanca: '+2', corMudanca: 'positivo' as const },
-    ];
-
     return (
         <div>
-            <h1 className="text-3xl font-bold mb-6">Estatísticas e Desempenho</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, index) => (
-                    <CartaoDeEstatistica
-                        key={index}
-                        titulo={stat.titulo}
-                        valor={stat.valor}
-                        icone={stat.icone}
-                        mudanca={stat.mudanca}
-                        corMudanca={stat.corMudanca}
-                    />
-                ))}
+            <h1 className="text-3xl font-bold mb-6">Estatísticas</h1>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                <CartaoDeEstatistica 
+                    titulo="Total de Clientes"
+                    valor="1,284"
+                    icone={<UsersIcon />}
+                    mudanca="+2.5%"
+                    corMudanca="positivo"
+                />
+                <CartaoDeEstatistica 
+                    titulo="Receita Mensal"
+                    valor="R$ 25.4k"
+                    icone={<CurrencyDollarIcon />}
+                    mudanca="+5.1%"
+                    corMudanca="positivo"
+                />
+                <CartaoDeEstatistica 
+                    titulo="Leads Convertidos"
+                    valor="312"
+                    icone={<ClipboardCheckIcon />}
+                    mudanca="-1.2%"
+                    corMudanca="negativo"
+                />
             </div>
-            <div className="mt-10 bg-white dark:bg-dark-secondary p-6 rounded-lg shadow-md">
-                <h2 className="text-xl font-semibold mb-4">Em Breve</h2>
-                <p className="text-gray-600 dark:text-gray-300">
-                    Gráficos interativos e relatórios detalhados estarão disponíveis nesta seção em futuras atualizações.
-                </p>
-            </div>
+
+            <GraficoDeBarras 
+                titulo="Leads Gerados por Mês"
+                data={leadsPorMesData}
+            />
         </div>
     );
 };

@@ -2,16 +2,16 @@ import { Plano } from "./modelos/PlanoModel";
 import { IServicoGestaoPlanos } from "./InterfacesGestaoPlanos";
 
 const mockPlanos: Plano[] = [
-    { id: 'p1', nome: 'Plano Básico Mensal', valor: 49.90 },
-    { id: 'p2', nome: 'Plano Premium Mensal', valor: 99.90 },
-    { id: 'p3', nome: 'Plano Empresarial Anual', valor: 999.00 },
+    { id: '1', nome: 'Plano Básico', valor: 99.90 },
+    { id: '2', nome: 'Plano Premium', valor: 199.90 },
+    { id: '3', nome: 'Plano Empresarial', valor: 499.90 },
 ];
 
 export class ServicoGestaoPlanos implements IServicoGestaoPlanos {
     public async getPlanos(): Promise<Plano[]> {
         return new Promise(resolve => {
             setTimeout(() => {
-                resolve([...mockPlanos]); 
+                resolve([...mockPlanos]);
             }, 500);
         });
     }
