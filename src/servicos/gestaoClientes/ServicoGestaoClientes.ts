@@ -1,4 +1,4 @@
-import { Cliente, TipoPlano } from "./modelos/ClienteModel";
+import { Cliente } from "./modelos/ClienteModel";
 import { IServicoGestaoClientes } from "./InterfacesGestaoClientes";
 
 // Mock data
