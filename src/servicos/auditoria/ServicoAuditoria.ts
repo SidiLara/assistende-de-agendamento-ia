@@ -1,4 +1,4 @@
-import { LogAuditoria, AcaoAuditoria } from './modelos/LogAuditoriaModel';
+import { LogAuditoria } from './modelos/LogAuditoriaModel';
 import { IServicoAuditoria } from './InterfacesAuditoria';
 
 const mockLogs: LogAuditoria[] = [
