@@ -21,38 +21,44 @@ export const CartaoDeCliente = ({ cliente, onEditar, onToggleStatus }: CartaoDeC
     const isInactive = status === 'Inativo';
 
     return (
-        <div className={`bg-white dark:bg-dark-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-slate-700 transition-all duration-300 relative ${isInactive ? 'opacity-50' : 'hover:shadow-lg'}`}>
-            {/* Botões de Ação */}
-            <div className="absolute top-4 right-4 flex items-center space-x-2">
-                <button onClick={() => onEditar(cliente)} title="Editar Cliente" className="p-1 text-gray-400 hover:text-blue-500 dark:hover:text-brand-blue rounded-full transition-colors">
-                    <EditIcon />
-                </button>
-                <button onClick={() => onToggleStatus(cliente)} title={isInactive ? 'Reativar Cliente' : 'Inativar Cliente'} className={`p-1 text-gray-400 hover:text-yellow-500 rounded-full transition-colors`}>
-                    {isInactive ? <EyeClosedIcon /> : <EyeOpenIcon />}
-                </button>
-            </div>
+        <div className={`bg-white dark:bg-dark-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-slate-700 transition-all duration-300 flex flex-col justify-between min-h-[190px] ${isInactive ? 'opacity-60' : 'hover:shadow-lg'}`}>
             
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 pr-16">{nome}</h3>
-                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${styles.badge} ${styles.text}`}>
-                    {plano}
-                </span>
-            </div>
-            <div className="space-y-3">
-                <div className="flex items-center text-gray-600 dark:text-gray-300">
-                    <PhoneIcon />
-                    <span>{telefone}</span>
-                </div>
-                <div className="flex items-center text-gray-600 dark:text-gray-300">
-                    <PlanIcon />
-                    <span>Plano {plano}</span>
+            {/* Header: Nome e Botões de Ação */}
+            <div className="flex justify-between items-start">
+                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 pr-4 break-words">{nome}</h3>
+                <div className="flex items-center space-x-2 flex-shrink-0">
+                    <button onClick={() => onEditar(cliente)} title="Editar Cliente" className="p-1 text-gray-400 hover:text-blue-500 dark:hover:text-brand-blue rounded-full transition-colors">
+                        <EditIcon />
+                    </button>
+                    <button onClick={() => onToggleStatus(cliente)} title={isInactive ? 'Reativar Cliente' : 'Inativar Cliente'} className={`p-1 text-gray-400 hover:text-yellow-500 rounded-full transition-colors`}>
+                        {isInactive ? <EyeClosedIcon /> : <EyeOpenIcon />}
+                    </button>
                 </div>
             </div>
-            {isInactive && (
-                 <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="bg-gray-500 text-white text-xs font-bold px-3 py-1 rounded-full">INATIVO</span>
+
+            {/* Footer: Informações e Badges */}
+            <div>
+                 <div className="flex items-center justify-between mt-4">
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${styles.badge} ${styles.text}`}>
+                        {plano}
+                    </span>
+                    {isInactive && (
+                        <span className="bg-slate-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                            INATIVO
+                        </span>
+                    )}
                 </div>
-            )}
+                <div className="space-y-3 mt-4 border-t border-gray-200 dark:border-slate-700 pt-4">
+                    <div className="flex items-center text-gray-600 dark:text-gray-300">
+                        <PhoneIcon />
+                        <span>{telefone}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600 dark:text-gray-300">
+                        <PlanIcon />
+                        <span>Plano {plano}</span>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
