@@ -1,12 +1,16 @@
-import { Cliente, StatusCliente } from "./modelos/ClienteModel";
+import { Cliente, TipoPlano } from "./modelos/ClienteModel";
 import { IServicoGestaoClientes } from "./InterfacesGestaoClientes";
 
 // Mock data
 const mockClientes: Cliente[] = [
-    { id: 'c1', nome: 'Empresa Alpha', plano: 'Empresarial', telefone: '(11) 91111-1111', status: 'Ativo' },
-    { id: 'c2', nome: 'Comércio Beta', plano: 'Premium', telefone: '(21) 92222-2222', status: 'Ativo' },
-    { id: 'c3', nome: 'Serviços Gama', plano: 'Básico', telefone: '(31) 93333-3333', status: 'Inativo' },
-    { id: 'c4', nome: 'Indústria Delta', plano: 'Premium', telefone: '(41) 94444-4444', status: 'Ativo' },
+    // FIX: Corrected `plano` to match the `TipoPlano` enum.
+    { id: 'c1', nome: 'Sidinei Lara', plano: 'Premium', telefone: '(11) 91111-1111', status: 'Ativo' },
+    // FIX: Corrected `plano` to match the `TipoPlano` enum.
+    { id: 'c2', nome: 'Maria Silva', plano: 'Básico', telefone: '(21) 92222-2222', status: 'Ativo' },
+    // FIX: Corrected `plano` to match the `TipoPlano` enum.
+    { id: 'c3', nome: 'Ana Pereira', plano: 'Básico', telefone: '(31) 93333-3333', status: 'Inativo' },
+    // FIX: Corrected `plano` to match the `TipoPlano` enum.
+    { id: 'c4', nome: 'Acme Corporation', plano: 'Empresarial', telefone: '(41) 94444-4444', status: 'Ativo' },
 ];
 
 export class ServicoGestaoClientes implements IServicoGestaoClientes {

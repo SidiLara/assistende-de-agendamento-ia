@@ -3,7 +3,8 @@ import { FormularioAdicionarClienteProps } from './FormularioAdicionarCliente.pr
 import { TipoPlano } from '../../servicos/gestaoClientes/modelos/ClienteModel';
 import { applyWhatsappMask } from '../../utils/formatters/Phone';
 
-export const FormularioAdicionarCliente = ({ clienteParaEditar, onSalvar, onCancelar }: FormularioAdicionarClienteProps) => {
+// FIX: Updated component to accept and use `planosDisponiveis` prop.
+export const FormularioAdicionarCliente = ({ clienteParaEditar, planosDisponiveis, onSalvar, onCancelar }: FormularioAdicionarClienteProps) => {
     const [nome, setNome] = React.useState('');
     const [plano, setPlano] = React.useState<TipoPlano>('Básico');
     const [telefone, setTelefone] = React.useState('');
@@ -52,9 +53,12 @@ export const FormularioAdicionarCliente = ({ clienteParaEditar, onSalvar, onCanc
                     onChange={(e) => setPlano(e.target.value as TipoPlano)}
                     className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-slate-600 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm rounded-md bg-white dark:bg-dark-tertiary"
                 >
-                    <option>Básico</option>
-                    <option>Premium</option>
-                    <option>Empresarial</option>
+                    {/* FIX: Dynamically render options from the `planosDisponiveis` prop instead of hardcoding them. */}
+                    {planosDisponiveis.map(p => (
+                        <option key={p.id} value={p.nome.split(' ')[1] as TipoPlano}>
+                            {p.nome}
+                        </option>
+                    ))}
                 </select>
             </div>
              <div>

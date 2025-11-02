@@ -2,28 +2,39 @@ import * as React from 'react';
 import { ListaDeClientes } from '../../componentes/ListaDeClientes';
 import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarCliente } from '../../componentes/FormularioAdicionarCliente';
-import { ServicoGestaoClientes, Cliente } from '../../servicos/gestaoClientes';
+import { ServicoGestaoClientes, Cliente, StatusCliente } from '../../servicos/gestaoClientes';
+import { ServicoGestaoPlanos, Plano } from '../../servicos/gestaoPlanos';
 
 export const Clientes: React.FC = () => {
     const [clientes, setClientes] = React.useState<Cliente[]>([]);
+    const [planos, setPlanos] = React.useState<Plano[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [clienteParaEditar, setClienteParaEditar] = React.useState<Cliente | null>(null);
     const [filtro, setFiltro] = React.useState('');
     
     const crmService = React.useMemo(() => new ServicoGestaoClientes(), []);
+    const planosService = React.useMemo(() => new ServicoGestaoPlanos(), []);
 
     React.useEffect(() => {
-        crmService.getClientes()
-            .then(data => {
-                setClientes(data);
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                const [clientesData, planosData] = await Promise.all([
+                    crmService.getClientes(),
+                    planosService.getPlanos()
+                ]);
+                setClientes(clientesData);
+                setPlanos(planosData);
+            } catch (error) {
+                console.error("Erro ao buscar dados:", error);
+            } finally {
                 setIsLoading(false);
-            })
-            .catch(error => {
-                console.error("Erro ao buscar clientes:", error);
-                setIsLoading(false);
-            });
-    }, [crmService]);
+            }
+        };
+
+        fetchData();
+    }, [crmService, planosService]);
 
     const handleAbrirModalParaAdicionar = () => {
         setClienteParaEditar(null);
@@ -56,7 +67,7 @@ export const Clientes: React.FC = () => {
     };
 
     const handleToggleStatus = async (cliente: Cliente) => {
-        const statusAtualizado = cliente.status === 'Ativo' ? 'Inativo' : 'Ativo';
+        const statusAtualizado: StatusCliente = cliente.status === 'Ativo' ? 'Inativo' : 'Ativo';
         const clienteAtualizado = { ...cliente, status: statusAtualizado };
         try {
             await crmService.updateCliente(clienteAtualizado);
@@ -107,6 +118,7 @@ export const Clientes: React.FC = () => {
             >
                 <FormularioAdicionarCliente
                     clienteParaEditar={clienteParaEditar}
+                    planosDisponiveis={planos}
                     onSalvar={handleSalvarCliente}
                     onCancelar={handleFecharModal}
                 />
