@@ -15,8 +15,21 @@ export class ServicoGestaoCrm implements IServicoGestaoCrm {
         // Por enquanto, retornamos os dados mockados após um pequeno delay.
         return new Promise(resolve => {
             setTimeout(() => {
-                resolve(mockConsultores);
+                resolve([...mockConsultores]); // Retorna uma cópia para evitar mutação direta
             }, 500);
+        });
+    }
+
+    public async addConsultor(consultorData: Omit<Consultor, 'id'>): Promise<Consultor> {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                const novoConsultor: Consultor = {
+                    id: Date.now().toString(), // ID simples para o mock
+                    ...consultorData
+                };
+                mockConsultores.push(novoConsultor);
+                resolve(novoConsultor);
+            }, 300);
         });
     }
 }
