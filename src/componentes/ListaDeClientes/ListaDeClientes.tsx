@@ -4,7 +4,7 @@ import { CartaoDeCliente } from '../CartaoDeCliente';
 
 export const ListaDeClientes = ({ clientes }: ListaDeClientesProps) => {
     if (!clientes.length) {
-        return <p className="text-center text-gray-500 dark:text-gray-400">Nenhum cliente encontrado.</p>;
+        return <p className="text-center text-gray-500 dark:text-gray-400 mt-8">Nenhum cliente corresponde à sua busca.</p>;
     }
 
     return (

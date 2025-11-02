@@ -19,9 +19,12 @@ export const LayoutCrm: React.FC = () => {
                 isCollapsed={isCollapsed}
                 toggleSidebar={toggleSidebar}
             />
-            <main className="flex-1 p-6 md:p-10 overflow-y-auto">
-                <Outlet />
-            </main>
+            {/* A div a seguir garante que a área de conteúdo se comporte corretamente com a barra lateral fixa */}
+            <div className={`flex-1 transition-all duration-300 ease-in-out ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
+                <main className="p-6 md:p-10">
+                    <Outlet />
+                </main>
+            </div>
         </div>
     );
 };

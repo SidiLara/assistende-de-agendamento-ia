@@ -1,11 +1,8 @@
-export type StatusCliente = 'Novo' | 'Em Contato' | 'Agendado' | 'Convertido' | 'Perdido';
+export type TipoPlano = 'Premium' | 'Básico' | 'Empresarial';
 
 export interface Cliente {
     id: string;
     nome: string;
+    plano: TipoPlano;
     telefone: string;
-    email: string;
-    status: StatusCliente;
-    consultorResponsavel: string; // Nome do consultor
-    dataAgendamento?: string;
 }
