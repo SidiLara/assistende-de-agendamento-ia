@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useAuth } from '../../hooks/useAuth';
-// FIX: Changed to a namespace import to address module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Changed to a named import to address module resolution errors.
+import { useNavigate } from 'react-router-dom';
 import { LogoEmpresa } from '../../componentes/LogoEmpresa';
 
 export const Login: React.FC = () => {
@@ -9,7 +9,7 @@ export const Login: React.FC = () => {
     const [password, setPassword] = React.useState('');
     const [error, setError] = React.useState('');
     const { login, isLoading } = useAuth();
-    const navigate = ReactRouterDOM.useNavigate();
+    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

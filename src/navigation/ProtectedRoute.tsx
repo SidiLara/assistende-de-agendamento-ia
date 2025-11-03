@@ -1,6 +1,6 @@
 import * as React from 'react';
-// FIX: Changed to a namespace import to address module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Changed to a named import to address module resolution errors.
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 interface ProtectedRouteProps {
@@ -16,7 +16,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     }
 
     if (!isAuthenticated) {
-        return <ReactRouterDOM.Navigate to="/login" replace />;
+        return <Navigate to="/login" replace />;
     }
 
     return <>{children}</>;

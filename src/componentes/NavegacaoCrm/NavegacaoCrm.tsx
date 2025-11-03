@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { NavLink } from 'react-router-dom';
+// FIX: Changed to a namespace import to address module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 import { NavegacaoCrmProps } from './NavegacaoCrm.props';
 import { LogoEmpresa } from '../LogoEmpresa';
 import { useAuth } from '../../hooks/useAuth';
@@ -16,7 +17,7 @@ const SunIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6
 const MoonIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>;
 const ChevronLeftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>;
 const ChevronRightIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>;
-const CurrencyDollarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0-1V4m0 2.01M12 14v4m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 14c-1.657 0-3-.895-3-2s1.343 2 3-2" /></svg>;
+const CurrencyDollarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0-1V4m0 2.01M12 14v4m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 14c-1.657 0-3-.895-3-2s1.343-2 3-2" /></svg>;
 
 const navItems = [
     { to: "/crm", label: "Início", icon: <HomeIcon /> },
@@ -29,7 +30,7 @@ const navItems = [
 ];
 
 const NavItem: React.FC<{ to: string, label: string, isCollapsed: boolean, children: React.ReactNode, onClick?: () => void }> = ({ to, label, isCollapsed, children, onClick }) => (
-    <NavLink
+    <ReactRouterDOM.NavLink
         to={to}
         end={to === "/crm"}
         onClick={onClick}
@@ -38,27 +39,27 @@ const NavItem: React.FC<{ to: string, label: string, isCollapsed: boolean, child
         }`}
     >
         {children}
-        <span className={`ml-4 font-medium transition-opacity duration-300 ${isCollapsed && 'xl:opacity-0'} whitespace-nowrap`}>{label}</span>
-    </NavLink>
+        <span className={`ml-4 font-medium transition-opacity duration-300 ${isCollapsed && 'lg:opacity-0'} whitespace-nowrap`}>{label}</span>
+    </ReactRouterDOM.NavLink>
 );
 
 export const NavegacaoCrm: React.FC<NavegacaoCrmProps> = ({ theme, toggleTheme, isCollapsed, toggleSidebar, isMobileMenuOpen, setIsMobileMenuOpen }) => {
     const { user, logout } = useAuth();
     
-    const sidebarWidth = isCollapsed ? 'xl:w-20' : 'xl:w-64';
+    const sidebarWidth = isCollapsed ? 'lg:w-20' : 'lg:w-64';
     const mobileTransform = isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full';
 
     const filteredNavItems = navItems.filter(item => !item.adminOnly || user?.role === 'Admin');
 
     return (
-        <aside className={`fixed top-0 left-0 h-dvh w-64 bg-white dark:bg-dark-tertiary flex flex-col transition-all duration-300 ease-in-out z-30 shadow-lg ${sidebarWidth} transform ${mobileTransform} xl:translate-x-0`}>
+        <aside className={`fixed top-0 left-0 h-dvh w-64 bg-white dark:bg-dark-tertiary flex flex-col transition-all duration-300 ease-in-out z-30 shadow-lg ${sidebarWidth} transform ${mobileTransform} lg:translate-x-0`}>
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700 h-16">
-                <div className={`transition-opacity duration-300 ${isCollapsed ? 'xl:opacity-0 xl:w-0' : 'opacity-100'}`}>
+                <div className={`transition-opacity duration-300 ${isCollapsed ? 'lg:opacity-0 lg:w-0' : 'opacity-100'}`}>
                     <LogoEmpresa />
                 </div>
                 <button
                     onClick={toggleSidebar}
-                    className="p-2 hidden xl:block rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-dark-secondary"
+                    className="p-2 hidden lg:block rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-dark-secondary"
                     aria-label={isCollapsed ? "Expandir menu" : "Recolher menu"}
                 >
                     {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -80,7 +81,7 @@ export const NavegacaoCrm: React.FC<NavegacaoCrmProps> = ({ theme, toggleTheme, 
                     aria-label="Alternar tema"
                 >
                     {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-                    <span className={`ml-4 font-medium transition-opacity duration-300 ${isCollapsed && 'xl:opacity-0'} whitespace-nowrap`}>Tema</span>
+                    <span className={`ml-4 font-medium transition-opacity duration-300 ${isCollapsed && 'lg:opacity-0'} whitespace-nowrap`}>Tema</span>
                 </button>
                 <button
                     onClick={logout}
@@ -88,7 +89,7 @@ export const NavegacaoCrm: React.FC<NavegacaoCrmProps> = ({ theme, toggleTheme, 
                     aria-label="Sair"
                 >
                     <LogoutIcon />
-                    <span className={`ml-4 font-medium transition-opacity duration-300 ${isCollapsed && 'xl:opacity-0'} whitespace-nowrap`}>Sair</span>
+                    <span className={`ml-4 font-medium transition-opacity duration-300 ${isCollapsed && 'lg:opacity-0'} whitespace-nowrap`}>Sair</span>
                 </button>
             </div>
         </aside>

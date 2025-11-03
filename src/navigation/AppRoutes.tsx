@@ -1,5 +1,5 @@
-// FIX: Changed to a namespace import to address module resolution errors.
-import * as ReactRouterDOM from 'react-router-dom';
+// FIX: Changed to named imports to address module resolution errors.
+import { Routes, Route } from 'react-router-dom';
 import { BatePapo } from '../paginas/BatePapo';
 import { LayoutCrm } from '../paginas/LayoutCrm';
 import { MenuCrm } from '../paginas/MenuCrm';
@@ -14,11 +14,11 @@ import { Financeiro } from '../paginas/Financeiro';
 
 const AppRoutes = () => {
     return (
-        <ReactRouterDOM.Routes>
-            <ReactRouterDOM.Route path="/" element={<BatePapo />} />
-            <ReactRouterDOM.Route path="/login" element={<Login />} />
+        <Routes>
+            <Route path="/" element={<BatePapo />} />
+            <Route path="/login" element={<Login />} />
             
-            <ReactRouterDOM.Route 
+            <Route 
                 path="/crm" 
                 element={
                     <ProtectedRoute>
@@ -26,15 +26,15 @@ const AppRoutes = () => {
                     </ProtectedRoute>
                 }
             >
-                <ReactRouterDOM.Route index element={<MenuCrm />} />
-                <ReactRouterDOM.Route path="usuarios" element={<Usuarios />} />
-                <ReactRouterDOM.Route path="clientes" element={<Clientes />} />
-                <ReactRouterDOM.Route path="planos" element={<Planos />} />
-                <ReactRouterDOM.Route path="estatisticas" element={<Estatisticas />} />
-                <ReactRouterDOM.Route path="auditoria" element={<Auditoria />} />
-                <ReactRouterDOM.Route path="financeiro" element={<Financeiro />} />
-            </ReactRouterDOM.Route>
-        </ReactRouterDOM.Routes>
+                <Route index element={<MenuCrm />} />
+                <Route path="usuarios" element={<Usuarios />} />
+                <Route path="clientes" element={<Clientes />} />
+                <Route path="planos" element={<Planos />} />
+                <Route path="estatisticas" element={<Estatisticas />} />
+                <Route path="auditoria" element={<Auditoria />} />
+                <Route path="financeiro" element={<Financeiro />} />
+            </Route>
+        </Routes>
     );
 };
 

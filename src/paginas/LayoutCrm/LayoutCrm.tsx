@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Outlet } from 'react-router-dom';
+// FIX: Changed to a namespace import to address module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 import { NavegacaoCrm } from '../../componentes/NavegacaoCrm';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { LogoEmpresa } from '../../componentes/LogoEmpresa';
@@ -24,7 +25,7 @@ export const LayoutCrm: React.FC = () => {
         <div className="bg-gray-100 dark:bg-dark-primary min-h-dvh w-full flex font-sans text-gray-800 dark:text-gray-200">
             {isMobileMenuOpen && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-50 z-20 xl:hidden"
+                    className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
             )}
@@ -37,9 +38,9 @@ export const LayoutCrm: React.FC = () => {
                 setIsMobileMenuOpen={setIsMobileMenuOpen}
             />
             
-            <div className={`flex-1 flex flex-col transition-all duration-300 ease-in-out xl:${isCollapsed ? 'ml-20' : 'ml-64'}`}>
+            <div className={`flex-1 flex flex-col transition-all duration-300 ease-in-out lg:${isCollapsed ? 'ml-20' : 'ml-64'}`}>
                 {/* Mobile Header */}
-                <header className="xl:hidden sticky top-0 z-10 bg-white dark:bg-dark-secondary shadow-sm flex items-center justify-between p-4">
+                <header className="lg:hidden sticky top-0 z-10 bg-white dark:bg-dark-secondary shadow-sm flex items-center justify-between p-4">
                     <button 
                         onClick={() => setIsMobileMenuOpen(true)}
                         className="p-2 text-gray-500 dark:text-gray-400"
@@ -51,7 +52,7 @@ export const LayoutCrm: React.FC = () => {
                 </header>
                 
                 <main className="p-6 md:p-10 flex-1">
-                    <Outlet />
+                    <ReactRouterDOM.Outlet />
                 </main>
             </div>
         </div>

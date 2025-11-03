@@ -2,7 +2,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSheetsClient, SPREADSHEET_ID, ensureSheetExists } from './utils/googleSheetsClient.js';
 import { Cliente } from '../src/servicos/gestaoClientes';
-import { Plano } from '../src/servicos/gestaoPlanos';
 import { RelatorioFinanceiro, EntidadeFinanceira } from '../src/servicos/financeiro';
 import { isPlanoAtivo } from './utils/financials.js';
 
