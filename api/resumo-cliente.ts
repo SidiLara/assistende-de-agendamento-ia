@@ -1,3 +1,4 @@
+// api/resumo-cliente.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSheetsClient, SPREADSHEET_ID, ensureSheetExists } from './utils/googleSheetsClient.js';
 import { Cliente } from '../src/servicos/gestaoClientes/modelos/ClienteModel';
@@ -35,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const vendasRows = vendasResponse.data.values || [];
         
         // Encontrar o cliente
-        const clienteRow = clientesRows.find(row => row[0] === clienteId);
+        const clienteRow = clientesRows.find((row: any[]) => row[0] === clienteId);
         if (!clienteRow) {
             return res.status(404).json({ error: 'Cliente não encontrado.' });
         }
@@ -52,9 +53,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         };
         
         // Filtrar vendas do cliente
-        const vendasCliente = vendasRows.filter(row => row[2] === clienteId);
+        const vendasCliente = vendasRows.filter((row: any[]) => row[2] === clienteId);
         const totalVendas = vendasCliente.length;
-        const valorTotalGasto = vendasCliente.reduce((acc, row) => acc + (parseFloat(row[5]) || 0), 0);
+        const valorTotalGasto = vendasCliente.reduce((acc: number, row: any[]) => acc + (parseFloat(row[5]) || 0), 0);
         
         const resumo = {
             cliente,

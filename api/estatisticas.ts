@@ -3,7 +3,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSheetsClient, SPREADSHEET_ID, ensureSheetExists } from './utils/googleSheetsClient.js';
 import { Cliente } from '../src/servicos/gestaoClientes';
 import { Consultor } from '../src/servicos/gestaoCrm';
-import { Plano } from '../src/servicos/gestaoPlanos';
 
 const VENDAS_SHEET_NAME = 'Vendas';
 const CLIENTES_SHEET_NAME = 'Clientes';
@@ -71,8 +70,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         const planosMap: Map<string, number> = new Map(planosRows.slice(1).map((row: any[]) => [row[1], parseFloat(row[2])])); // Mapeia nome do plano para valor
 
-        const clientes: Cliente[] = clientesRows.slice(1).map(row => ({ id: row[0], nome: row[1], plano: row[2], telefone: row[3], status: row[4], dataInicio: row[5], tipoPagamento: row[6] || 'Fixo', numeroParcelas: row[7] ? parseInt(row[7]) : undefined }));
-        const consultores: Consultor[] = consultoresRows.slice(1).map(row => ({ id: row[0], nome: row[1], plano: row[2], telefone: row[3], dataInicio: row[4], tipoPagamento: row[5] || 'Fixo', numeroParcelas: row[6] ? parseInt(row[6]) : undefined }));
+        const clientes: Cliente[] = clientesRows.slice(1).map((row: any[]) => ({ id: row[0], nome: row[1], plano: row[2], telefone: row[3], status: row[4], dataInicio: row[5], tipoPagamento: row[6] || 'Fixo', numeroParcelas: row[7] ? parseInt(row[7]) : undefined }));
+        const consultores: Consultor[] = consultoresRows.slice(1).map((row: any[]) => ({ id: row[0], nome: row[1], plano: row[2], telefone: row[3], dataInicio: row[4], tipoPagamento: row[5] || 'Fixo', numeroParcelas: row[6] ? parseInt(row[6]) : undefined }));
         
         let faturamentoMensal = 0;
         [...clientes, ...consultores].forEach(entidade => {
@@ -92,8 +91,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const diasNoMes = new Date(targetYear, targetMonth + 1, 0).getDate();
         const faturamentoPorDia = Array.from({ length: diasNoMes }, (_, i) => {
             const dia = i + 1;
-            const vendasDoDia = vendasDoMes.filter(row => new Date(row[1]).getDate() === dia);
-            const faturamento = vendasDoDia.reduce((acc, row) => acc + (parseFloat(row[5]) || 0), 0);
+            const vendasDoDia = vendasDoMes.filter((row: any[]) => new Date(row[1]).getDate() === dia);
+            const faturamento = vendasDoDia.reduce((acc: number, row: any[]) => acc + (parseFloat(row[5]) || 0), 0);
             return {
                 label: `${String(dia).padStart(2, '0')}/${String(targetMonth + 1).padStart(2, '0')}`,
                 value: faturamento
