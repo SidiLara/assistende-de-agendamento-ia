@@ -12,8 +12,8 @@ const handleResponse = async (response: Response) => {
 };
 
 export class ServicoFinanceiro implements IServicoFinanceiro {
-    public async getRelatorioFinanceiro(): Promise<RelatorioFinanceiro> {
-        const response = await fetch(API_BASE_URL);
+    public async getRelatorioFinanceiro(mes: number, ano: number): Promise<RelatorioFinanceiro> {
+        const response = await fetch(`${API_BASE_URL}?mes=${mes}&ano=${ano}`);
         return handleResponse(response);
     }
 }

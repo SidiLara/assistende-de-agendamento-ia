@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CartaoDeClienteProps } from './CartaoDeCliente.props';
-import { TipoPlano, StatusCliente, TipoEntidade } from '../../servicos/gestaoClientes/modelos/ClienteModel';
+import { StatusCliente } from '../../servicos/gestaoClientes/modelos/ClienteModel';
 
 const PhoneIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -14,28 +14,24 @@ const PlanIcon = () => (
     </svg>
 );
 
-const planStyles: Record<TipoPlano, { badge: string, text: string }> = {
-    'Premium': { badge: 'bg-yellow-400 dark:bg-yellow-500', text: 'text-yellow-800 dark:text-yellow-100' },
-    'Básico': { badge: 'bg-blue-400 dark:bg-blue-500', text: 'text-blue-800 dark:text-blue-100' },
-    'Empresarial': { badge: 'bg-purple-400 dark:bg-purple-500', text: 'text-purple-800 dark:text-purple-100' },
+const statusStyles: Record<StatusCliente, { badge: string, text: string }> = {
+    'Ativo': {
+        badge: 'bg-green-100 dark:bg-green-900/50',
+        text: 'text-green-800 dark:text-green-300'
+    },
+    'Inativo': {
+        badge: 'bg-red-100 dark:bg-red-900/50',
+        text: 'text-red-800 dark:text-red-300'
+    },
+    'Pendente': {
+        badge: 'bg-yellow-100 dark:bg-yellow-900/50',
+        text: 'text-yellow-800 dark:text-yellow-300'
+    }
 };
 
-const statusStyles: Record<StatusCliente, string> = {
-    'Ativo': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-    'Inativo': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
-};
-
-const tipoStyles: Record<TipoEntidade, string> = {
-    'Cliente': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-    'Consultor': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300'
-};
-
-
-export const CartaoDeCliente: React.FC<CartaoDeClienteProps> = ({ cliente, planos, onEditar, onToggleStatus }) => {
-    const { nome, plano, telefone, status, tipo } = cliente;
-    const planStyle = planStyles[plano];
-    const statusStyle = statusStyles[status];
-    const tipoStyle = tipoStyles[tipo];
+export const CartaoDeCliente: React.FC<CartaoDeClienteProps> = ({ cliente, planos, onEditar }) => {
+    const { nome, plano, telefone, status } = cliente;
+    const styles = statusStyles[status];
     const nomePlanoCompleto = `Plano ${plano}`;
     const planoInfo = planos.find(p => p.nome === nomePlanoCompleto);
     const valorPlanoFormatado = planoInfo ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(planoInfo.valor) : 'N/A';
@@ -43,16 +39,11 @@ export const CartaoDeCliente: React.FC<CartaoDeClienteProps> = ({ cliente, plano
     return (
         <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-slate-700 transition-shadow hover:shadow-lg min-h-[190px] flex flex-col justify-between">
             <div>
-                <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 break-words pr-2">{nome}</h3>
-                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${statusStyle}`}>
-                            {status}
-                        </span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${tipoStyle}`}>
-                            {tipo}
-                        </span>
-                    </div>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 truncate">{nome}</h3>
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${styles.badge} ${styles.text}`}>
+                        {status}
+                    </span>
                 </div>
                 <div className="space-y-3">
                     <div className="flex items-center text-gray-600 dark:text-gray-300">
@@ -61,25 +52,11 @@ export const CartaoDeCliente: React.FC<CartaoDeClienteProps> = ({ cliente, plano
                     </div>
                     <div className="flex items-center text-gray-600 dark:text-gray-300">
                         <PlanIcon />
-                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${planStyle.badge} ${planStyle.text}`}>
-                           {plano}
-                        </span>
-                        <span className="ml-2">({valorPlanoFormatado})</span>
+                        <span>{nomePlanoCompleto} ({valorPlanoFormatado})</span>
                     </div>
                 </div>
             </div>
-            <div className="flex justify-between items-center mt-4">
-                <label className="flex items-center cursor-pointer">
-                    <div className="relative">
-                        <input type="checkbox" className="sr-only" checked={status === 'Ativo'} onChange={() => onToggleStatus(cliente)} />
-                        <div className={`block w-14 h-8 rounded-full transition ${status === 'Ativo' ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-600'}`}></div>
-                        <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${status === 'Ativo' ? 'transform translate-x-6' : ''}`}></div>
-                    </div>
-                    <div className="ml-3 text-sm text-gray-700 dark:text-gray-300 font-medium">
-                        {status === 'Ativo' ? 'Ativo' : 'Inativo'}
-                    </div>
-                </label>
-
+            <div className="flex justify-end mt-4">
                 <button
                     onClick={() => onEditar(cliente)}
                     className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-100 border border-transparent rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-900/50 dark:text-brand-blue dark:hover:bg-blue-900"

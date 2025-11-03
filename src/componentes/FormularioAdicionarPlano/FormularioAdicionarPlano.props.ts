@@ -1,6 +1,8 @@
-import { Plano } from "../../servicos/gestaoPlanos/modelos/PlanoModel";
+import { Plano } from "../../servicos/gestaoPlanos";
 
 export interface FormularioAdicionarPlanoProps {
-    onSalvar: (novoPlano: Omit<Plano, 'id'>) => void;
+    onSalvar: (planoData: Omit<Plano, 'id'>) => void;
     onCancelar: () => void;
+    isSaving?: boolean;
+    apiError?: string | null;
 }

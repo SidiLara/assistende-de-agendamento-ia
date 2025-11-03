@@ -5,7 +5,8 @@ import { Cliente } from '../src/servicos/gestaoClientes/modelos/ClienteModel';
 
 const CLIENTES_SHEET_NAME = 'Clientes';
 const VENDAS_SHEET_NAME = 'Vendas';
-const CLIENTES_HEADERS = ['id', 'nome', 'plano', 'telefone', 'status', 'dataInicio', 'tipoPagamento', 'numeroParcelas'];
+// FIX: The 'tipo' field was missing from the headers, which is required by the Cliente model and present in the 'Clientes' sheet.
+const CLIENTES_HEADERS = ['id', 'nome', 'plano', 'telefone', 'status', 'dataInicio', 'tipoPagamento', 'numeroParcelas', 'tipo'];
 const VENDAS_HEADERS = ['id', 'dataVenda', 'clienteId', 'planoId', 'consultorId', 'valor'];
 
 // Vercel Serverless Function Handler
@@ -28,7 +29,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await ensureSheetExists(sheets, SPREADSHEET_ID!, VENDAS_SHEET_NAME, VENDAS_HEADERS);
 
         const [clientesResponse, vendasResponse] = await Promise.all([
-            sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${CLIENTES_SHEET_NAME}!A:H` }),
+            // FIX: The range was only fetching up to column H. It has been extended to column I to include the 'tipo' field.
+            sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${CLIENTES_SHEET_NAME}!A:I` }),
             sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${VENDAS_SHEET_NAME}!A:F` })
         ]);
 
@@ -49,7 +51,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             status: clienteRow[4],
             dataInicio: clienteRow[5],
             tipoPagamento: clienteRow[6] || 'Fixo',
-            numeroParcelas: clienteRow[7] ? parseInt(clienteRow[7]) : undefined
+            numeroParcelas: clienteRow[7] ? parseInt(clienteRow[7]) : undefined,
+            // FIX: Added the 'tipo' property to satisfy the Cliente interface. A default value is provided for backward compatibility.
+            tipo: clienteRow[8] || 'Cliente',
         };
         
         // Filtrar vendas do cliente

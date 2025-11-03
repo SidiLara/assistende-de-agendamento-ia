@@ -1,7 +1,8 @@
 // api/estatisticas.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSheetsClient, SPREADSHEET_ID } from './utils/googleSheetsClient.js';
-import { Cliente } from '../src/servicos/gestaoClientes';
+// FIX: Changed import path to directly reference the model file to avoid resolution issues.
+import { Cliente } from '../src/servicos/gestaoClientes/modelos/ClienteModel';
 import { isPlanoAtivo } from './utils/financials.js';
 
 const VENDAS_SHEET_NAME = 'Vendas';

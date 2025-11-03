@@ -6,51 +6,72 @@ import { ServicoGestaoPlanos, Plano } from '../../servicos/gestaoPlanos';
 import { getFriendlyApiError } from '../../utils/apiErrorHandler';
 import { useAuth } from '../../hooks/useAuth';
 import { ServicoAuditoria } from '../../servicos/auditoria';
+import { Toast } from '../../componentes/Toast';
 
 export const Planos: React.FC = () => {
     const [planos, setPlanos] = React.useState<Plano[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+    const [isSaving, setIsSaving] = React.useState(false);
+    const [apiError, setApiError] = React.useState<string | null>(null);
+    const [toast, setToast] = React.useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const { user } = useAuth();
     
     const planosService = React.useMemo(() => new ServicoGestaoPlanos(), []);
     const auditoriaService = React.useMemo(() => new ServicoAuditoria(), []);
 
     React.useEffect(() => {
-        setIsLoading(true);
-        setError(null);
-        planosService.getPlanos()
-            .then(data => {
-                setPlanos(data);
-            })
-            .catch(err => {
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+                const planosData = await planosService.getPlanos();
+                setPlanos(planosData);
+            } catch (err) {
                 console.error("Erro ao buscar planos:", err);
                 setError(getFriendlyApiError(err, 'os planos'));
-            })
-            .finally(() => {
+            } finally {
                 setIsLoading(false);
-            });
+            }
+        };
+        fetchData();
     }, [planosService]);
 
-    const handleSalvarPlano = async (novoPlanoData: Omit<Plano, 'id'>) => {
+    const handleAbrirModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleFecharModal = () => {
+        setIsModalOpen(false);
+        setApiError(null);
+    };
+
+    const handleSalvarPlano = async (planoData: Omit<Plano, 'id'>) => {
+        setIsSaving(true);
+        setApiError(null);
         try {
-            const planoAdicionado = await planosService.addPlano(novoPlanoData);
+            const planoAdicionado = await planosService.addPlano(planoData);
             setPlanos(prev => [...prev, planoAdicionado]);
-            setIsModalOpen(false);
-            await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'CRIACAO', entidade: 'Plano', entidadeId: planoAdicionado.id, detalhes: `Plano "${planoAdicionado.nome}" criado com valor de ${planoAdicionado.valor}.` });
+            await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'CRIACAO', entidade: 'Plano', entidadeId: planoAdicionado.id, detalhes: `Plano "${planoAdicionado.nome}" criado com valor ${planoAdicionado.valor}.` });
+            setToast({ message: 'Plano adicionado com sucesso!', type: 'success' });
+            handleFecharModal();
         } catch (error) {
-            console.error("Erro ao adicionar plano:", error);
+            console.error("Erro ao salvar plano:", error);
+            setApiError(getFriendlyApiError(error, 'salvar o plano'));
+        } finally {
+            setIsSaving(false);
         }
     };
 
     return (
         <div>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <h1 className="text-3xl font-bold flex-shrink-0">Gerenciamento de Planos</h1>
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold">Gerenciamento de Planos</h1>
                 <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full md:w-auto"
+                    onClick={handleAbrirModal}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                     Adicionar Plano
                 </button>
@@ -68,12 +89,14 @@ export const Planos: React.FC = () => {
 
             <Modal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={handleFecharModal}
                 titulo="Adicionar Novo Plano"
             >
                 <FormularioAdicionarPlano
                     onSalvar={handleSalvarPlano}
-                    onCancelar={() => setIsModalOpen(false)}
+                    onCancelar={handleFecharModal}
+                    isSaving={isSaving}
+                    apiError={apiError}
                 />
             </Modal>
         </div>

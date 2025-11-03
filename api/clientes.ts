@@ -4,7 +4,6 @@ import { getSheetsClient, SPREADSHEET_ID, ensureSheetExists } from './utils/goog
 import { Cliente } from '../src/servicos/gestaoClientes';
 
 const SHEET_NAME = 'Clientes';
-// Adicionado o campo 'tipo' para diferenciar Cliente de Consultor
 const HEADERS = ['id', 'nome', 'plano', 'telefone', 'status', 'dataInicio', 'tipoPagamento', 'numeroParcelas', 'tipo'];
 const RANGE = `${SHEET_NAME}!A:I`;
 
@@ -29,11 +28,11 @@ const rowsToClientes = (rows: any[][]): Cliente[] => {
         nome: row[nomeIndex],
         plano: row[planoIndex],
         telefone: row[telefoneIndex],
-        status: row[statusIndex],
+        status: row[statusIndex] || 'Pendente',
         dataInicio: row[dataInicioIndex],
         tipoPagamento: row[tipoPagamentoIndex] || 'Fixo',
         numeroParcelas: row[numeroParcelasIndex] ? parseInt(row[numeroParcelasIndex], 10) : undefined,
-        tipo: row[tipoIndex] || 'Cliente', // Default to 'Cliente' for backward compatibility
+        tipo: row[tipoIndex] || 'Cliente',
     }));
 };
 
@@ -61,8 +60,9 @@ const addCliente = async (clienteData: Omit<Cliente, 'id' | 'status'>): Promise<
         requestBody: {
             values: [[
                 novoCliente.id, novoCliente.nome, novoCliente.plano, 
-                novoCliente.telefone, novoCliente.status, novoCliente.dataInicio,
-                novoCliente.tipoPagamento, novoCliente.numeroParcelas || '', novoCliente.tipo
+                novoCliente.telefone, novoCliente.status, novoCliente.dataInicio, 
+                novoCliente.tipoPagamento, novoCliente.numeroParcelas || '',
+                novoCliente.tipo
             ]]
         }
     });
@@ -81,7 +81,7 @@ const updateCliente = async (clienteData: Cliente): Promise<Cliente> => {
     const rowIndex = allClientes.findIndex(c => c.id === clienteData.id);
     
     if (rowIndex === -1) {
-        throw new Error("Entidade não encontrada para atualização.");
+        throw new Error("Cliente não encontrado para atualização.");
     }
     
     const sheetRowNumber = rowIndex + 2;
@@ -94,15 +94,15 @@ const updateCliente = async (clienteData: Cliente): Promise<Cliente> => {
         requestBody: {
             values: [[
                 clienteData.id, clienteData.nome, clienteData.plano, 
-                clienteData.telefone, clienteData.status, clienteData.dataInicio,
-                clienteData.tipoPagamento, clienteData.numeroParcelas || '', clienteData.tipo
+                clienteData.telefone, clienteData.status, clienteData.dataInicio, 
+                clienteData.tipoPagamento, clienteData.numeroParcelas || '',
+                clienteData.tipo
             ]]
         }
     });
 
     return clienteData;
 };
-
 
 // Vercel Serverless Function Handler
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -125,7 +125,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
     } catch (error) {
         console.error("Erro na API de Clientes:", error);
-        // Ensure error is an instance of Error to access message property
         const message = error instanceof Error ? error.message : 'Um erro interno ocorreu.';
         res.status(500).json({ error: 'Falha ao processar a requisição.', details: message });
     }

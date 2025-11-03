@@ -1,5 +1,5 @@
 import { RelatorioFinanceiro } from "./modelos/FinanceiroModel";
 
 export interface IServicoFinanceiro {
-    getRelatorioFinanceiro(): Promise<RelatorioFinanceiro>;
+    getRelatorioFinanceiro(mes: number, ano: number): Promise<RelatorioFinanceiro>;
 }

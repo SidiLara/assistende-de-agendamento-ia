@@ -5,5 +5,4 @@ export interface ListaDeClientesProps {
     clientes: Cliente[];
     planos: Plano[];
     onEditar: (cliente: Cliente) => void;
-    onToggleStatus: (cliente: Cliente) => void;
 }

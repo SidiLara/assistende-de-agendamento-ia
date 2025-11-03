@@ -1,5 +1,6 @@
 // api/utils/financials.ts
-import { Cliente } from '../../src/servicos/gestaoClientes';
+// FIX: Changed import path to directly reference the model file to avoid resolution issues.
+import { Cliente } from '../../src/servicos/gestaoClientes/modelos/ClienteModel';
 
 /**
  * Verifica se o plano de uma entidade (Cliente ou Consultor) está ativo em um determinado mês/ano.

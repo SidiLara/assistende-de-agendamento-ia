@@ -1,5 +1,5 @@
-import { EntidadeFinanceira } from "../../servicos/financeiro";
+import { EntidadeFinanceira } from "../../servicos/financeiro/modelos/FinanceiroModel";
 
 export interface TabelaFinanceiraProps {
-    entidades: EntidadeFinanceira[];
+    dados: EntidadeFinanceira[];
 }
