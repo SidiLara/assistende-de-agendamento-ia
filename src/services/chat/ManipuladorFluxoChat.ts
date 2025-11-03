@@ -1,17 +1,17 @@
 import { RemetenteMensagem } from './modelos/MensagemModel';
-import { ServicoChat } from './ServicoChat';
+import { ChatService } from './ChatService';
 import { ConfiguracaoChat } from './modelos/ConfiguracaoChatModel';
-import { IManipuladorFluxoChat, MessageHandlerParams, PillSelectionHandlerParams } from './InterfacesChat';
+import { ChatFlowManager, MessageHandlerParams, PillSelectionHandlerParams } from './ChatInterfaces';
 import { ResultadoFluxo } from './handlers/ManipuladorAcao';
 import { ManipuladorMensagemUsuario, ManipuladorConfirmacao, ManipuladorCorrecao, ManipuladorSelecaoDataHora } from './handlers';
 
-export class ManipuladorFluxoChat implements IManipuladorFluxoChat {
+export class ManipuladorFluxoChat implements ChatFlowManager {
     private userMessageHandler: ManipuladorMensagemUsuario;
     private confirmationHandler: ManipuladorConfirmacao;
     private correctionHandler: ManipuladorCorrecao;
     private dateTimeSelectionHandler: ManipuladorSelecaoDataHora;
 
-    constructor(chatService: ServicoChat, config: ConfiguracaoChat) {
+    constructor(chatService: ChatService, config: ConfiguracaoChat) {
         this.userMessageHandler = new ManipuladorMensagemUsuario(chatService, config);
         this.confirmationHandler = new ManipuladorConfirmacao(chatService, config);
         this.correctionHandler = new ManipuladorCorrecao();

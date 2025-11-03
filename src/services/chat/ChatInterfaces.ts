@@ -1,6 +1,5 @@
 import { Mensagem } from './modelos/MensagemModel';
 import { Lead, LeadKey } from './modelos/LeadModel';
-// FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao
 import { ResultadoFluxo } from './handlers/ManipuladorAcao';
 
 export interface SendCrmOptions {
@@ -22,11 +21,10 @@ export interface PillSelectionHandlerParams {
     leadData: Partial<Lead>;
     isCorrecting: boolean;
     isFallbackMode: boolean;
-    triggeredObjections: string[];
     currentHistory: Mensagem[];
 }
 
-export interface IChatFlowHandler {
+export interface ChatFlowManager {
     processUserMessage(params: MessageHandlerParams): Promise<ResultadoFluxo>;
     processPillSelection(params: PillSelectionHandlerParams): Promise<ResultadoFluxo>;
 }

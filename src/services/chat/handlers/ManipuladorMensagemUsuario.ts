@@ -1,6 +1,8 @@
 import { RemetenteMensagem } from '../modelos/MensagemModel';
-import { ServicoChat } from '../ServicoChat';
+import { ServicoChat } from '../ChatService';
+// FIX: Corrected import path to use the barrel file and resolve casing issues.
 import { validateEmail, validateWhatsapp } from '../../../utils/validators';
+// FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { UserMessageHandlerParams } from '../InterfacesChat';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';
@@ -79,7 +81,7 @@ export class ManipuladorMensagemUsuario implements ManipuladorAcao<UserMessageHa
 
         finalResult.updatedLeadData = newLeadData;
         finalResult.newNextKey = response.nextKey;
-
+        
         if (response.nextKey === null) {
             const summaryResult = await this.summaryHandler.handle({ leadData: newLeadData, isFallbackMode });
             finalResult = {

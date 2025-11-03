@@ -1,13 +1,13 @@
-import { Mensagem } from "./modelos/MensagemModel";
-import { Lead } from "./modelos/LeadModel";
-import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
-import { ServicoChat } from "./ChatService";
-import { SendCrmOptions } from "./ChatInterfaces";
-import { RespostaAi } from "./modelos/AiResponse";
-import { RegraFallback } from "./FallbackRule";
-import { baseDeConhecimento } from "./conhecimento";
+import { Mensagem } from "./models/MensagemModel";
+import { Lead } from "./models/LeadModel";
+import { ConfiguracaoChat } from "./models/ConfiguracaoChatModel";
+import { ServicoChat } from "./ServicoChat";
+import { SendCrmOptions } from "./InterfacesChat";
+import { RespostaAi } from "./models/RespostaAi";
+import { RegraFallback } from "./RegraFallback";
+import { baseDeConhecimento } from "./conhecimento/BaseDeConhecimento";
 import { getFallbackQuestions, fallbackFlow } from "./ConfiguracaoFallback";
-import { ICrmApiService, IGeminiApiService } from "../api/ApiInterfaces";
+import { ICrmApiService, IGeminiApiService } from "../api/InterfacesApi";
 
 export class ServicoChatImpl implements ServicoChat {
     private fallbackRule: RegraFallback;

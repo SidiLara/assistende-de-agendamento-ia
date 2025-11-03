@@ -1,5 +1,6 @@
 import { RemetenteMensagem } from '../modelos/MensagemModel';
 import { ServicoChat } from '../ServicoChat';
+// FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';
 // FIX: Corrected import casing to use the PascalCase file directly.

@@ -1,6 +1,6 @@
-import { RespostaAi } from "./modelos/AiResponse";
-import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
-import { Lead, LeadKey } from "./modelos/LeadModel";
+import { RespostaAi } from "./models/AiResponse";
+import { ConfiguracaoChat } from "./models/ConfiguracaoChatModel";
+import { Lead, LeadKey } from "./models/LeadModel";
 
 export interface RegraFallback {
     getFallbackResponse(

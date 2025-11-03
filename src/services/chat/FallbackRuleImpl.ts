@@ -1,7 +1,7 @@
-import { RespostaAi } from "./modelos/AiResponse";
-import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
-import { Lead, LeadKey } from "./modelos/LeadModel";
-import { RegraFallback } from "./FallbackRule";
+import { RespostaAi } from "./models/RespostaAi";
+import { ConfiguracaoChat } from "./models/ConfiguracaoChatModel";
+import { Lead, LeadKey } from "./models/LeadModel";
+import { RegraFallback } from "./RegraFallback";
 import { fallbackFlow, getFallbackQuestions } from "./ConfiguracaoFallback";
 import { ManipuladorObjecaoFallback, ManipuladorDadosFallback, ManipuladorDataHoraFallback, ManipuladorResumoFallback } from './handlers';
 
