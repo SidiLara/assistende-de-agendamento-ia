@@ -18,7 +18,7 @@ export const PillContainer: React.FC<PillContainerProps> = ({ options, onPillSel
                     label={option.label}
                     value={option.valor}
                     chave={option.chave}
-                    onClick={onPillSelect}
+                    onClick={() => onPillSelect(option.valor, option.chave)}
                 />
             ))}
         </div>

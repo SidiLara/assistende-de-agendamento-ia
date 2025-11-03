@@ -5,11 +5,11 @@ import { EntradaDeChat } from '../../componentes/EntradaDeChat';
 import { PillsDeAcao } from '../../componentes/PillsDeAcao';
 import { useGerenciadorDeChat } from '../../hooks/useGerenciadorDeChat';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { ServicoChatImpl } from '../../servicos/chat/ServicoChatImpl';
-import { RegraFallbackImpl } from '../../servicos/chat/RegraFallbackImpl';
+import { ServicoChatImpl } from '../../services/chat/ServicoChatImpl';
+import { RegraFallbackImpl } from '../../services/chat/RegraFallbackImpl';
 // FIX: `ServicoCrmApi` is not exported from `ServicoGeminiApi.ts`. Changed to import from its own file.
-import { ServicoGeminiApi } from '../../servicos/api/ServicoGeminiApi';
-import { ServicoCrmApi } from '../../servicos/api/ServicoCrmApi';
+import { ServicoGeminiApi } from '../../services/api/ServicoGeminiApi';
+import { ServicoCrmApi } from '../../services/api/ServicoCrmApi';
 
 export const BatePapo: React.FC = () => {
     const { theme, toggleTheme } = useDarkMode();

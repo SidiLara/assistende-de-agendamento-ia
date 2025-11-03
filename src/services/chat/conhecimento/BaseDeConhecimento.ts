@@ -1,4 +1,4 @@
-// src/servicos/chat/conhecimento/BaseDeConhecimento.ts
+// src/services/chat/conhecimento/BaseDeConhecimento.ts
 
 /**
  * Define a estrutura para cada item da base de conhecimento.

@@ -1,2 +1,2 @@
-// src/servicos/chat/conhecimento/index.ts
+// src/services/chat/conhecimento/index.ts
 export * from './BaseDeConhecimento';

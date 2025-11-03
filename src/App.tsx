@@ -3,11 +3,11 @@ import { ChatInput } from './componentes/ChatInput';
 import { ChatWindow } from './componentes/ChatWindow';
 import { PillContainer } from './componentes/PillContainer';
 import { useGerenciadorDeChat } from './hooks/useGerenciadorDeChat';
-import { ConfiguracaoChat } from './servicos/chat/modelos/ConfiguracaoChatModel';
-import { ServicoChatImpl } from './servicos/chat/ServicoChatImpl';
-import { RegraFallbackImpl } from './servicos/chat/RegraFallbackImpl';
-import { ServicoGeminiApi } from './servicos/api/ServicoGeminiApi';
-import { ServicoCrmApi } from './servicos/api/ServicoCrmApi';
+import { ConfiguracaoChat } from './services/chat/modelos/ConfiguracaoChatModel';
+import { ServicoChatImpl } from './services/chat/ServicoChatImpl';
+import { RegraFallbackImpl } from './services/chat/RegraFallbackImpl';
+import { ServicoGeminiApi } from './services/api/ServicoGeminiApi';
+import { ServicoCrmApi } from './services/api/ServicoCrmApi';
 
 const config: ConfiguracaoChat = {
     consultantName: 'Seu Nome',

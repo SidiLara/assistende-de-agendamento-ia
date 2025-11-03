@@ -24,7 +24,7 @@ export class ManipuladorDadosFallback {
                 if (lastUserMessage !== updatedLeadData.startDatetime) {
                     updatedLeadData.startDatetime = `${updatedLeadData.startDatetime} às ${lastUserMessage}`;
                 }
-            } else if (keyToCollect === 'creditAmount' && !updatedLeadData.creditAmount) {
+            } else if (keyToCollect === 'creditAmount' && !updatedLead-Data.creditAmount) {
                 const numericValue = parseHumanNumber(lastUserMessage, true);
                 if (!isNaN(numericValue)) updatedLeadData.creditAmount = numericValue;
             } else if (keyToCollect === 'monthlyInvestment' && !updatedLeadData.monthlyInvestment) {

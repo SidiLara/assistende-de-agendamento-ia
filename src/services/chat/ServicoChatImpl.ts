@@ -32,7 +32,7 @@ export class ServicoChatImpl implements ServicoChat {
     }
 
     public getFallbackResponse(...args: Parameters<RegraFallback['getFallbackResponse']>): RespostaAi {
-        return this.fallbackRule.getFallbackResponse(...args);
+        return this.fallbackRule.fallbackGetResponse(...args);
     }
 
     public getFallbackSummary(leadData: Partial<Lead>): string {

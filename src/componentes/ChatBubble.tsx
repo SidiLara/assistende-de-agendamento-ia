@@ -1,4 +1,4 @@
-import { Mensagem } from '../../servicos/chat/modelos/MensagemModel';
+import { Mensagem } from '../services/chat/modelos/MensagemModel';
 
 interface ChatBubbleProps {
     message: Mensagem;

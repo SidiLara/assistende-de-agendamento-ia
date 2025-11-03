@@ -1,5 +1,5 @@
 import { RemetenteMensagem } from '../modelos/MensagemModel';
-import { ServicoChat } from '../ChatService';
+import { ServicoChat } from '../ServicoChat';
 // FIX: Corrected import path to use the barrel file and resolve casing issues.
 import { validateEmail, validateWhatsapp } from '../../../utils/validators';
 // FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao
@@ -16,7 +16,7 @@ export class ManipuladorMensagemUsuario implements ManipuladorAcao<UserMessageHa
     constructor(chatService: ServicoChat, config: ConfiguracaoChat) {
         this.chatService = chatService;
         this.config = config;
-        this.summaryHandler = new ManipuladorResumo(chatService, config);
+        this.summaryHandler = new ManipuladorResumo(this.chatService, this.config);
     }
 
     public async handle(params: UserMessageHandlerParams): Promise<ResultadoFluxo> {
