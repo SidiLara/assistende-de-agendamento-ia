@@ -23,7 +23,7 @@ export const configuracoes: Record<string, ChatConfig> = {
   'default': {
     consultor: 'Sidinei Lara',
     assistente: 'Yannis',
-    webhook: 'https://hook.us2.make.com/ud4aq9lrms2mfpce40ur6ac1papv68fi',
+    webhook: 'ud4aq9lrms2mfpce40ur6ac1papv68fi',
   },
   'site-principal-italo': {
     consultor: 'Italo',
