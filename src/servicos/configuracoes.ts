@@ -19,7 +19,13 @@ export interface ChatConfig {
  * basta adicionar uma nova entrada a este objeto.
  */
 export const configuracoes: Record<string, ChatConfig> = {
-  'Italo-Werner': {
+  // Configuração Padrão para Sidinei Lara (quando nenhum ID é fornecido)
+  'default': {
+    consultor: 'Sidinei Lara',
+    assistente: 'Yannis',
+    webhook: 'https://hook.us2.make.com/ud4aq9lrms2mfpce40ur6ac1papv68fi',
+  },
+  'site-principal-italo': {
     consultor: 'Italo',
     assistente: 'Yannis',
     webhook: '1iqcj1yt537oikvm9w93i2fv3db4x9k4',

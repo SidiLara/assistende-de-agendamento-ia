@@ -35,13 +35,8 @@ export const BatePapo: React.FC = () => {
     React.useEffect(() => {
         const fetchConfig = async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('id');
-
-            if (!id) {
-                setError('ID de configuração não fornecido na URL. Adicione "?id=seu-id-de-configuracao" ao final do endereço.');
-                setIsLoading(false);
-                return;
-            }
+            // Se nenhum ID for encontrado, usa 'default' como padrão.
+            const id = urlParams.get('id') || 'default'; 
 
             try {
                 // Em desenvolvimento, a URL completa é necessária.
@@ -54,6 +49,10 @@ export const BatePapo: React.FC = () => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
+                    // Mensagem de erro mais amigável se a configuração padrão falhar
+                    if (id === 'default') {
+                         throw new Error("A configuração padrão não foi encontrada. Por favor, contate o suporte.");
+                    }
                     throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
                 }
 
