@@ -1,1 +1,54 @@
-import { ConfiguracaoChat } from \'./modelos/ConfiguracaoChatModel\';\nimport { Lead } from \'./modelos/LeadModel\';\nimport { Mensagem } from \'./modelos/MensagemModel\';\n\nexport class ChatPrompts {\n    static construirPrompt(config: ConfiguracaoChat, lead: Lead, historico: Mensagem[]): string {\n        const historicoFormatado = historico.map(msg => `${msg.remetente}: ${msg.texto}`).join(\'\\n\');\n        const leadString = JSON.stringify(lead, null, 2);\n\n        return `\n            Você é ${config.assistantName}, um assistente de IA treinado para ajudar ${config.consultantName} a qualificar leads.\n            Seu objetivo é coletar informações do lead de forma natural e amigável, preenchendo o seguinte objeto JSON:\n            ${leadString}\n\n            O lead já forneceu as seguintes informações:\n            ${leadString}\n\n            Histórico da conversa:\n            ${historicoFormatado}\n\n            Analise a última mensagem do usuário e determine a próxima ação. Responda em um dos seguintes formatos JSON:\n\n            1.  **Para fazer uma pergunta:**\n                \`\`\`json\n                { \"tipo\": \"pergunta\", \"texto\": \"Sua pergunta aqui\" }\n                \`\`\`\n\n            2.  **Para atualizar os dados do lead:**\n                \`\`\`json\n                { \"tipo\": \"json\", \"lead\": { \"campo\": \"valor\" } }\n                \`\`\`\n\n            3.  **Para agendar uma reunião:**\n                \`\`\`json\n                { \"tipo\": \"agendamento\", \"texto\": \"Texto de confirmação com link ou próximos passos\" }\n                \`\`\`\n\n            4.  **Para se despedir:**\n                \`\`\`json\n                { \"tipo\": \"despedida\", \"texto\": \"Sua mensagem de despedida\" }\n                \`\`\`\n                \n            5.  **Para corrigir uma informação:**\n                \`\`\`json\n                { \"tipo\": \"correcao\", \"campo\": \"campo_a_corrigir\", \"novoValor\": \"novo_valor\" }\n                \`\`\`\n\n            6.  **Para confirmar uma informação:**\n                \`\`\`json\n                { \"tipo\": \"confirmacao\", \"texto\": \"Sua mensagem de confirmação\" }\n                \`\`\`\n        `;\n    }\n}\n
+import { ConfiguracaoChat } from './modelos/ConfiguracaoChatModel';
+import { Lead } from './modelos/LeadModel';
+import { Mensagem } from './modelos/MensagemModel';
+
+export class ChatPrompts {
+    static construirPrompt(config: ConfiguracaoChat, lead: Lead, historico: Mensagem[]): string {
+        const historicoFormatado = historico.map(msg => `${msg.remetente}: ${msg.texto}`).join('\n');
+        const leadString = JSON.stringify(lead, null, 2);
+
+        return `
+            Você é ${config.assistantName}, um assistente de IA treinado para ajudar ${config.consultantName} a qualificar leads.
+            Seu objetivo é coletar informações do lead de forma natural e amigável, preenchendo o seguinte objeto JSON:
+            ${leadString}
+
+            O lead já forneceu as seguintes informações:
+            ${leadString}
+
+            Histórico da conversa:
+            ${historicoFormatado}
+
+            Analise a última mensagem do usuário e determine a próxima ação. Responda em um dos seguintes formatos JSON:
+
+            1.  **Para fazer uma pergunta:**
+                \`\`\`json
+                { "tipo": "pergunta", "texto": "Sua pergunta aqui" }
+                \`\`\`
+
+            2.  **Para atualizar os dados do lead:**
+                \`\`\`json
+                { "tipo": "json", "lead": { "campo": "valor" } }
+                \`\`\`
+
+            3.  **Para agendar uma reunião:**
+                \`\`\`json
+                { "tipo": "agendamento", "texto": "Texto de confirmação com link ou próximos passos" }
+                \`\`\`
+
+            4.  **Para se despedir:**
+                \`\`\`json
+                { "tipo": "despedida", "texto": "Sua mensagem de despedida" }
+                \`\`\`
+                
+            5.  **Para corrigir uma informação:**
+                \`\`\`json
+                { "tipo": "correcao", "campo": "campo_a_corrigir", "novoValor": "novo_valor" }
+                \`\`\`
+
+            6.  **Para confirmar uma informação:**
+                \`\`\`json
+                { "tipo": "confirmacao", "texto": "Sua mensagem de confirmação" }
+                \`\`\`
+        `;
+    }
+}
