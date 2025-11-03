@@ -13,12 +13,12 @@ const handleResponse = async (response: Response) => {
 };
 
 export class ServicoGestaoCrm implements IServicoGestaoCrm {
-    public async getConsultores(): Promise<Consultor[]> {
+    public async getAll(): Promise<Consultor[]> {
         const response = await fetch(API_BASE_URL);
         return handleResponse(response);
     }
 
-    public async addConsultor(consultorData: Omit<Consultor, 'id'>): Promise<Consultor> {
+    public async add(consultorData: Omit<Consultor, 'id'>): Promise<Consultor> {
         const response = await fetch(API_BASE_URL, {
             method: 'POST',
             headers: {
@@ -29,7 +29,7 @@ export class ServicoGestaoCrm implements IServicoGestaoCrm {
         return handleResponse(response);
     }
 
-    public async updateConsultor(consultorData: Consultor): Promise<Consultor> {
+    public async update(consultorData: Consultor): Promise<Consultor> {
         const response = await fetch(API_BASE_URL, {
             method: 'PUT',
             headers: {

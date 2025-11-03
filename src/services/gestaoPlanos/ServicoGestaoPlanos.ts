@@ -13,14 +13,25 @@ const handleResponse = async (response: Response) => {
 };
 
 export class ServicoGestaoPlanos implements IServicoGestaoPlanos {
-    public async getPlanos(): Promise<Plano[]> {
+    public async getAll(): Promise<Plano[]> {
         const response = await fetch(API_BASE_URL);
         return handleResponse(response);
     }
 
-    public async addPlano(planoData: Omit<Plano, 'id'>): Promise<Plano> {
+    public async add(planoData: Omit<Plano, 'id'>): Promise<Plano> {
         const response = await fetch(API_BASE_URL, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(planoData),
+        });
+        return handleResponse(response);
+    }
+
+    public async update(planoData: Plano): Promise<Plano> {
+        const response = await fetch(`${API_BASE_URL}/${planoData.id}`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },

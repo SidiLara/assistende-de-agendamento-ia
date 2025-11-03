@@ -2,80 +2,50 @@ import * as React from 'react';
 import { ListaDeConsultores } from '../../componentes/ListaDeConsultores';
 import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarConsultor } from '../../componentes/FormularioAdicionarConsultor';
-import { ServicoGestaoCrm, Consultor } from '../../services/gestaoCrm';
+import { ServicoGestaoCrm } from '../../services/gestaoCrm';
 import { ServicoGestaoPlanos, Plano } from '../../services/gestaoPlanos';
-import { getFriendlyApiError } from '../../utils/apiErrorHandler';
-import { useAuth } from '../../hooks/useAuth';
-import { ServicoAuditoria } from '../../services/auditoria';
+import { useGerenciamento } from '../../hooks/useGerenciamento';
+import { Toast } from '../../componentes/Toast';
 
 export const Consultores: React.FC = () => {
-    const [consultores, setConsultores] = React.useState<Consultor[]>([]);
+    const {
+        items: consultores,
+        isLoading,
+        error,
+        isModalOpen,
+        itemParaEditar: consultorParaEditar,
+        isSaving,
+        apiError,
+        toast,
+        setToast,
+        handleAbrirModalParaAdicionar,
+        handleAbrirModalParaEditar,
+        handleFecharModal,
+        handleSalvarItem,
+    } = useGerenciamento({
+        service: new ServicoGestaoCrm(),
+        entidade: 'Consultor',
+        entidadePlural: 'Consultores',
+    });
+
     const [planos, setPlanos] = React.useState<Plano[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [isModalOpen, setIsModalOpen] = React.useState(false);
-    const [consultorParaEditar, setConsultorParaEditar] = React.useState<Consultor | null>(null);
-    const [error, setError] = React.useState<string | null>(null);
-    const { user } = useAuth();
-    
-    const crmService = React.useMemo(() => new ServicoGestaoCrm(), []);
     const planosService = React.useMemo(() => new ServicoGestaoPlanos(), []);
-    const auditoriaService = React.useMemo(() => new ServicoAuditoria(), []);
 
     React.useEffect(() => {
-        const fetchData = async () => {
+        const fetchPlanos = async () => {
             try {
-                setIsLoading(true);
-                setError(null);
-                const [consultoresData, planosData] = await Promise.all([
-                    crmService.getConsultores(),
-                    planosService.getPlanos()
-                ]);
-                setConsultores(consultoresData);
+                const planosData = await planosService.getAll();
                 setPlanos(planosData);
             } catch (err) {
-                console.error("Erro ao buscar dados:", err);
-                setError(getFriendlyApiError(err, 'os consultores e planos'));
-            } finally {
-                setIsLoading(false);
+                console.error("Erro ao buscar planos:", err);
             }
         };
-        fetchData();
-    }, [crmService, planosService]);
-
-    const handleAbrirModalParaAdicionar = () => {
-        setConsultorParaEditar(null);
-        setIsModalOpen(true);
-    };
-
-    const handleAbrirModalParaEditar = (consultor: Consultor) => {
-        setConsultorParaEditar(consultor);
-        setIsModalOpen(true);
-    };
-
-    const handleFecharModal = () => {
-        setIsModalOpen(false);
-        setConsultorParaEditar(null);
-    };
-
-    const handleSalvarConsultor = async (consultorData: Omit<Consultor, 'id'>) => {
-        try {
-            if (consultorParaEditar) {
-                const consultorAtualizado = await crmService.updateConsultor({ ...consultorParaEditar, ...consultorData });
-                setConsultores(prev => prev.map(c => c.id === consultorAtualizado.id ? consultorAtualizado : c));
-                await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'ATUALIZACAO', entidade: 'Consultor', entidadeId: consultorAtualizado.id, detalhes: `Consultor "${consultorAtualizado.nome}" atualizado.` });
-            } else {
-                const consultorAdicionado = await crmService.addConsultor(consultorData);
-                setConsultores(prev => [...prev, consultorAdicionado]);
-                await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'CRIACAO', entidade: 'Consultor', entidadeId: consultorAdicionado.id, detalhes: `Consultor "${consultorAdicionado.nome}" criado.` });
-            }
-            handleFecharModal();
-        } catch (error) {
-            console.error("Erro ao salvar consultor:", error);
-        }
-    };
+        fetchPlanos();
+    }, [planosService]);
 
     return (
         <div>
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold">Gerenciamento de Consultores</h1>
                 <button
@@ -93,7 +63,7 @@ export const Consultores: React.FC = () => {
                     <span className="block sm:inline ml-2">{error}</span>
                 </div>
             ) : (
-                <ListaDeConsultores 
+                <ListaDeConsultores
                     consultores={consultores}
                     planos={planos}
                     onEditar={handleAbrirModalParaEditar}
@@ -103,13 +73,15 @@ export const Consultores: React.FC = () => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={handleFecharModal}
-                titulo={consultorParaEditar ? "Editar Consultor" : "Adicionar Novo Consultor"}
+                titulo={consultorParaEditar ? 'Editar Consultor' : 'Adicionar Novo Consultor'}
             >
                 <FormularioAdicionarConsultor
                     consultorParaEditar={consultorParaEditar}
                     planosDisponiveis={planos}
-                    onSalvar={handleSalvarConsultor}
+                    onSalvar={handleSalvarItem}
                     onCancelar={handleFecharModal}
+                    isSaving={isSaving}
+                    apiError={apiError}
                 />
             </Modal>
         </div>

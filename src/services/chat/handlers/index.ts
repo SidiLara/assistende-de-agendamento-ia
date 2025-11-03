@@ -3,3 +3,7 @@ export * from './acoes/ManipuladorCorrecao';
 export * from './acoes/ManipuladorSelecaoDataHora';
 export * from './ManipuladorResumo';
 export * from './ManipuladorMensagemUsuario';
+export * from './fallback/ManipuladorDadosFallback';
+export * from './fallback/ManipuladorDataHoraFallback';
+export * from './fallback/ManipuladorObjecaoFallback';
+export * from './fallback/ManipuladorResumoFallback';

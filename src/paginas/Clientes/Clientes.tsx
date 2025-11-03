@@ -2,93 +2,50 @@ import * as React from 'react';
 import { ListaDeClientes } from '../../componentes/ListaDeClientes';
 import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarCliente } from '../../componentes/FormularioAdicionarCliente';
-import { ServicoGestaoClientes, Cliente } from '../../services/gestaoClientes';
+import { ServicoGestaoClientes } from '../../services/gestaoClientes';
 import { ServicoGestaoPlanos, Plano } from '../../services/gestaoPlanos';
-import { getFriendlyApiError } from '../../utils/apiErrorHandler';
-import { useAuth } from '../../hooks/useAuth';
-import { ServicoAuditoria } from '../../services/auditoria';
+import { useGerenciamento } from '../../hooks/useGerenciamento';
 import { Toast } from '../../componentes/Toast';
 
 export const Clientes: React.FC = () => {
-    const [clientes, setClientes] = React.useState<Cliente[]>([]);
+    const {
+        items: clientes,
+        isLoading,
+        error,
+        isModalOpen,
+        itemParaEditar: clienteParaEditar,
+        isSaving,
+        apiError,
+        toast,
+        setToast,
+        handleAbrirModalParaAdicionar,
+        handleAbrirModalParaEditar,
+        handleFecharModal,
+        handleSalvarItem,
+    } = useGerenciamento({
+        service: new ServicoGestaoClientes(),
+        entidade: 'Cliente',
+        entidadePlural: 'Clientes',
+    });
+
     const [planos, setPlanos] = React.useState<Plano[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [isModalOpen, setIsModalOpen] = React.useState(false);
-    const [clienteParaEditar, setClienteParaEditar] = React.useState<Cliente | null>(null);
-    const [error, setError] = React.useState<string | null>(null);
-    const [isSaving, setIsSaving] = React.useState(false);
-    const [apiError, setApiError] = React.useState<string | null>(null);
-    const [toast, setToast] = React.useState<{ message: string; type: 'success' | 'error' } | null>(null);
-    const { user } = useAuth();
-    
-    const crmService = React.useMemo(() => new ServicoGestaoClientes(), []);
     const planosService = React.useMemo(() => new ServicoGestaoPlanos(), []);
-    const auditoriaService = React.useMemo(() => new ServicoAuditoria(), []);
 
     React.useEffect(() => {
-        const fetchData = async () => {
+        const fetchPlanos = async () => {
             try {
-                setIsLoading(true);
-                setError(null);
-                const [clientesData, planosData] = await Promise.all([
-                    crmService.getClientes(),
-                    planosService.getPlanos()
-                ]);
-                setClientes(clientesData);
+                const planosData = await planosService.getAll();
                 setPlanos(planosData);
             } catch (err) {
-                console.error("Erro ao buscar dados:", err);
-                setError(getFriendlyApiError(err, 'os clientes e planos'));
-            } finally {
-                setIsLoading(false);
+                console.error("Erro ao buscar planos:", err);
             }
         };
-        fetchData();
-    }, [crmService, planosService]);
-
-    const handleAbrirModalParaAdicionar = () => {
-        setClienteParaEditar(null);
-        setIsModalOpen(true);
-    };
-
-    const handleAbrirModalParaEditar = (cliente: Cliente) => {
-        setClienteParaEditar(cliente);
-        setIsModalOpen(true);
-    };
-
-    const handleFecharModal = () => {
-        setIsModalOpen(false);
-        setClienteParaEditar(null);
-        setApiError(null);
-    };
-
-    const handleSalvarCliente = async (clienteData: Omit<Cliente, 'id'>) => {
-        setIsSaving(true);
-        setApiError(null);
-        try {
-            if (clienteParaEditar) {
-                const clienteAtualizado = await crmService.updateCliente({ ...clienteParaEditar, ...clienteData });
-                setClientes(prev => prev.map(c => c.id === clienteAtualizado.id ? clienteAtualizado : c));
-                await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'ATUALIZACAO', entidade: 'Cliente', entidadeId: clienteAtualizado.id, detalhes: `Cliente "${clienteAtualizado.nome}" atualizado.` });
-                setToast({ message: 'Cliente atualizado com sucesso!', type: 'success' });
-            } else {
-                const clienteAdicionado = await crmService.addCliente(clienteData);
-                setClientes(prev => [...prev, clienteAdicionado]);
-                await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'CRIACAO', entidade: 'Cliente', entidadeId: clienteAdicionado.id, detalhes: `Cliente "${clienteAdicionado.nome}" criado.` });
-                setToast({ message: 'Cliente adicionado com sucesso!', type: 'success' });
-            }
-            handleFecharModal();
-        } catch (error) {
-            console.error("Erro ao salvar cliente:", error);
-            setApiError(getFriendlyApiError(error, 'salvar o cliente'));
-        } finally {
-            setIsSaving(false);
-        }
-    };
+        fetchPlanos();
+    }, [planosService]);
 
     return (
         <div>
-             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold">Gerenciamento de Clientes</h1>
                 <button
@@ -116,12 +73,12 @@ export const Clientes: React.FC = () => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={handleFecharModal}
-                titulo={clienteParaEditar ? "Editar Cliente" : "Adicionar Novo Cliente"}
+                titulo={clienteParaEditar ? 'Editar Cliente' : 'Adicionar Novo Cliente'}
             >
                 <FormularioAdicionarCliente
                     clienteParaEditar={clienteParaEditar}
                     planosDisponiveis={planos}
-                    onSalvar={handleSalvarCliente}
+                    onSalvar={handleSalvarItem}
                     onCancelar={handleFecharModal}
                     isSaving={isSaving}
                     apiError={apiError}

@@ -13,12 +13,12 @@ const handleResponse = async (response: Response) => {
 };
 
 export class ServicoGestaoClientes implements IServicoGestaoClientes {
-    public async getClientes(): Promise<Cliente[]> {
+    public async getAll(): Promise<Cliente[]> {
         const response = await fetch(API_BASE_URL);
         return handleResponse(response);
     }
 
-    public async addCliente(clienteData: Omit<Cliente, 'id' | 'status'>): Promise<Cliente> {
+    public async add(clienteData: Omit<Cliente, 'id' | 'status'>): Promise<Cliente> {
         const response = await fetch(API_BASE_URL, {
             method: 'POST',
             headers: {
@@ -29,7 +29,7 @@ export class ServicoGestaoClientes implements IServicoGestaoClientes {
         return handleResponse(response);
     }
 
-    public async updateCliente(clienteData: Cliente): Promise<Cliente> {
+    public async update(clienteData: Cliente): Promise<Cliente> {
         const response = await fetch(API_BASE_URL, {
             method: 'PUT',
             headers: {
