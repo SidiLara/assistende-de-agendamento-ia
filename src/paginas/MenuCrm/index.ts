@@ -1,1 +1,0 @@
-export { MenuCrm } from './MenuCrm';

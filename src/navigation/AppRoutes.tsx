@@ -1,8 +1,8 @@
-// FIX: Changed to named imports to address module resolution errors.
+
 import { Routes, Route } from 'react-router-dom';
 import { BatePapo } from '../paginas/BatePapo';
 import { LayoutCrm } from '../paginas/LayoutCrm';
-import { MenuCrm } from '../paginas/MenuCrm';
+import { Crm } from '../paginas/Crm';
 import { Clientes } from '../paginas/Clientes';
 import { Planos } from '../paginas/Planos';
 import { Estatisticas } from '../paginas/Estatisticas';
@@ -26,7 +26,7 @@ const AppRoutes = () => {
                     </ProtectedRoute>
                 }
             >
-                <Route index element={<MenuCrm />} />
+                <Route index element={<Crm />} />
                 <Route path="usuarios" element={<Usuarios />} />
                 <Route path="clientes" element={<Clientes />} />
                 <Route path="planos" element={<Planos />} />
