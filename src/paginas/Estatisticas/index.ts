@@ -1,1 +1,0 @@
-export { Estatisticas } from './Estatisticas';

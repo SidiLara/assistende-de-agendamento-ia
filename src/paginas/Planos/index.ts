@@ -1,1 +1,0 @@
-export { Planos } from './Planos';

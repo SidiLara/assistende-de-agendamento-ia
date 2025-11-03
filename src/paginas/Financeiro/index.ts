@@ -1,1 +1,0 @@
-export { Financeiro } from './Financeiro';

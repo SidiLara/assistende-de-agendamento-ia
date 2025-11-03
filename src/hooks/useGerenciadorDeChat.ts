@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { Mensagem, RemetenteMensagem } from '../servicos/chat/modelos/MensagemModel';
-import { Lead, LeadKey } from '../servicos/chat/modelos/LeadModel';
-import { ConfiguracaoChat } from '../servicos/chat/modelos/ConfiguracaoChatModel';
-import { ServicoChat } from '../servicos/chat/ServicoChat';
-import { ManipuladorFluxoChat } from '../servicos/chat/ManipuladorFluxoChat';
-import { ResultadoFluxo } from '../servicos/chat/handlers/ManipuladorAcao';
-import { IManipuladorFluxoChat } from '../servicos/chat/InterfacesChat';
+import { Mensagem, RemetenteMensagem } from '../services/chat/modelos/MensagemModel';
+import { Lead, LeadKey } from '../services/chat/modelos/LeadModel';
+import { ConfiguracaoChat } from '../services/chat/modelos/ConfiguracaoChatModel';
+import { ServicoChat } from '../services/chat/ServicoChat';
+import { ManipuladorFluxoChat } from '../services/chat/ManipuladorFluxoChat';
+import { ResultadoFluxo } from '../services/chat/handlers/ManipuladorAcao';
+import { IManipuladorFluxoChat } from '../services/chat/InterfacesChat';
 
 export const useGerenciadorDeChat = (config: ConfiguracaoChat | null, chatService: ServicoChat | null) => {
     const [messages, setMessages] = React.useState<Mensagem[]>([]);

@@ -1,15 +1,11 @@
-// FIX: Changed to a named import to address module resolution errors.
 import { BrowserRouter } from 'react-router-dom';
-import AppRoutes from './src/navigation/AppRoutes';
-import { AuthProvider } from './src/context/AuthContext';
+import { AppRoutes } from './src/navigation/AppRoutes';
 
 const App = () => {
   return (
-    <AuthProvider>
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
-    </AuthProvider>
     );
 };
 
