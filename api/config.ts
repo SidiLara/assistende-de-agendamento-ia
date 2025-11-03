@@ -1,37 +1,28 @@
 // api/config.ts
-// Esta é uma Vercel Serverless Function.
-// Ela será responsável por responder a requisições em /api/config
-
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { configuracoes } from '../src/servicos/configuracoes';
+// CORREÇÃO: Importando as configurações do mesmo diretório da API.
+import { configuracoes } from './configuracoes';
 
 export default function handler(
   request: VercelRequest,
   response: VercelResponse,
 ) {
-  // Extrai o 'id' dos parâmetros da URL.
-  // Exemplo: /api/config?id=site-principal-italo
+  // Extrai o parâmetro 'id' da query string da URL.
   const { id } = request.query;
 
-  // Valida se o 'id' foi fornecido e é uma string.
+  // Se nenhum ID for fornecido ou se não for uma string, retorna um erro.
   if (typeof id !== 'string' || !id) {
-    return response.status(400).json({ error: 'O parâmetro "id" é obrigatório.' });
+    return response.status(400).json({ error: 'ID de configuração inválido ou não fornecido.' });
   }
 
-  // Busca a configuração usando o ID fornecido (em minúsculas para ser case-insensitive).
-  const config = configuracoes[id.toLowerCase()];
+  // Busca a configuração correspondente ao ID fornecido no nosso "banco de dados".
+  const config = configuracoes[id];
 
-  // Se a configuração for encontrada, retorna como JSON com status 200 (OK).
-  if (config) {
-    // Adiciona headers de CORS para permitir que o front-end chame esta API
-    // em ambiente de desenvolvimento e produção.
-    response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    
-    return response.status(200).json(config);
+  // Se nenhuma configuração for encontrada para o ID, retorna um erro 404 (Não Encontrado).
+  if (!config) {
+    return response.status(404).json({ error: `Configuração com ID '${id}' não encontrada.` });
   }
 
-  // Se nenhuma configuração for encontrada para o ID, retorna um erro 404 (Not Found).
-  return response.status(404).json({ error: `Configuração não encontrada para o id: ${id}` });
+  // Se a configuração for encontrada, retorna com sucesso (status 200) em formato JSON.
+  return response.status(200).json(config);
 }

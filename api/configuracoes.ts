@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-// src/servicos/configuracoes.ts
+// api/configuracoes.ts
 
 /**
  * Interface que define a estrutura de um objeto de configuração do chat.
@@ -8,7 +8,7 @@
 export interface ChatConfig {
   consultor: string;    // O nome do consultor associado a este link.
   assistente: string;   // O nome que o assistente de IA usará.
-  webhook: string;      // A URL do webhook para enviar os dados do lead.
+  webhook: string;      // O ID do webhook para enviar os dados do lead.
 }
 
 /**
@@ -23,6 +23,7 @@ export const configuracoes: Record<string, ChatConfig> = {
   'default': {
     consultor: 'Sidinei Lara',
     assistente: 'Yannis',
+    // CORREÇÃO: O valor deve ser apenas o ID do webhook, não a URL completa.
     webhook: 'ud4aq9lrms2mfpce40ur6ac1papv68fi',
   },
   'site-principal-italo': {
