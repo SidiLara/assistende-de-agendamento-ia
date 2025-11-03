@@ -1,4 +1,4 @@
-import { Usuario } from "../../servicos/gestaoUsuarios/modelos/UsuarioModel";
+import { Usuario } from "../../servicos/gestaoUsuarios";
 
 export interface ListaDeUsuariosProps {
     usuarios: Usuario[];

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FormularioAdicionarUsuarioProps } from './FormularioAdicionarUsuario.props';
-import { Role } from '../../servicos/gestaoUsuarios/modelos/UsuarioModel';
+import { Role } from '../../servicos/gestaoUsuarios';
 
 export const FormularioAdicionarUsuario = ({ onSalvar, onCancelar }: FormularioAdicionarUsuarioProps) => {
     const [email, setEmail] = React.useState('');

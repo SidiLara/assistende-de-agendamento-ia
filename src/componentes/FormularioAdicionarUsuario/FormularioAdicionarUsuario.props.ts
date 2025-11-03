@@ -1,6 +1,6 @@
-import { Usuario } from "../../servicos/gestaoUsuarios/modelos/UsuarioModel";
+import { Usuario } from "../../servicos/gestaoUsuarios";
 
 export interface FormularioAdicionarUsuarioProps {
-    onSalvar: (novoUsuario: Omit<Usuario, 'id'> & { password?: string }) => void;
+    onSalvar: (novoUsuario: Omit<Usuario, 'id'> & { password?: string }) => void | Promise<void>;
     onCancelar: () => void;
 }
