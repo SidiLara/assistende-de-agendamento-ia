@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pill } from './Pill';
-import { OpcaoDeAcao } from '../../servicos/chat/InterfacesChat';
+import { OpcaoDeAcao } from '../../services/chat/InterfacesChat';
 
 interface PillContainerProps {
     options: OpcaoDeAcao[];

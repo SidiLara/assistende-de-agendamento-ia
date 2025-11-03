@@ -3,16 +3,17 @@ import { Lead } from "./modelos/LeadModel";
 import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
 import { ServicoChat } from "./ServicoChat";
 import { SendCrmOptions } from "./InterfacesChat";
-import { RespostaAi } from "./modelos/AiResponse";
+import { RespostaAi } from "./modelos/RespostaAi";
 import { RegraFallback } from "./RegraFallback";
-import { ICrmApiService, IGeminiApiService } from "../api/ApiInterfaces";
+import { ServicoCrmApi } from "../api/ServicoCrmApi";
+import { ServicoGeminiApi } from "../api/ServicoGeminiApi";
 
 export class ServicoChatImpl implements ServicoChat {
     private fallbackRule: RegraFallback;
-    private geminiApi: IGeminiApiService;
-    private crmApi: ICrmApiService;
+    private geminiApi: ServicoGeminiApi;
+    private crmApi: ServicoCrmApi;
 
-    constructor(fallbackRule: RegraFallback, geminiApi: IGeminiApiService, crmApi: ICrmApiService) {
+    constructor(fallbackRule: RegraFallback, geminiApi: ServicoGeminiApi, crmApi: ServicoCrmApi) {
         this.fallbackRule = fallbackRule;
         this.geminiApi = geminiApi;
         this.crmApi = crmApi;
@@ -23,16 +24,15 @@ export class ServicoChatImpl implements ServicoChat {
         currentData: Partial<Lead>,
         config: ConfiguracaoChat
     ): Promise<RespostaAi> {
-        // A lógica de objeção agora é tratada diretamente pelo prompt do Gemini para respostas mais inteligentes e contextuais.
-        return await this.geminiApi.generateAiResponse(history, currentData, config);
+        return await this.geminiApi.gerarRespostaAi(history, currentData, config);
     }
 
     public async getFinalSummary(leadData: Partial<Lead>, config: ConfiguracaoChat): Promise<string> {
-        return await this.geminiApi.generateFinalSummary(leadData, config);
+        return await this.geminiApi.gerarResumoFinal(leadData, config);
     }
 
     public getFallbackResponse(...args: Parameters<RegraFallback['getFallbackResponse']>): RespostaAi {
-        return this.fallbackRule.fallbackGetResponse(...args);
+        return this.fallbackRule.getFallbackResponse(...args);
     }
 
     public getFallbackSummary(leadData: Partial<Lead>): string {
@@ -52,16 +52,14 @@ export class ServicoChatImpl implements ServicoChat {
             const project = leadData.topic || '(não informado)';
             narrativeReport = `Cliente quer fazer ${project}, precisa de ${formattedCreditAmount} e consegue pagar até ${formattedMonthlyInvestment} por mês.`;
             
-            // A lógica de objeções foi centralizada na IA, então o array de objeções pode não ser mais populado da mesma forma.
-            // Mantendo a estrutura para compatibilidade, mas pode ser simplificado no futuro.
             const uniqueObjections = [...new Set(options.objections)];
             if (uniqueObjections.length > 0) {
                 narrativeReport += ` Teve algumas objeções: ${uniqueObjections.join(', ')}.`;
             }
         } else {
-            narrativeReport = await this.geminiApi.generateInternalSummary(leadData, history, formattedCreditAmount, formattedMonthlyInvestment, consultantName);
+            narrativeReport = await this.geminiApi.gerarResumoInterno(leadData, history, formattedCreditAmount, formattedMonthlyInvestment, consultantName);
         }
 
-        await this.crmApi.sendLead(leadData, narrativeReport, config);
+        await this.crmApi.enviarLead(leadData, narrativeReport, config);
     }
 }

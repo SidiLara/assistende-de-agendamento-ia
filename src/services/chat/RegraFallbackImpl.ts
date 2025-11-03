@@ -3,7 +3,7 @@ import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
 import { Lead, LeadKey } from "./modelos/LeadModel";
 import { RegraFallback } from "./RegraFallback";
 import { fallbackFlow, getFallbackQuestions } from "./ConfiguracaoFallback";
-import { ManipuladorObjecaoFallback, ManipuladorDadosFallback, ManipuladorDataHoraFallback, ManipuladorResumoFallback } from './handlers';
+import { ManipuladorObjecaoFallback, ManipuladorDadosFallback, ManipuladorDataHoraFallback, ManipuladorResumoFallback } from './handlers/fallback';
 
 export class RegraFallbackImpl implements RegraFallback {
     private objectionHandler: ManipuladorObjecaoFallback;

@@ -17,7 +17,7 @@ const dayOfWeekMap: { [key: string]: number } = {
  * @param timeString A hora no formato "HH:mm" ou "HH".
  * @returns A data e hora formatada (ex: "segunda-feira, 22 de julho de 2024, às 15:00").
  */
-export const calculateFullDate = (dayOfWeekString: string, timeString: string): string => {
+export const calcularDataCompleta = (dayOfWeekString: string, timeString: string): string => {
     const lowerDayOfWeek = dayOfWeekString.toLowerCase();
     if (!dayOfWeekMap.hasOwnProperty(lowerDayOfWeek)) {
         return dayOfWeekString; // Retorna o original se não for um dia válido

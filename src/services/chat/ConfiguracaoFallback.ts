@@ -1,5 +1,5 @@
-import { ConfiguracaoChat } from "./models/ConfiguracaoChatModel";
-import { LeadKey } from "./models/LeadModel";
+import { ConfiguracaoChat } from "./modelos/ConfiguracaoChatModel";
+import { LeadKey } from "./modelos/LeadModel";
 
 export const fallbackFlow: LeadKey[] = [
     'clientName', 'topic', 'creditAmount', 'monthlyInvestment',

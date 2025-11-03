@@ -1,18 +1,12 @@
-import { RemetenteMensagem } from '../modelos/MensagemModel';
+import { Remetente, Mensagem } from '../modelos/MensagemModel';
 import { ServicoChat } from '../ServicoChat';
-// FIX: Changed import from non-existent AcaoHandler to ManipuladorAcao
 import { ManipuladorAcao, ResultadoFluxo } from './ManipuladorAcao';
 import { ConfiguracaoChat } from '../modelos/ConfiguracaoChatModel';
-// FIX: Corrected import casing to use the PascalCase file directly.
-import { calculateFullDate } from '../../../utils/formatters/DateAndTime';
+import { calcularDataCompleta } from '../../../utils/formatters/DateAndTime';
 import { Lead } from '../modelos/LeadModel';
+import { ResumoHandlerParams } from '../InterfacesChat';
 
-interface SummaryHandlerParams {
-    leadData: Partial<Lead>;
-    isFallbackMode: boolean;
-}
-
-export class ManipuladorResumo implements ManipuladorAcao<SummaryHandlerParams> {
+export class ManipuladorResumo implements ManipuladorAcao<ResumoHandlerParams> {
     private chatService: ServicoChat;
     private config: ConfiguracaoChat;
 
@@ -21,7 +15,7 @@ export class ManipuladorResumo implements ManipuladorAcao<SummaryHandlerParams> 
         this.config = config;
     }
 
-    public async handle(params: SummaryHandlerParams): Promise<ResultadoFluxo> {
+    public async handle(params: ResumoHandlerParams): Promise<ResultadoFluxo> {
         const { leadData, isFallbackMode } = params;
 
         const dateTimeString = leadData.startDatetime || '';
@@ -29,7 +23,7 @@ export class ManipuladorResumo implements ManipuladorAcao<SummaryHandlerParams> 
         const timeMatch = dateTimeString.match(/(\d{1,2}[:h]?\d{0,2})/);
         const dayOfWeek = dayMatch ? dayMatch[1] : '';
         const time = timeMatch ? timeMatch[0] : '';
-        const finalDate = calculateFullDate(dayOfWeek, time);
+        const finalDate = calcularDataCompleta(dayOfWeek, time);
         
         const finalLeadData = { ...leadData, startDatetime: finalDate };
         
@@ -39,9 +33,16 @@ export class ManipuladorResumo implements ManipuladorAcao<SummaryHandlerParams> 
             
         const finalDataWithSummary = { ...finalLeadData, finalSummary: summaryText };
 
+        const summaryMessage: Mensagem = {
+            id: (Date.now() + Math.random()).toString(),
+            remetente: 'assistente',
+            texto: summaryText,
+            timestamp: Date.now(),
+        };
+
         return {
             updatedLeadData: finalDataWithSummary,
-            newMessages: [{ id: Date.now() + 2, sender: RemetenteMensagem.Bot, text: summaryText }],
+            newMessages: [summaryMessage],
             newActionOptions: [
                 { label: 'Confirmar Agendamento', value: 'confirm' },
                 { label: 'Corrigir Informações', value: 'correct' },

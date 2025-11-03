@@ -2,7 +2,7 @@ import { RespostaAi } from "../../modelos/RespostaAi";
 import { ConfiguracaoChat } from "../../modelos/ConfiguracaoChatModel";
 import { Lead, LeadKey } from "../../modelos/LeadModel";
 import { baseDeConhecimento } from "../../conhecimento";
-import { fallbackFlow, getFallbackQuestions } from "../../ConfiguracaoFallback";
+import { fluxoFallback, obterPerguntasFallback } from "../../ConfiguracaoFallback";
 
 export class ManipuladorObjecaoFallback {
     public handle(
@@ -15,9 +15,9 @@ export class ManipuladorObjecaoFallback {
         for (const objecao of baseDeConhecimento) {
             for (const palavra of objecao.palavrasChave) {
                 if (lowerCaseMessage.includes(palavra)) {
-                    const fallbackQuestions = getFallbackQuestions(config);
+                    const fallbackQuestions = obterPerguntasFallback(config);
                     
-                    const nextKeyToAsk = keyToCollect || fallbackFlow.find(key => !currentData.hasOwnProperty(key)) || 'clientName';
+                    const nextKeyToAsk = keyToCollect || fluxoFallback.find(key => !currentData.hasOwnProperty(key)) || 'clientName';
                     
                     let nextQuestion = fallbackQuestions[nextKeyToAsk];
 

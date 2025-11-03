@@ -1,7 +1,7 @@
-import { RemetenteMensagem } from './modelos/MensagemModel';
-import { ChatService } from './ChatService';
+import { Remetente, Mensagem } from './modelos/MensagemModel';
+import { ServicoChat } from './ServicoChat';
 import { ConfiguracaoChat } from './modelos/ConfiguracaoChatModel';
-import { ChatFlowManager, MessageHandlerParams, PillSelectionHandlerParams } from './ChatInterfaces';
+import { ChatFlowManager, MessageHandlerParams, PillSelectionHandlerParams } from './InterfacesChat';
 import { ResultadoFluxo } from './handlers/ManipuladorAcao';
 import { ManipuladorMensagemUsuario, ManipuladorConfirmacao, ManipuladorCorrecao, ManipuladorSelecaoDataHora } from './handlers';
 
@@ -11,7 +11,7 @@ export class ManipuladorFluxoChat implements ChatFlowManager {
     private correctionHandler: ManipuladorCorrecao;
     private dateTimeSelectionHandler: ManipuladorSelecaoDataHora;
 
-    constructor(chatService: ChatService, config: ConfiguracaoChat) {
+    constructor(chatService: ServicoChat, config: ConfiguracaoChat) {
         this.userMessageHandler = new ManipuladorMensagemUsuario(chatService, config);
         this.confirmationHandler = new ManipuladorConfirmacao(chatService, config);
         this.correctionHandler = new ManipuladorCorrecao();
@@ -33,18 +33,20 @@ export class ManipuladorFluxoChat implements ChatFlowManager {
             return this.correctionHandler.handle(params);
         }
         
-        const isDateTimeSelection = (leadData.startDatetime && !leadData.startDatetime.includes('às')) || params.currentHistory.some(m => m.text.includes("dia da semana"));
+        const isDateTimeSelection = (leadData.startDatetime && !leadData.startDatetime.includes('às')) || params.currentHistory.some(m => m.texto.includes("dia da semana"));
         if(isDateTimeSelection) {
             return this.dateTimeSelectionHandler.handle(params);
         }
 
         console.error("Ação de pill não reconhecida:", value);
+        const errorMessage: Mensagem = {
+            id: (Date.now() + Math.random()).toString(),
+            remetente: 'assistente',
+            texto: "Desculpe, não entendi sua seleção. Poderia tentar novamente?",
+            timestamp: Date.now()
+        };
         return {
-            newMessages: [{
-                id: Date.now(),
-                sender: RemetenteMensagem.Bot,
-                text: "Desculpe, não entendi sua seleção. Poderia tentar novamente?"
-            }]
+            newMessages: [errorMessage]
         };
     }
 }

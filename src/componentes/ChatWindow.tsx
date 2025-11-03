@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mensagem } from '../servicos/chat/modelos/MensagemModel';
+import { Mensagem } from '../services/chat/modelos/MensagemModel';
 import { ChatBubble } from './ChatBubble';
 import { TypingIndicator } from './TypingIndicator';
 
