@@ -2,7 +2,7 @@ import * as React from 'react';
 import { ListaDeClientesProps } from './ListaDeClientes.props';
 import { CartaoDeCliente } from '../CartaoDeCliente';
 
-export const ListaDeClientes = ({ clientes, onEditar, onToggleStatus }: ListaDeClientesProps) => {
+export const ListaDeClientes = ({ clientes, planos, onEditar, onToggleStatus }: ListaDeClientesProps) => {
     if (!clientes.length) {
         return <p className="text-center text-gray-500 dark:text-gray-400 mt-8">Nenhum cliente corresponde à sua busca.</p>;
     }
@@ -13,6 +13,7 @@ export const ListaDeClientes = ({ clientes, onEditar, onToggleStatus }: ListaDeC
                 <React.Fragment key={cliente.id}>
                     <CartaoDeCliente 
                         cliente={cliente} 
+                        planos={planos}
                         onEditar={onEditar}
                         onToggleStatus={onToggleStatus}
                     />

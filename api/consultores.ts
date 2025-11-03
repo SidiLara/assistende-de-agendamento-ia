@@ -4,8 +4,8 @@ import { getSheetsClient, SPREADSHEET_ID, ensureSheetExists } from './utils/goog
 import { Consultor } from '../src/servicos/gestaoCrm';
 
 const SHEET_NAME = 'Consultores';
-const HEADERS = ['id', 'nome', 'plano', 'telefone'];
-const RANGE = `${SHEET_NAME}!A:D`;
+const HEADERS = ['id', 'nome', 'plano', 'telefone', 'dataInicio', 'tipoPagamento', 'numeroParcelas'];
+const RANGE = `${SHEET_NAME}!A:G`;
 
 // Helper to convert sheet rows to Consultor objects
 const rowsToConsultores = (rows: any[][]): Consultor[] => {
@@ -17,12 +17,18 @@ const rowsToConsultores = (rows: any[][]): Consultor[] => {
     const nomeIndex = header.indexOf('nome');
     const planoIndex = header.indexOf('plano');
     const telefoneIndex = header.indexOf('telefone');
+    const dataInicioIndex = header.indexOf('dataInicio');
+    const tipoPagamentoIndex = header.indexOf('tipoPagamento');
+    const numeroParcelasIndex = header.indexOf('numeroParcelas');
 
     return data.map(row => ({
         id: row[idIndex],
         nome: row[nomeIndex],
         plano: row[planoIndex],
         telefone: row[telefoneIndex],
+        dataInicio: row[dataInicioIndex],
+        tipoPagamento: row[tipoPagamentoIndex] || 'Fixo',
+        numeroParcelas: row[numeroParcelasIndex] ? parseInt(row[numeroParcelasIndex], 10) : undefined,
     }));
 };
 
@@ -47,11 +53,48 @@ const addConsultor = async (consultorData: Omit<Consultor, 'id'>): Promise<Consu
         range: RANGE,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
-            values: [[novoConsultor.id, novoConsultor.nome, novoConsultor.plano, novoConsultor.telefone]]
+            values: [[
+                novoConsultor.id, novoConsultor.nome, novoConsultor.plano, 
+                novoConsultor.telefone, novoConsultor.dataInicio, 
+                novoConsultor.tipoPagamento, novoConsultor.numeroParcelas || ''
+            ]]
         }
     });
 
     return novoConsultor;
+};
+
+const updateConsultor = async (consultorData: Consultor): Promise<Consultor> => {
+    const sheets = await getSheetsClient();
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: RANGE,
+    });
+    const allConsultores = rowsToConsultores(response.data.values || []);
+    
+    const rowIndex = allConsultores.findIndex(c => c.id === consultorData.id);
+    
+    if (rowIndex === -1) {
+        throw new Error("Consultor não encontrado para atualização.");
+    }
+    
+    const sheetRowNumber = rowIndex + 2;
+    const updateRange = `${SHEET_NAME}!A${sheetRowNumber}:G${sheetRowNumber}`;
+
+    await sheets.spreadsheets.values.update({
+        spreadsheetId: SPREADSHEET_ID,
+        range: updateRange,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: {
+            values: [[
+                consultorData.id, consultorData.nome, consultorData.plano, 
+                consultorData.telefone, consultorData.dataInicio, 
+                consultorData.tipoPagamento, consultorData.numeroParcelas || ''
+            ]]
+        }
+    });
+
+    return consultorData;
 };
 
 
@@ -67,8 +110,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         } else if (req.method === 'POST') {
             const novoConsultor = await addConsultor(req.body);
             res.status(201).json(novoConsultor);
+        } else if (req.method === 'PUT') {
+            const consultorAtualizado = await updateConsultor(req.body);
+            res.status(200).json(consultorAtualizado);
         } else {
-            res.setHeader('Allow', ['GET', 'POST']);
+            res.setHeader('Allow', ['GET', 'POST', 'PUT']);
             res.status(405).end(`Method ${req.method} Not Allowed`);
         }
     } catch (error) {

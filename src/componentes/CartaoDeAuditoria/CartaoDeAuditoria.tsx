@@ -41,7 +41,7 @@ export const CartaoDeAuditoria: React.FC<CartaoDeAuditoriaProps> = ({ log }) => 
     const config = actionConfig[log.acao];
 
     return (
-        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-slate-700 flex flex-col justify-between h-full">
+        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-slate-700 transition-shadow hover:shadow-lg min-h-[190px] flex flex-col justify-between">
             <div>
                 <div className="flex items-center justify-between mb-4">
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{log.usuario}</p>

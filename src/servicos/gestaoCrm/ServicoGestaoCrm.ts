@@ -28,4 +28,15 @@ export class ServicoGestaoCrm implements IServicoGestaoCrm {
         });
         return handleResponse(response);
     }
+
+    public async updateConsultor(consultorData: Consultor): Promise<Consultor> {
+        const response = await fetch(API_BASE_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(consultorData),
+        });
+        return handleResponse(response);
+    }
 }

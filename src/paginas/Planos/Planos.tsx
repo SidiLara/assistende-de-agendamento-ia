@@ -4,14 +4,18 @@ import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarPlano } from '../../componentes/FormularioAdicionarPlano';
 import { ServicoGestaoPlanos, Plano } from '../../servicos/gestaoPlanos';
 import { getFriendlyApiError } from '../../utils/apiErrorHandler';
+import { useAuth } from '../../hooks/useAuth';
+import { ServicoAuditoria } from '../../servicos/auditoria';
 
 export const Planos: React.FC = () => {
     const [planos, setPlanos] = React.useState<Plano[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+    const { user } = useAuth();
     
     const planosService = React.useMemo(() => new ServicoGestaoPlanos(), []);
+    const auditoriaService = React.useMemo(() => new ServicoAuditoria(), []);
 
     React.useEffect(() => {
         setIsLoading(true);
@@ -34,6 +38,7 @@ export const Planos: React.FC = () => {
             const planoAdicionado = await planosService.addPlano(novoPlanoData);
             setPlanos(prev => [...prev, planoAdicionado]);
             setIsModalOpen(false);
+            await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'CRIACAO', entidade: 'Plano', entidadeId: planoAdicionado.id, detalhes: `Plano "${planoAdicionado.nome}" criado com valor de ${planoAdicionado.valor}.` });
         } catch (error) {
             console.error("Erro ao adicionar plano:", error);
         }

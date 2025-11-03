@@ -4,14 +4,18 @@ import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarUsuario } from '../../componentes/FormularioAdicionarUsuario';
 import { ServicoGestaoUsuarios, Usuario } from '../../servicos/gestaoUsuarios';
 import { getFriendlyApiError } from '../../utils/apiErrorHandler';
+import { useAuth } from '../../hooks/useAuth';
+import { ServicoAuditoria } from '../../servicos/auditoria';
 
 export const Usuarios: React.FC = () => {
     const [usuarios, setUsuarios] = React.useState<Usuario[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+    const { user } = useAuth();
     
     const usuariosService = React.useMemo(() => new ServicoGestaoUsuarios(), []);
+    const auditoriaService = React.useMemo(() => new ServicoAuditoria(), []);
 
     React.useEffect(() => {
         setIsLoading(true);
@@ -34,6 +38,7 @@ export const Usuarios: React.FC = () => {
             const usuarioAdicionado = await usuariosService.addUsuario(novoUsuarioData);
             setUsuarios(prev => [...prev, usuarioAdicionado]);
             setIsModalOpen(false);
+            await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'CRIACAO', entidade: 'Usuario', entidadeId: usuarioAdicionado.id, detalhes: `Usuário "${usuarioAdicionado.email}" criado com o papel de ${usuarioAdicionado.role}.` });
         } catch (error) {
             console.error("Erro ao adicionar usuário:", error);
         }

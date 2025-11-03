@@ -18,22 +18,24 @@ export const CartaoDeEstatistica: React.FC<CartaoDeEstatisticaProps> = ({ titulo
     const corTextoMudanca = corMudanca === 'positivo' ? 'text-green-500' : 'text-red-500';
 
     return (
-        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-slate-700">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{titulo}</p>
-                    <p className="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-1">{valor}</p>
-                </div>
-                <div className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-brand-blue rounded-full p-3">
-                    {icone}
+        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-slate-700 transition-shadow hover:shadow-lg min-h-[190px] flex flex-col justify-between">
+            <div>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{titulo}</p>
+                        <p className="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-1">{valor}</p>
+                    </div>
+                    <div className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-brand-blue rounded-full p-3">
+                        {icone}
+                    </div>
                 </div>
             </div>
-            {mudanca && (
+            {mudanca ? (
                 <div className={`flex items-center mt-4 text-sm ${corTextoMudanca}`}>
                     {corMudanca === 'positivo' ? <ArrowUpIcon /> : <ArrowDownIcon />}
                     <span className="ml-1 font-semibold">{mudanca}</span>
                 </div>
-            )}
+            ) : <div />}
         </div>
     );
 };

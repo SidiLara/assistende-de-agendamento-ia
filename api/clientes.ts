@@ -4,8 +4,8 @@ import { getSheetsClient, SPREADSHEET_ID, ensureSheetExists } from './utils/goog
 import { Cliente } from '../src/servicos/gestaoClientes';
 
 const SHEET_NAME = 'Clientes';
-const HEADERS = ['id', 'nome', 'plano', 'telefone', 'status'];
-const RANGE = `${SHEET_NAME}!A:E`;
+const HEADERS = ['id', 'nome', 'plano', 'telefone', 'status', 'dataInicio', 'tipoPagamento', 'numeroParcelas'];
+const RANGE = `${SHEET_NAME}!A:H`;
 
 // Helper to convert sheet rows to Cliente objects
 const rowsToClientes = (rows: any[][]): Cliente[] => {
@@ -18,6 +18,9 @@ const rowsToClientes = (rows: any[][]): Cliente[] => {
     const planoIndex = header.indexOf('plano');
     const telefoneIndex = header.indexOf('telefone');
     const statusIndex = header.indexOf('status');
+    const dataInicioIndex = header.indexOf('dataInicio');
+    const tipoPagamentoIndex = header.indexOf('tipoPagamento');
+    const numeroParcelasIndex = header.indexOf('numeroParcelas');
 
     return data.map(row => ({
         id: row[idIndex],
@@ -25,6 +28,9 @@ const rowsToClientes = (rows: any[][]): Cliente[] => {
         plano: row[planoIndex],
         telefone: row[telefoneIndex],
         status: row[statusIndex],
+        dataInicio: row[dataInicioIndex],
+        tipoPagamento: row[tipoPagamentoIndex] || 'Fixo',
+        numeroParcelas: row[numeroParcelasIndex] ? parseInt(row[numeroParcelasIndex], 10) : undefined,
     }));
 };
 
@@ -50,7 +56,11 @@ const addCliente = async (clienteData: Omit<Cliente, 'id' | 'status'>): Promise<
         range: RANGE,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
-            values: [[novoCliente.id, novoCliente.nome, novoCliente.plano, novoCliente.telefone, novoCliente.status]]
+            values: [[
+                novoCliente.id, novoCliente.nome, novoCliente.plano, 
+                novoCliente.telefone, novoCliente.status, novoCliente.dataInicio,
+                novoCliente.tipoPagamento, novoCliente.numeroParcelas || ''
+            ]]
         }
     });
 
@@ -73,14 +83,18 @@ const updateCliente = async (clienteData: Cliente): Promise<Cliente> => {
     
     // Números de linha na planilha são baseados em 1, e pulamos o cabeçalho.
     const sheetRowNumber = rowIndex + 2;
-    const updateRange = `${SHEET_NAME}!A${sheetRowNumber}:E${sheetRowNumber}`;
+    const updateRange = `${SHEET_NAME}!A${sheetRowNumber}:H${sheetRowNumber}`;
 
     await sheets.spreadsheets.values.update({
         spreadsheetId: SPREADSHEET_ID,
         range: updateRange,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
-            values: [[clienteData.id, clienteData.nome, clienteData.plano, clienteData.telefone, clienteData.status]]
+            values: [[
+                clienteData.id, clienteData.nome, clienteData.plano, 
+                clienteData.telefone, clienteData.status, clienteData.dataInicio,
+                clienteData.tipoPagamento, clienteData.numeroParcelas || ''
+            ]]
         }
     });
 

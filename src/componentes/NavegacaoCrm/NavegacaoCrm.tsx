@@ -38,69 +38,59 @@ const NavItem: React.FC<{ to: string, label: string, isCollapsed: boolean, child
         }`}
     >
         {children}
-        <span className={`ml-4 font-medium transition-opacity duration-300 ${isCollapsed && 'md:opacity-0'} whitespace-nowrap`}>{label}</span>
+        <span className={`ml-4 font-medium transition-opacity duration-300 ${isCollapsed && 'xl:opacity-0'} whitespace-nowrap`}>{label}</span>
     </NavLink>
 );
 
 export const NavegacaoCrm: React.FC<NavegacaoCrmProps> = ({ theme, toggleTheme, isCollapsed, toggleSidebar, isMobileMenuOpen, setIsMobileMenuOpen }) => {
     const { user, logout } = useAuth();
     
-    const sidebarWidth = isCollapsed ? 'md:w-20' : 'md:w-64';
+    const sidebarWidth = isCollapsed ? 'xl:w-20' : 'xl:w-64';
     const mobileTransform = isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full';
 
     const filteredNavItems = navItems.filter(item => !item.adminOnly || user?.role === 'Admin');
 
     return (
-        <>
-            {/* Overlay for mobile */}
-            {isMobileMenuOpen && (
-                <div 
-                    className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                />
-            )}
-
-            <aside className={`fixed top-0 left-0 h-dvh w-64 bg-white dark:bg-dark-tertiary flex flex-col transition-all duration-300 ease-in-out z-30 shadow-lg ${sidebarWidth} transform ${mobileTransform} md:translate-x-0`}>
-                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700 h-16">
-                    <div className={`transition-opacity duration-300 ${isCollapsed ? 'md:opacity-0 md:w-0' : 'opacity-100'}`}>
-                        <LogoEmpresa />
-                    </div>
-                    <button
-                        onClick={toggleSidebar}
-                        className="p-2 hidden md:block rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-dark-secondary"
-                        aria-label={isCollapsed ? "Expandir menu" : "Recolher menu"}
-                    >
-                        {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-                    </button>
+        <aside className={`fixed top-0 left-0 h-dvh w-64 bg-white dark:bg-dark-tertiary flex flex-col transition-all duration-300 ease-in-out z-30 shadow-lg ${sidebarWidth} transform ${mobileTransform} xl:translate-x-0`}>
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700 h-16">
+                <div className={`transition-opacity duration-300 ${isCollapsed ? 'xl:opacity-0 xl:w-0' : 'opacity-100'}`}>
+                    <LogoEmpresa />
                 </div>
-                
-                <nav className="flex-1 px-2 py-4 overflow-y-auto">
-                    {filteredNavItems.map(item => (
-                        <NavItem key={item.to} to={item.to} label={item.label} isCollapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>
-                            {item.icon}
-                        </NavItem>
-                    ))}
-                </nav>
+                <button
+                    onClick={toggleSidebar}
+                    className="p-2 hidden xl:block rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-dark-secondary"
+                    aria-label={isCollapsed ? "Expandir menu" : "Recolher menu"}
+                >
+                    {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                </button>
+            </div>
+            
+            <nav className="flex-1 px-2 py-4 overflow-y-auto">
+                {filteredNavItems.map(item => (
+                    <NavItem key={item.to} to={item.to} label={item.label} isCollapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>
+                        {item.icon}
+                    </NavItem>
+                ))}
+            </nav>
 
-                <div className="px-2 py-4 border-t border-gray-200 dark:border-slate-700">
-                    <button
-                        onClick={toggleTheme}
-                        className="flex items-center p-3 w-full rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-dark-secondary"
-                        aria-label="Alternar tema"
-                    >
-                        {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-                        <span className={`ml-4 font-medium transition-opacity duration-300 ${isCollapsed && 'md:opacity-0'} whitespace-nowrap`}>Tema</span>
-                    </button>
-                    <button
-                        onClick={logout}
-                        className="flex items-center p-3 w-full rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-dark-secondary"
-                        aria-label="Sair"
-                    >
-                        <LogoutIcon />
-                        <span className={`ml-4 font-medium transition-opacity duration-300 ${isCollapsed && 'md:opacity-0'} whitespace-nowrap`}>Sair</span>
-                    </button>
-                </div>
-            </aside>
-        </>
+            <div className="px-2 py-4 border-t border-gray-200 dark:border-slate-700">
+                <button
+                    onClick={toggleTheme}
+                    className="flex items-center p-3 w-full rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-dark-secondary"
+                    aria-label="Alternar tema"
+                >
+                    {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+                    <span className={`ml-4 font-medium transition-opacity duration-300 ${isCollapsed && 'xl:opacity-0'} whitespace-nowrap`}>Tema</span>
+                </button>
+                <button
+                    onClick={logout}
+                    className="flex items-center p-3 w-full rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-dark-secondary"
+                    aria-label="Sair"
+                >
+                    <LogoutIcon />
+                    <span className={`ml-4 font-medium transition-opacity duration-300 ${isCollapsed && 'xl:opacity-0'} whitespace-nowrap`}>Sair</span>
+                </button>
+            </div>
+        </aside>
     );
 };

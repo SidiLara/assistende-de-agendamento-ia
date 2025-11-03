@@ -1,4 +1,5 @@
-import { Route, Routes } from 'react-router-dom';
+// FIX: Changed to a namespace import to address module resolution errors.
+import * as ReactRouterDOM from 'react-router-dom';
 import { BatePapo } from '../paginas/BatePapo';
 import { LayoutCrm } from '../paginas/LayoutCrm';
 import { MenuCrm } from '../paginas/MenuCrm';
@@ -13,11 +14,11 @@ import { Usuarios } from '../paginas/Usuarios';
 
 const AppRoutes = () => {
     return (
-        <Routes>
-            <Route path="/" element={<BatePapo />} />
-            <Route path="/login" element={<Login />} />
+        <ReactRouterDOM.Routes>
+            <ReactRouterDOM.Route path="/" element={<BatePapo />} />
+            <ReactRouterDOM.Route path="/login" element={<Login />} />
             
-            <Route 
+            <ReactRouterDOM.Route 
                 path="/crm" 
                 element={
                     <ProtectedRoute>
@@ -25,15 +26,15 @@ const AppRoutes = () => {
                     </ProtectedRoute>
                 }
             >
-                <Route index element={<MenuCrm />} />
-                <Route path="consultores" element={<Consultores />} />
-                <Route path="usuarios" element={<Usuarios />} />
-                <Route path="clientes" element={<Clientes />} />
-                <Route path="planos" element={<Planos />} />
-                <Route path="estatisticas" element={<Estatisticas />} />
-                <Route path="auditoria" element={<Auditoria />} />
-            </Route>
-        </Routes>
+                <ReactRouterDOM.Route index element={<MenuCrm />} />
+                <ReactRouterDOM.Route path="consultores" element={<Consultores />} />
+                <ReactRouterDOM.Route path="usuarios" element={<Usuarios />} />
+                <ReactRouterDOM.Route path="clientes" element={<Clientes />} />
+                <ReactRouterDOM.Route path="planos" element={<Planos />} />
+                <ReactRouterDOM.Route path="estatisticas" element={<Estatisticas />} />
+                <ReactRouterDOM.Route path="auditoria" element={<Auditoria />} />
+            </ReactRouterDOM.Route>
+        </ReactRouterDOM.Routes>
     );
 };
 

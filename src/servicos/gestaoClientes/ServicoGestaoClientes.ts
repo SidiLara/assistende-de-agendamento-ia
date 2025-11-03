@@ -30,13 +30,13 @@ export class ServicoGestaoClientes implements IServicoGestaoClientes {
     }
 
     public async updateCliente(clienteData: Cliente): Promise<Cliente> {
-       const response = await fetch(API_BASE_URL, {
+        const response = await fetch(API_BASE_URL, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(clienteData),
-       });
-       return handleResponse(response);
+        });
+        return handleResponse(response);
     }
 }

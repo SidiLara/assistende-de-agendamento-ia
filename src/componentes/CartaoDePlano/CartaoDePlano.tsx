@@ -9,7 +9,7 @@ export const CartaoDePlano = ({ plano }: CartaoDePlanoProps) => {
     }).format(valor);
 
     return (
-        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-slate-700 transition-shadow hover:shadow-lg">
+        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-slate-700 transition-shadow hover:shadow-lg min-h-[190px] flex flex-col justify-between">
             <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">{nome}</h3>
             <p className="text-3xl font-light text-blue-600 dark:text-brand-blue">{valorFormatado}</p>
         </div>

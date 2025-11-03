@@ -1,34 +1,30 @@
 import { LogAuditoria } from './modelos/LogAuditoriaModel';
 import { IServicoAuditoria } from './InterfacesAuditoria';
 
-const mockLogs: LogAuditoria[] = [
-    { id: '1', timestamp: new Date(Date.now() - 1000 * 60 * 5), usuario: 'Sidinei Lara', acao: 'LOGIN', entidade: 'Sistema', entidadeId: 'system', detalhes: 'Login bem-sucedido.' },
-    { id: '2', timestamp: new Date(Date.now() - 1000 * 60 * 3), usuario: 'Admin', acao: 'CRIACAO', entidade: 'Cliente', entidadeId: '4', detalhes: 'Cliente "Consultoria Delta" criado.' },
-    { id: '3', timestamp: new Date(Date.now() - 1000 * 60 * 2), usuario: 'Admin', acao: 'ATUALIZACAO', entidade: 'Cliente', entidadeId: '3', detalhes: 'Status do cliente "Tecnologia Gamma" alterado para Inativo.' },
-    { id: '4', timestamp: new Date(Date.now() - 1000 * 60 * 1), usuario: 'Maria Silva', acao: 'LOGIN', entidade: 'Sistema', entidadeId: 'system', detalhes: 'Login bem-sucedido.' },
-];
+const API_BASE_URL = '/api/auditoria';
+
+const handleResponse = async (response: Response) => {
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.details || `HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+};
 
 export class ServicoAuditoria implements IServicoAuditoria {
     public async getLogs(): Promise<LogAuditoria[]> {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                // Sort by most recent
-                resolve([...mockLogs].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()));
-            }, 500);
-        });
+        const response = await fetch(API_BASE_URL);
+        const logs = await handleResponse(response);
+        // Garante que o timestamp seja um objeto Date
+        return logs.map((log: any) => ({ ...log, timestamp: new Date(log.timestamp) }));
     }
 
     public async addLog(logData: Omit<LogAuditoria, 'id' | 'timestamp'>): Promise<LogAuditoria> {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                const novoLog: LogAuditoria = {
-                    id: Date.now().toString(),
-                    timestamp: new Date(),
-                    ...logData
-                };
-                mockLogs.push(novoLog);
-                resolve(novoLog);
-            }, 100);
+        const response = await fetch(API_BASE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(logData)
         });
+        return handleResponse(response);
     }
 }

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { AutenticacaoService, Usuario } from '../servicos/autenticacao';
+import { ServicoAuditoria } from '../servicos/auditoria';
 
 interface AuthContextType {
     user: Usuario | null;
@@ -16,6 +17,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = React.useState<Usuario | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const authService = React.useMemo(() => new AutenticacaoService(), []);
+    const auditoriaService = React.useMemo(() => new ServicoAuditoria(), []);
 
     React.useEffect(() => {
         const checkLoggedIn = () => {
@@ -40,6 +42,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const loggedInUser = await authService.login(email, password);
             setUser(loggedInUser);
             localStorage.setItem('crmUser', JSON.stringify(loggedInUser));
+            // Adiciona log de auditoria
+            await auditoriaService.addLog({ usuario: loggedInUser.email, acao: 'LOGIN', entidade: 'Sistema', entidadeId: loggedInUser.id, detalhes: 'Login bem-sucedido.' });
         } catch (error) {
             throw error;
         } finally {

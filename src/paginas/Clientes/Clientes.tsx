@@ -5,6 +5,8 @@ import { FormularioAdicionarCliente } from '../../componentes/FormularioAdiciona
 import { ServicoGestaoClientes, Cliente, StatusCliente } from '../../servicos/gestaoClientes';
 import { ServicoGestaoPlanos, Plano } from '../../servicos/gestaoPlanos';
 import { getFriendlyApiError } from '../../utils/apiErrorHandler';
+import { useAuth } from '../../hooks/useAuth';
+import { ServicoAuditoria } from '../../servicos/auditoria';
 
 export const Clientes: React.FC = () => {
     const [clientes, setClientes] = React.useState<Cliente[]>([]);
@@ -14,9 +16,11 @@ export const Clientes: React.FC = () => {
     const [clienteParaEditar, setClienteParaEditar] = React.useState<Cliente | null>(null);
     const [filtro, setFiltro] = React.useState('');
     const [error, setError] = React.useState<string | null>(null);
+    const { user } = useAuth();
     
     const crmService = React.useMemo(() => new ServicoGestaoClientes(), []);
     const planosService = React.useMemo(() => new ServicoGestaoPlanos(), []);
+    const auditoriaService = React.useMemo(() => new ServicoAuditoria(), []);
 
     React.useEffect(() => {
         const fetchData = async () => {
@@ -60,9 +64,11 @@ export const Clientes: React.FC = () => {
             if (clienteParaEditar) {
                 const clienteAtualizado = await crmService.updateCliente({ ...clienteParaEditar, ...clienteData });
                 setClientes(prev => prev.map(c => c.id === clienteAtualizado.id ? clienteAtualizado : c));
+                await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'ATUALIZACAO', entidade: 'Cliente', entidadeId: clienteAtualizado.id, detalhes: `Cliente "${clienteAtualizado.nome}" atualizado.` });
             } else {
                 const clienteAdicionado = await crmService.addCliente(clienteData);
                 setClientes(prev => [...prev, clienteAdicionado]);
+                await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'CRIACAO', entidade: 'Cliente', entidadeId: clienteAdicionado.id, detalhes: `Cliente "${clienteAdicionado.nome}" criado.` });
             }
             handleFecharModal();
         } catch (error) {
@@ -76,6 +82,7 @@ export const Clientes: React.FC = () => {
         try {
             await crmService.updateCliente(clienteAtualizado);
             setClientes(prev => prev.map(c => c.id === cliente.id ? clienteAtualizado : c));
+            await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'ATUALIZACAO', entidade: 'Cliente', entidadeId: cliente.id, detalhes: `Status do cliente "${cliente.nome}" alterado para ${statusAtualizado}.` });
         } catch (error) {
             console.error("Erro ao atualizar status do cliente:", error);
         }
@@ -115,6 +122,7 @@ export const Clientes: React.FC = () => {
             ) : (
                 <ListaDeClientes 
                     clientes={clientesFiltrados}
+                    planos={planos}
                     onEditar={handleAbrirModalParaEditar}
                     onToggleStatus={handleToggleStatus}
                 />

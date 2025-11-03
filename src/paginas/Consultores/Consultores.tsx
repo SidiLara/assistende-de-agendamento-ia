@@ -3,39 +3,74 @@ import { ListaDeConsultores } from '../../componentes/ListaDeConsultores';
 import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarConsultor } from '../../componentes/FormularioAdicionarConsultor';
 import { ServicoGestaoCrm, Consultor } from '../../servicos/gestaoCrm';
+import { ServicoGestaoPlanos, Plano } from '../../servicos/gestaoPlanos';
 import { getFriendlyApiError } from '../../utils/apiErrorHandler';
+import { useAuth } from '../../hooks/useAuth';
+import { ServicoAuditoria } from '../../servicos/auditoria';
 
 export const Consultores: React.FC = () => {
     const [consultores, setConsultores] = React.useState<Consultor[]>([]);
+    const [planos, setPlanos] = React.useState<Plano[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [consultorParaEditar, setConsultorParaEditar] = React.useState<Consultor | null>(null);
     const [error, setError] = React.useState<string | null>(null);
+    const { user } = useAuth();
     
     const crmService = React.useMemo(() => new ServicoGestaoCrm(), []);
+    const planosService = React.useMemo(() => new ServicoGestaoPlanos(), []);
+    const auditoriaService = React.useMemo(() => new ServicoAuditoria(), []);
 
     React.useEffect(() => {
-        setIsLoading(true);
-        setError(null);
-        crmService.getConsultores()
-            .then(data => {
-                setConsultores(data);
-            })
-            .catch(err => {
-                console.error("Erro ao buscar consultores:", err);
-                setError(getFriendlyApiError(err, 'os consultores'));
-            })
-            .finally(() => {
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+                const [consultoresData, planosData] = await Promise.all([
+                    crmService.getConsultores(),
+                    planosService.getPlanos()
+                ]);
+                setConsultores(consultoresData);
+                setPlanos(planosData);
+            } catch (err) {
+                console.error("Erro ao buscar dados:", err);
+                setError(getFriendlyApiError(err, 'os consultores e planos'));
+            } finally {
                 setIsLoading(false);
-            });
-    }, [crmService]);
+            }
+        };
+        fetchData();
+    }, [crmService, planosService]);
 
-    const handleSalvarConsultor = async (novoConsultorData: Omit<Consultor, 'id'>) => {
+    const handleAbrirModalParaAdicionar = () => {
+        setConsultorParaEditar(null);
+        setIsModalOpen(true);
+    };
+
+    const handleAbrirModalParaEditar = (consultor: Consultor) => {
+        setConsultorParaEditar(consultor);
+        setIsModalOpen(true);
+    };
+
+    const handleFecharModal = () => {
+        setIsModalOpen(false);
+        setConsultorParaEditar(null);
+    };
+
+    const handleSalvarConsultor = async (consultorData: Omit<Consultor, 'id'>) => {
         try {
-            const consultorAdicionado = await crmService.addConsultor(novoConsultorData);
-            setConsultores(prev => [...prev, consultorAdicionado]);
-            setIsModalOpen(false);
+            if (consultorParaEditar) {
+                const consultorAtualizado = await crmService.updateConsultor({ ...consultorParaEditar, ...consultorData });
+                setConsultores(prev => prev.map(c => c.id === consultorAtualizado.id ? consultorAtualizado : c));
+                await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'ATUALIZACAO', entidade: 'Consultor', entidadeId: consultorAtualizado.id, detalhes: `Consultor "${consultorAtualizado.nome}" atualizado.` });
+            } else {
+                const consultorAdicionado = await crmService.addConsultor(consultorData);
+                setConsultores(prev => [...prev, consultorAdicionado]);
+                await auditoriaService.addLog({ usuario: user?.email || 'Sistema', acao: 'CRIACAO', entidade: 'Consultor', entidadeId: consultorAdicionado.id, detalhes: `Consultor "${consultorAdicionado.nome}" criado.` });
+            }
+            handleFecharModal();
         } catch (error) {
-            console.error("Erro ao adicionar consultor:", error);
+            console.error("Erro ao salvar consultor:", error);
         }
     };
 
@@ -44,7 +79,7 @@ export const Consultores: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold">Gerenciamento de Consultores</h1>
                 <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={handleAbrirModalParaAdicionar}
                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                     Adicionar Consultor
@@ -58,17 +93,23 @@ export const Consultores: React.FC = () => {
                     <span className="block sm:inline ml-2">{error}</span>
                 </div>
             ) : (
-                <ListaDeConsultores consultores={consultores} />
+                <ListaDeConsultores 
+                    consultores={consultores}
+                    planos={planos}
+                    onEditar={handleAbrirModalParaEditar}
+                />
             )}
 
             <Modal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                titulo="Adicionar Novo Consultor"
+                onClose={handleFecharModal}
+                titulo={consultorParaEditar ? "Editar Consultor" : "Adicionar Novo Consultor"}
             >
                 <FormularioAdicionarConsultor
+                    consultorParaEditar={consultorParaEditar}
+                    planosDisponiveis={planos}
                     onSalvar={handleSalvarConsultor}
-                    onCancelar={() => setIsModalOpen(false)}
+                    onCancelar={handleFecharModal}
                 />
             </Modal>
         </div>

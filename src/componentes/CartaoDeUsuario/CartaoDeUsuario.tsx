@@ -30,17 +30,19 @@ export const CartaoDeUsuario = ({ usuario }: CartaoDeUsuarioProps) => {
     const styles = roleStyles[role];
 
     return (
-        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-slate-700 transition-shadow hover:shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate">{email}</h3>
-                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${styles.badge} ${styles.text}`}>
-                    {role}
-                </span>
+        <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-slate-700 transition-shadow hover:shadow-lg min-h-[190px] flex flex-col justify-between">
+            <div>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate">{email}</h3>
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${styles.badge} ${styles.text}`}>
+                        {role}
+                    </span>
+                </div>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-slate-700">
                 <div className="flex items-center text-gray-600 dark:text-gray-300">
                     <EmailIcon />
-                    <span>{email}</span>
+                    <span className="truncate">{email}</span>
                 </div>
                 <div className="flex items-center text-gray-600 dark:text-gray-300">
                     <RoleIcon />
