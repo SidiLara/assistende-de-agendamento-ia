@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CartaoDeClienteProps } from './CartaoDeCliente.props';
-import { TipoPlano, StatusCliente } from '../../servicos/gestaoClientes/modelos/ClienteModel';
+import { TipoPlano, StatusCliente, TipoEntidade } from '../../servicos/gestaoClientes/modelos/ClienteModel';
 
 const PhoneIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -25,11 +25,17 @@ const statusStyles: Record<StatusCliente, string> = {
     'Inativo': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
 };
 
+const tipoStyles: Record<TipoEntidade, string> = {
+    'Cliente': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+    'Consultor': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300'
+};
+
 
 export const CartaoDeCliente: React.FC<CartaoDeClienteProps> = ({ cliente, planos, onEditar, onToggleStatus }) => {
-    const { nome, plano, telefone, status } = cliente;
+    const { nome, plano, telefone, status, tipo } = cliente;
     const planStyle = planStyles[plano];
     const statusStyle = statusStyles[status];
+    const tipoStyle = tipoStyles[tipo];
     const nomePlanoCompleto = `Plano ${plano}`;
     const planoInfo = planos.find(p => p.nome === nomePlanoCompleto);
     const valorPlanoFormatado = planoInfo ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(planoInfo.valor) : 'N/A';
@@ -39,9 +45,14 @@ export const CartaoDeCliente: React.FC<CartaoDeClienteProps> = ({ cliente, plano
             <div>
                 <div className="flex items-start justify-between mb-4">
                     <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 break-words pr-2">{nome}</h3>
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${statusStyle} flex-shrink-0`}>
-                        {status}
-                    </span>
+                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${statusStyle}`}>
+                            {status}
+                        </span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${tipoStyle}`}>
+                            {tipo}
+                        </span>
+                    </div>
                 </div>
                 <div className="space-y-3">
                     <div className="flex items-center text-gray-600 dark:text-gray-300">

@@ -4,8 +4,9 @@ import { getSheetsClient, SPREADSHEET_ID, ensureSheetExists } from './utils/goog
 import { Cliente } from '../src/servicos/gestaoClientes';
 
 const SHEET_NAME = 'Clientes';
-const HEADERS = ['id', 'nome', 'plano', 'telefone', 'status', 'dataInicio', 'tipoPagamento', 'numeroParcelas'];
-const RANGE = `${SHEET_NAME}!A:H`;
+// Adicionado o campo 'tipo' para diferenciar Cliente de Consultor
+const HEADERS = ['id', 'nome', 'plano', 'telefone', 'status', 'dataInicio', 'tipoPagamento', 'numeroParcelas', 'tipo'];
+const RANGE = `${SHEET_NAME}!A:I`;
 
 // Helper to convert sheet rows to Cliente objects
 const rowsToClientes = (rows: any[][]): Cliente[] => {
@@ -21,6 +22,7 @@ const rowsToClientes = (rows: any[][]): Cliente[] => {
     const dataInicioIndex = header.indexOf('dataInicio');
     const tipoPagamentoIndex = header.indexOf('tipoPagamento');
     const numeroParcelasIndex = header.indexOf('numeroParcelas');
+    const tipoIndex = header.indexOf('tipo');
 
     return data.map(row => ({
         id: row[idIndex],
@@ -31,6 +33,7 @@ const rowsToClientes = (rows: any[][]): Cliente[] => {
         dataInicio: row[dataInicioIndex],
         tipoPagamento: row[tipoPagamentoIndex] || 'Fixo',
         numeroParcelas: row[numeroParcelasIndex] ? parseInt(row[numeroParcelasIndex], 10) : undefined,
+        tipo: row[tipoIndex] || 'Cliente', // Default to 'Cliente' for backward compatibility
     }));
 };
 
@@ -59,7 +62,7 @@ const addCliente = async (clienteData: Omit<Cliente, 'id' | 'status'>): Promise<
             values: [[
                 novoCliente.id, novoCliente.nome, novoCliente.plano, 
                 novoCliente.telefone, novoCliente.status, novoCliente.dataInicio,
-                novoCliente.tipoPagamento, novoCliente.numeroParcelas || ''
+                novoCliente.tipoPagamento, novoCliente.numeroParcelas || '', novoCliente.tipo
             ]]
         }
     });
@@ -78,12 +81,11 @@ const updateCliente = async (clienteData: Cliente): Promise<Cliente> => {
     const rowIndex = allClientes.findIndex(c => c.id === clienteData.id);
     
     if (rowIndex === -1) {
-        throw new Error("Cliente não encontrado para atualização.");
+        throw new Error("Entidade não encontrada para atualização.");
     }
     
-    // Números de linha na planilha são baseados em 1, e pulamos o cabeçalho.
     const sheetRowNumber = rowIndex + 2;
-    const updateRange = `${SHEET_NAME}!A${sheetRowNumber}:H${sheetRowNumber}`;
+    const updateRange = `${SHEET_NAME}!A${sheetRowNumber}:I${sheetRowNumber}`;
 
     await sheets.spreadsheets.values.update({
         spreadsheetId: SPREADSHEET_ID,
@@ -93,7 +95,7 @@ const updateCliente = async (clienteData: Cliente): Promise<Cliente> => {
             values: [[
                 clienteData.id, clienteData.nome, clienteData.plano, 
                 clienteData.telefone, clienteData.status, clienteData.dataInicio,
-                clienteData.tipoPagamento, clienteData.numeroParcelas || ''
+                clienteData.tipoPagamento, clienteData.numeroParcelas || '', clienteData.tipo
             ]]
         }
     });
