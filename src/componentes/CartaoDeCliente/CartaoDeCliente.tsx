@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CartaoDeClienteProps } from './CartaoDeCliente.props';
-import { StatusCliente } from '../../servicos/gestaoClientes/modelos/ClienteModel';
+import { StatusCliente } from '../../services/gestaoClientes/modelos/ClienteModel';
 
 const PhoneIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ServicoAuditoria, LogAuditoria } from '../../servicos/auditoria';
+import { ServicoAuditoria, LogAuditoria } from '../../services/auditoria';
 import { ListaDeAuditoria } from '../../componentes/ListaDeAuditoria';
 
 export const Auditoria: React.FC = () => {

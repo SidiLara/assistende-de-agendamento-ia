@@ -2,11 +2,11 @@ import * as React from 'react';
 import { ListaDeConsultores } from '../../componentes/ListaDeConsultores';
 import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarConsultor } from '../../componentes/FormularioAdicionarConsultor';
-import { ServicoGestaoCrm, Consultor } from '../../servicos/gestaoCrm';
-import { ServicoGestaoPlanos, Plano } from '../../servicos/gestaoPlanos';
+import { ServicoGestaoCrm, Consultor } from '../../services/gestaoCrm';
+import { ServicoGestaoPlanos, Plano } from '../../services/gestaoPlanos';
 import { getFriendlyApiError } from '../../utils/apiErrorHandler';
 import { useAuth } from '../../hooks/useAuth';
-import { ServicoAuditoria } from '../../servicos/auditoria';
+import { ServicoAuditoria } from '../../services/auditoria';
 
 export const Consultores: React.FC = () => {
     const [consultores, setConsultores] = React.useState<Consultor[]>([]);

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ServicoFinanceiro, RelatorioFinanceiro } from '../../servicos/financeiro';
+import { ServicoFinanceiro, RelatorioFinanceiro } from '../../services/financeiro';
 import { getFriendlyApiError } from '../../utils/apiErrorHandler';
 import { CartaoDeEstatistica } from '../../componentes/CartaoDeEstatistica';
 import { TabelaFinanceira } from '../../componentes/TabelaFinanceira';

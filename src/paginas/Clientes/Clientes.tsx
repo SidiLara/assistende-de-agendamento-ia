@@ -2,11 +2,11 @@ import * as React from 'react';
 import { ListaDeClientes } from '../../componentes/ListaDeClientes';
 import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarCliente } from '../../componentes/FormularioAdicionarCliente';
-import { ServicoGestaoClientes, Cliente } from '../../servicos/gestaoClientes';
-import { ServicoGestaoPlanos, Plano } from '../../servicos/gestaoPlanos';
+import { ServicoGestaoClientes, Cliente } from '../../services/gestaoClientes';
+import { ServicoGestaoPlanos, Plano } from '../../services/gestaoPlanos';
 import { getFriendlyApiError } from '../../utils/apiErrorHandler';
 import { useAuth } from '../../hooks/useAuth';
-import { ServicoAuditoria } from '../../servicos/auditoria';
+import { ServicoAuditoria } from '../../services/auditoria';
 import { Toast } from '../../componentes/Toast';
 
 export const Clientes: React.FC = () => {

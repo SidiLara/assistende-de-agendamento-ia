@@ -1,5 +1,5 @@
-import { Cliente } from "../../servicos/gestaoClientes/modelos/ClienteModel";
-import { Plano } from "../../servicos/gestaoPlanos";
+import { Cliente } from "../../services/gestaoClientes/modelos/ClienteModel";
+import { Plano } from "../../services/gestaoPlanos";
 
 export interface CartaoDeClienteProps {
     cliente: Cliente;

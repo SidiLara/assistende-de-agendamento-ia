@@ -2,10 +2,10 @@ import * as React from 'react';
 import { ListaDePlanos } from '../../componentes/ListaDePlanos';
 import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarPlano } from '../../componentes/FormularioAdicionarPlano';
-import { ServicoGestaoPlanos, Plano } from '../../servicos/gestaoPlanos';
+import { ServicoGestaoPlanos, Plano } from '../../services/gestaoPlanos';
 import { getFriendlyApiError } from '../../utils/apiErrorHandler';
 import { useAuth } from '../../hooks/useAuth';
-import { ServicoAuditoria } from '../../servicos/auditoria';
+import { ServicoAuditoria } from '../../services/auditoria';
 import { Toast } from '../../componentes/Toast';
 
 export const Planos: React.FC = () => {

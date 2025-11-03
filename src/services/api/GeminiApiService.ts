@@ -1,8 +1,8 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
-import { Mensagem, RemetenteMensagem } from "../chat/modelos/MensagemModel";
-import { Lead } from "../chat/modelos/LeadModel";
-import { ConfiguracaoChat } from "../chat/modelos/ConfiguracaoChatModel";
-import { RespostaAi } from "../chat/modelos/RespostaAi";
+import { Mensagem, RemetenteMensagem } from "../chat/models/MensagemModel";
+import { Lead } from "../chat/models/LeadModel";
+import { ConfiguracaoChat } from "../chat/models/ConfiguracaoChatModel";
+import { RespostaAi } from "../chat/models/RespostaAi";
 import { createSystemPrompt, leadDataSchema, createFinalSummaryPrompt, createInternalSummaryPrompt } from "../chat/ChatPrompts";
 import { IGeminiApiService } from "./ApiInterfaces";
 

@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { ServicoGestaoUsuarios, Usuario } from '../../servicos/gestaoUsuarios';
+import { ServicoGestaoUsuarios, Usuario } from '../../services/gestaoUsuarios';
 import { ListaDeUsuarios } from '../../componentes/ListaDeUsuarios';
 import { Modal } from '../../componentes/Modal';
 import { FormularioAdicionarUsuario } from '../../componentes/FormularioAdicionarUsuario';
 import { getFriendlyApiError } from '../../utils/apiErrorHandler';
 import { useAuth } from '../../hooks/useAuth';
-import { ServicoAuditoria } from '../../servicos/auditoria';
+import { ServicoAuditoria } from '../../services/auditoria';
 import { Toast } from '../../componentes/Toast';
 
 export const Usuarios: React.FC = () => {

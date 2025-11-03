@@ -1,7 +1,7 @@
-import { Mensagem } from "../chat/modelos/MensagemModel";
-import { Lead } from "../chat/modelos/LeadModel";
-import { ConfiguracaoChat } from "../chat/modelos/ConfiguracaoChatModel";
-import { RespostaAi } from "../chat/modelos/RespostaAi";
+import { Mensagem } from "../chat/models/MensagemModel";
+import { Lead } from "../chat/models/LeadModel";
+import { ConfiguracaoChat } from "../chat/models/ConfiguracaoChatModel";
+import { RespostaAi } from "../chat/models/RespostaAi";
 
 export interface IGeminiApiService {
     generateAiResponse(history: Mensagem[], currentData: Partial<Lead>, config: ConfiguracaoChat): Promise<RespostaAi>;

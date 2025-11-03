@@ -1,5 +1,5 @@
-import { Lead } from "../chat/modelos/LeadModel";
-import { ConfiguracaoChat } from "../chat/modelos/ConfiguracaoChatModel";
+import { Lead } from "../chat/models/LeadModel";
+import { ConfiguracaoChat } from "../chat/models/ConfiguracaoChatModel";
 import { ICrmApiService } from "./ApiInterfaces";
 
 const BASE_MAKE_URL = "https://hook.us2.make.com/";

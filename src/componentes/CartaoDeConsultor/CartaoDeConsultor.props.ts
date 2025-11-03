@@ -1,5 +1,5 @@
-import { Consultor } from "../../servicos/gestaoCrm/modelos/ConsultorModel";
-import { Plano } from "../../servicos/gestaoPlanos";
+import { Consultor } from "../../services/gestaoCrm/modelos/ConsultorModel";
+import { Plano } from "../../services/gestaoPlanos";
 
 export interface CartaoDeConsultorProps {
     consultor: Consultor;

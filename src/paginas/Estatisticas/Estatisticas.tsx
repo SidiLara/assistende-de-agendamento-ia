@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { CartaoDeEstatistica } from '../../componentes/CartaoDeEstatistica';
 import { GraficoDeBarras } from '../../componentes/GraficoDeBarras';
-import { ServicoEstatisticas, EstatisticasData } from '../../servicos/estatisticas';
+import { ServicoEstatisticas, EstatisticasData } from '../../services/estatisticas';
 import { getFriendlyApiError } from '../../utils/apiErrorHandler';
 
 // Icons

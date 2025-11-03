@@ -1,7 +1,7 @@
-import { RemetenteMensagem } from './modelos/MensagemModel';
+import { RemetenteMensagem } from './models/MensagemModel';
 // FIX: Corrected import to use the refactored 'ServicoChat' interface file.
 import { ServicoChat } from './ServicoChat';
-import { ConfiguracaoChat } from './modelos/ConfiguracaoChatModel';
+import { ConfiguracaoChat } from './models/ConfiguracaoChatModel';
 // FIX: Corrected import to use the refactored 'InterfacesChat' file and resolve missing export error.
 import { IManipuladorFluxoChat, MessageHandlerParams, PillSelectionHandlerParams } from './InterfacesChat';
 import { ResultadoFluxo } from './handlers/ManipuladorAcao';
