@@ -1,45 +1,42 @@
-// api/consultores.ts
+// api/usuarios.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSheetsClient, SPREADSHEET_ID, ensureSheetExists } from './utils/googleSheetsClient.js';
-import { Consultor } from '../src/servicos/gestaoCrm';
+import { Usuario } from '../src/servicos/autenticacao/modelos/UsuarioModel';
 
-const SHEET_NAME = 'Consultores';
-const HEADERS = ['id', 'nome', 'plano', 'telefone'];
+const SHEET_NAME = 'Usuarios';
+const HEADERS = ['id', 'email', 'password', 'role'];
 const RANGE = `${SHEET_NAME}!A:D`;
 
-// Helper to convert sheet rows to Consultor objects
-const rowsToConsultores = (rows: any[][]): Consultor[] => {
+const rowsToUsuarios = (rows: any[][]): Usuario[] => {
     if (!rows || rows.length < 2) return [];
     const header = rows[0];
     const data = rows.slice(1);
     
     const idIndex = header.indexOf('id');
-    const nomeIndex = header.indexOf('nome');
-    const planoIndex = header.indexOf('plano');
-    const telefoneIndex = header.indexOf('telefone');
+    const emailIndex = header.indexOf('email');
+    const roleIndex = header.indexOf('role');
 
     return data.map(row => ({
         id: row[idIndex],
-        nome: row[nomeIndex],
-        plano: row[planoIndex],
-        telefone: row[telefoneIndex],
+        email: row[emailIndex],
+        role: row[roleIndex],
     }));
 };
 
-const getConsultores = async (): Promise<Consultor[]> => {
+const getUsuarios = async (): Promise<Usuario[]> => {
     const sheets = await getSheetsClient();
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: RANGE,
     });
-    return rowsToConsultores(response.data.values || []);
+    return rowsToUsuarios(response.data.values || []);
 };
 
-const addConsultor = async (consultorData: Omit<Consultor, 'id'>): Promise<Consultor> => {
+const addUsuario = async (usuarioData: Omit<Usuario, 'id'> & { password?: string }): Promise<Usuario> => {
     const sheets = await getSheetsClient();
-    const novoConsultor: Consultor = {
+    const novoUsuario: Usuario & { password?: string } = {
         id: Date.now().toString(),
-        ...consultorData
+        ...usuarioData
     };
 
     await sheets.spreadsheets.values.append({
@@ -47,13 +44,13 @@ const addConsultor = async (consultorData: Omit<Consultor, 'id'>): Promise<Consu
         range: RANGE,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
-            values: [[novoConsultor.id, novoConsultor.nome, novoConsultor.plano, novoConsultor.telefone]]
+            values: [[novoUsuario.id, novoUsuario.email, novoUsuario.password, novoUsuario.role]]
         }
     });
 
-    return novoConsultor;
+    const { password, ...userWithoutPassword } = novoUsuario;
+    return userWithoutPassword;
 };
-
 
 // Vercel Serverless Function Handler
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -62,17 +59,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await ensureSheetExists(sheets, SPREADSHEET_ID!, SHEET_NAME, HEADERS);
 
         if (req.method === 'GET') {
-            const consultores = await getConsultores();
-            res.status(200).json(consultores);
+            const usuarios = await getUsuarios();
+            res.status(200).json(usuarios);
         } else if (req.method === 'POST') {
-            const novoConsultor = await addConsultor(req.body);
-            res.status(201).json(novoConsultor);
+            const novoUsuario = await addUsuario(req.body);
+            res.status(201).json(novoUsuario);
         } else {
             res.setHeader('Allow', ['GET', 'POST']);
             res.status(405).end(`Method ${req.method} Not Allowed`);
         }
     } catch (error) {
-        console.error("Erro na API de Consultores:", error);
+        console.error("Erro na API de Usuários:", error);
         const message = error instanceof Error ? error.message : 'Um erro interno ocorreu.';
         res.status(500).json({ error: 'Falha ao processar a requisição.', details: message });
     }

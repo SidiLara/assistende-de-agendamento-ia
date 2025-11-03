@@ -1,9 +1,11 @@
 // api/planos.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSheetsClient, SPREADSHEET_ID } from './utils/googleSheetsClient.js';
+import { getSheetsClient, SPREADSHEET_ID, ensureSheetExists } from './utils/googleSheetsClient.js';
 import { Plano } from '../src/servicos/gestaoPlanos';
 
-const RANGE = 'Planos!A:C';
+const SHEET_NAME = 'Planos';
+const HEADERS = ['id', 'nome', 'valor'];
+const RANGE = `${SHEET_NAME}!A:C`;
 
 // Helper to convert sheet rows to Plano objects
 const rowsToPlanos = (rows: any[][]): Plano[] => {
@@ -54,6 +56,9 @@ const addPlano = async (planoData: Omit<Plano, 'id'>): Promise<Plano> => {
 // Vercel Serverless Function Handler
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
+        const sheets = await getSheetsClient();
+        await ensureSheetExists(sheets, SPREADSHEET_ID!, SHEET_NAME, HEADERS);
+        
         if (req.method === 'GET') {
             const planos = await getPlanos();
             res.status(200).json(planos);

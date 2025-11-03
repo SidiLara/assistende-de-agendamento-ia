@@ -42,3 +42,72 @@ export const getSheetsClient = async () => {
         throw new Error("Falha na autenticação do Google Sheets.");
     }
 };
+
+/**
+ * Garante que uma aba (sheet) específica exista na planilha. Se não existir,
+ * a cria juntamente com a linha de cabeçalho.
+ * @param sheets O cliente autenticado do Google Sheets.
+ * @param spreadsheetId O ID da planilha.
+ * @param sheetName O nome da aba a ser verificada/criada.
+ * @param headers Um array com os títulos das colunas para o cabeçalho.
+ */
+export const ensureSheetExists = async (sheets: any, spreadsheetId: string, sheetName: string, headers: string[]) => {
+    try {
+        const spreadsheetMeta = await sheets.spreadsheets.get({
+            spreadsheetId,
+        });
+
+        const sheetExists = spreadsheetMeta.data.sheets?.some(
+            (s: any) => s.properties.title === sheetName
+        );
+
+        if (!sheetExists) {
+            console.log(`Aba "${sheetName}" não encontrada. Criando...`);
+            // Cria a aba
+            await sheets.spreadsheets.batchUpdate({
+                spreadsheetId,
+                requestBody: {
+                    requests: [{
+                        addSheet: {
+                            properties: { title: sheetName },
+                        },
+                    }],
+                },
+            });
+
+            // Adiciona os cabeçalhos à nova aba
+            await sheets.spreadsheets.values.append({
+                spreadsheetId,
+                range: `${sheetName}!A1`,
+                valueInputOption: 'USER_ENTERED',
+                requestBody: {
+                    values: [headers],
+                },
+            });
+            console.log(`Aba "${sheetName}" criada com sucesso e cabeçalhos adicionados.`);
+
+            // Lógica especial para criar o usuário administrador padrão na primeira vez
+            if (sheetName === 'Usuarios') {
+                console.log('Criando usuário administrador padrão...');
+                const adminUser = [
+                    Date.now().toString(), // id
+                    'sidineilara@gmail.com', // email
+                    'Crm@Admin2024!', // senha
+                    'Admin' // role
+                ];
+                await sheets.spreadsheets.values.append({
+                    spreadsheetId,
+                    range: `${sheetName}!A2`,
+                    valueInputOption: 'USER_ENTERED',
+                    requestBody: {
+                        values: [adminUser],
+                    },
+                });
+                console.log('Usuário administrador padrão criado com sucesso.');
+            }
+        }
+    } catch (error) {
+        console.error(`Erro ao garantir a existência da aba "${sheetName}":`, error);
+        throw new Error(`Falha ao verificar ou criar a aba "${sheetName}".`);
+    }
+};

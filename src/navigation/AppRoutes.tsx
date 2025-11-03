@@ -7,14 +7,27 @@ import { Planos } from '../paginas/Planos';
 import { Estatisticas } from '../paginas/Estatisticas';
 import { Auditoria } from '../paginas/Auditoria';
 import { Consultores } from '../paginas/Consultores';
+import { Login } from '../paginas/Login';
+import { ProtectedRoute } from './ProtectedRoute';
+import { Usuarios } from '../paginas/Usuarios';
 
 const AppRoutes = () => {
     return (
         <Routes>
             <Route path="/" element={<BatePapo />} />
-            <Route path="/crm" element={<LayoutCrm />}>
+            <Route path="/login" element={<Login />} />
+            
+            <Route 
+                path="/crm" 
+                element={
+                    <ProtectedRoute>
+                        <LayoutCrm />
+                    </ProtectedRoute>
+                }
+            >
                 <Route index element={<MenuCrm />} />
                 <Route path="consultores" element={<Consultores />} />
+                <Route path="usuarios" element={<Usuarios />} />
                 <Route path="clientes" element={<Clientes />} />
                 <Route path="planos" element={<Planos />} />
                 <Route path="estatisticas" element={<Estatisticas />} />

@@ -1,9 +1,11 @@
 // api/clientes.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSheetsClient, SPREADSHEET_ID } from './utils/googleSheetsClient.js';
+import { getSheetsClient, SPREADSHEET_ID, ensureSheetExists } from './utils/googleSheetsClient.js';
 import { Cliente } from '../src/servicos/gestaoClientes';
 
-const RANGE = 'Clientes!A:E';
+const SHEET_NAME = 'Clientes';
+const HEADERS = ['id', 'nome', 'plano', 'telefone', 'status'];
+const RANGE = `${SHEET_NAME}!A:E`;
 
 // Helper to convert sheet rows to Cliente objects
 const rowsToClientes = (rows: any[][]): Cliente[] => {
@@ -57,16 +59,21 @@ const addCliente = async (clienteData: Omit<Cliente, 'id' | 'status'>): Promise<
 
 const updateCliente = async (clienteData: Cliente): Promise<Cliente> => {
     const sheets = await getSheetsClient();
-    const allClientes = await getClientes();
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: RANGE,
+    });
+    const allClientes = rowsToClientes(response.data.values || []);
+    
     const rowIndex = allClientes.findIndex(c => c.id === clienteData.id);
     
     if (rowIndex === -1) {
         throw new Error("Cliente não encontrado para atualização.");
     }
     
-    // In Sheets, row numbers are 1-based, and we skip the header.
+    // Números de linha na planilha são baseados em 1, e pulamos o cabeçalho.
     const sheetRowNumber = rowIndex + 2;
-    const updateRange = `Clientes!A${sheetRowNumber}:E${sheetRowNumber}`;
+    const updateRange = `${SHEET_NAME}!A${sheetRowNumber}:E${sheetRowNumber}`;
 
     await sheets.spreadsheets.values.update({
         spreadsheetId: SPREADSHEET_ID,
@@ -84,6 +91,9 @@ const updateCliente = async (clienteData: Cliente): Promise<Cliente> => {
 // Vercel Serverless Function Handler
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
+        const sheets = await getSheetsClient();
+        await ensureSheetExists(sheets, SPREADSHEET_ID!, SHEET_NAME, HEADERS);
+
         if (req.method === 'GET') {
             const clientes = await getClientes();
             res.status(200).json(clientes);
