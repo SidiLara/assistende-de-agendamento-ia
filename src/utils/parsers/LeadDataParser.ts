@@ -1,4 +1,4 @@
-import { Lead } from '../../services/chat/modelos/LeadModel';
+import { Lead } from '../../servicos/chat/modelos/LeadModel';
 // FIX: Standardizing import to use PascalCase file to avoid casing conflicts.
 import { parseHumanNumber } from '../formatters/Number';
 

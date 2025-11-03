@@ -1,6 +1,12 @@
 import * as React from 'react';
 import { EntradaDeChatProps } from './EntradaDeChat.props';
-import { applyWhatsappMask } from '../../utils/formatters/Phone';
+
+const applyWhatsappMask = (value: string): string => {
+    value = value.replace(/\D/g, '');
+    value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+    value = value.replace(/(\d{5})(\d)/, '$1-$2');
+    return value.slice(0, 15);
+};
 
 export const EntradaDeChat = React.forwardRef<HTMLInputElement, EntradaDeChatProps>(({ onSendMessage, isSending, isDone, isActionPending, nextKey, assistantName }, ref) => {
     const [inputValue, setInputValue] = React.useState('');
